@@ -1,7 +1,7 @@
-const axios = require("axios");
-const _ = require("lodash");
-const fs = require("fs");
-const { resolve } = require("bluebird");
+const axios = require('axios');
+const _ = require('lodash');
+const fs = require('fs');
+const { resolve } = require('bluebird');
 
 const syncHelper = {};
 
@@ -17,9 +17,9 @@ syncHelper.getSeddifyContractDetails = async (
       const blockData = data;
 
       if (blockData.length) {
-        console.log("block data", blockData.length);
+        console.log('block data', blockData.length);
         const itreateBlocks = async (i) => {
-          console.log("i is:", i);
+          console.log('i is:', i);
           if (i < blockData.length) {
             const fromAddress = blockData[i].from.trim();
             const requiredAddress = fromAddress.substring(2, address.length);
@@ -27,8 +27,8 @@ syncHelper.getSeddifyContractDetails = async (
             // get balance for seedify token
 
             const data = {
-              jsonrpc: "2.0",
-              method: "eth_call",
+              jsonrpc: '2.0',
+              method: 'eth_call',
               params: [
                 {
                   to: address,
@@ -39,10 +39,10 @@ syncHelper.getSeddifyContractDetails = async (
               id: 67,
             };
             const config = {
-              method: "post",
-              url: "https://bsc-private-dataseed1.nariox.org",
+              method: 'post',
+              url: 'https://bsc-private-dataseed1.nariox.org',
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
               data: JSON.stringify(data),
             };
@@ -65,11 +65,13 @@ syncHelper.getSeddifyContractDetails = async (
               result.push({
                 address: blockData[i].from.toLowerCase(),
                 balance: 0,
-                tier: "tier0",
+                tier: 'tier0',
               });
             }
 
-            itreateBlocks(i + 1);
+            setTimeout(function () {
+              itreateBlocks(i + 1);
+            }, 1000);
           } else {
             resolve(result);
           }
@@ -86,15 +88,15 @@ syncHelper.getSeddifyContractDetails = async (
 
 syncHelper.getUserTier = (balance) => {
   if (+balance >= 100 && +balance <= 999) {
-    return "tier1";
+    return 'tier1';
   } else if (+balance >= 1000 && +balance <= 9999) {
-    return "tier2";
+    return 'tier2';
   } else if (+balance >= 10000 && +balance <= 99999) {
-    return "tier3";
+    return 'tier3';
   } else if (+balance >= 100000) {
-    return "tier4";
+    return 'tier4';
   } else {
-    return "tier0";
+    return 'tier0';
   }
 };
 
@@ -163,7 +165,7 @@ syncHelper.getFarmingDetails = (data, totalSupply, totalBalance) => {
 syncHelper.getSeedifyBalance = (start, end) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const address = "0x477bc8d23c634c154061869478bce96be6045d12";
+      const address = '0x477bc8d23c634c154061869478bce96be6045d12';
       const startBlock = 5172421;
       const endBlock = end;
 
@@ -179,7 +181,7 @@ syncHelper.getSeedifyBalance = (start, end) => {
         finalData,
         address,
         endBlock,
-        "seedify"
+        'seedify'
       );
 
       // let data = JSON.stringify(seedifyDataFromBSc);
@@ -193,7 +195,7 @@ syncHelper.getSeedifyBalance = (start, end) => {
       //   emailId
       // );
     } catch (err) {
-      console.log("error is:", err);
+      console.log('error is:', err);
       resolve([]);
       // return res.status(500).send({
       //   message: "Something went wrong",
@@ -209,7 +211,7 @@ syncHelper.getSeedifyBalance = (start, end) => {
 syncHelper.getLiquidityBalance = (start, end) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const address = "0x74fa517715c4ec65ef01d55ad5335f90dce7cc87";
+      const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
       const startBlock = 6801618;
       const endBlock = end;
 
@@ -232,7 +234,7 @@ syncHelper.getLiquidityBalance = (start, end) => {
         getDataFromBSc,
         address,
         endBlock,
-        "liquidity"
+        'liquidity'
       );
 
       if (seedifyDataFromBSc.length) {
@@ -273,7 +275,7 @@ syncHelper.getLiquidityBalance = (start, end) => {
 // farming contract
 
 syncHelper.getFarmingBalance = (start, end) => {
-  console.log("get farmig called");
+  console.log('get farmig called');
   return new Promise(async (resolve, reject) => {
     try {
       const address = process.env.FARMING_ADDRESS;
@@ -357,12 +359,12 @@ syncHelper.getDataFromBScScanForSeedify = (startBlock, endBlock, address) => {
       let start = startBlock;
       let end = endBlock;
 
-      console.log("start is:", start, end);
+      console.log('start is:', start, end);
 
       const finalData = [];
 
       const getResults = async (i) => {
-        console.log("I is", i);
+        console.log('I is', i);
         const url = `${process.env.BSC_API_URL}?module=account&action=txlist&address=${address}&startblock=${start}&endblock=${end}&sort=desc&apikey=${process.env.BSC_API_KEY}`;
 
         const getResult = await axios.get(url);
@@ -379,7 +381,7 @@ syncHelper.getDataFromBScScanForSeedify = (startBlock, endBlock, address) => {
               start = startBlock;
               end = seedifyData[seedifyData.length - 1].blockNumber;
 
-              console.log("start and end is:", start, end);
+              console.log('start and end is:', start, end);
               getResults(i + 1);
             } else {
               // console.log("final data is:", _.uniq(finalData, "from"));
@@ -482,10 +484,10 @@ syncHelper.getDataFromBScScanForFarming = (
               end = parseInt(seedifyData[0].blockNumber, 16) + 1;
               getResults(i + 1);
             } else {
-              resolve(_.uniq(finalData, "from"));
+              resolve(_.uniq(finalData, 'from'));
             }
           } else {
-            resolve(_.uniq(finalData, "from"));
+            resolve(_.uniq(finalData, 'from'));
           }
         } else {
           resolve([]);
@@ -493,7 +495,7 @@ syncHelper.getDataFromBScScanForFarming = (
       };
       getResults(0);
     } catch (err) {
-      console.log("error is:", err);
+      console.log('error is:', err);
       resolve([]);
     }
   });
@@ -695,7 +697,7 @@ syncHelper.getToshFarmBalance = async (start, end) => {
 };
 
 syncHelper.slpBalance = (start, end) => {
-  console.log("SLP FUNCTION CALLED ===>");
+  console.log('SLP FUNCTION CALLED ===>');
   return new Promise(async (resolve, reject) => {
     try {
       const address = process.env.FARMING_SLP;
