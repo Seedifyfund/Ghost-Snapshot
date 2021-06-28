@@ -71,7 +71,7 @@ syncHelper.getSeddifyContractDetails = async (
 
             setTimeout(function () {
               itreateBlocks(i + 1);
-            }, 1000);
+            }, 500);
           } else {
             resolve(result);
           }
