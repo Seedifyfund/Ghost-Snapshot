@@ -1,10 +1,11 @@
-const axios = require("axios");
-const get = require("../../");
-const syncHelper = require("./syncHelper");
-const Utils = require("../../helper/utils");
-const { resolve, reject } = require("bluebird");
-const { getBakeryFarmBalance, getToshDishDetails } = require("./syncHelper");
-const blockNo = require("../../result/block.json");
+const axios = require('axios');
+const get = require('../../');
+const syncHelper = require('./syncHelper');
+const Utils = require('../../helper/utils');
+const { resolve, reject } = require('bluebird');
+const { getBakeryFarmBalance, getToshDishDetails } = require('./syncHelper');
+const blockNo = require('../../result/block.json');
+const fs = require('fs');
 const syncController = {};
 
 // get all contract details
@@ -17,7 +18,7 @@ syncController.getDataFromContract = async (req, res) => {
     let finalData = [];
 
     res.status(200).send({
-      message: "All Request received ",
+      message: 'All Request received ',
       status: true,
     });
 
@@ -56,7 +57,7 @@ syncController.getDataFromContract = async (req, res) => {
       finalData = await syncController.checkData(
         finalData,
         getLiquidityBalance,
-        "liquidity"
+        'liquidity'
       );
     }
 
@@ -64,7 +65,7 @@ syncController.getDataFromContract = async (req, res) => {
       finalData = await syncController.checkData(
         finalData,
         getFarmingBalance,
-        "farming"
+        'farming'
       );
     }
 
@@ -72,7 +73,7 @@ syncController.getDataFromContract = async (req, res) => {
       finalData = await syncController.checkData(
         finalData,
         getBakeryBalance,
-        "bakery"
+        'bakery'
       );
     }
 
@@ -80,7 +81,7 @@ syncController.getDataFromContract = async (req, res) => {
       finalData = await syncController.checkData(
         finalData,
         getToshBalance,
-        "tosh"
+        'tosh'
       );
     }
 
@@ -88,7 +89,7 @@ syncController.getDataFromContract = async (req, res) => {
       finalData = await syncController.checkData(
         finalData,
         getSlpBalance,
-        "slp"
+        'slp'
       );
     }
 
@@ -104,9 +105,9 @@ syncController.getDataFromContract = async (req, res) => {
     //   data: finalData,
     // });
   } catch (err) {
-    console.log("err", err);
+    console.log('err', err);
     return res.status(500).send({
-      message: "Something went wrong ",
+      message: 'Something went wrong ',
       status: false,
       error: `${err.message ? err.message : null}`,
     });
@@ -151,7 +152,7 @@ syncController.checkData = (data, checkData, type) => {
 // get seedify token balance
 syncController.getSeddifyContract = async (req, res) => {
   try {
-    const address = "0x477bc8d23c634c154061869478bce96be6045d12";
+    const address = '0x477bc8d23c634c154061869478bce96be6045d12';
     const startBlock = 5172421;
     const endBlock = +req.query.endBlock;
     const emailId = req.query.email;
@@ -164,7 +165,7 @@ syncController.getSeddifyContract = async (req, res) => {
     let seedifyDataFromBSc = [];
 
     res.status(200).send({
-      message: "seedify contract details",
+      message: 'seedify contract details',
       status: true,
     });
 
@@ -172,7 +173,7 @@ syncController.getSeddifyContract = async (req, res) => {
       finalData,
       address,
       endBlock,
-      "seedify"
+      'seedify'
     );
 
     Utils.sendEmail(
@@ -181,7 +182,7 @@ syncController.getSeddifyContract = async (req, res) => {
       emailId
     );
   } catch (err) {
-    console.log("err is:", err);
+    console.log('err is:', err);
     // return res.status(500).send({
     //   message: "Something went wrong",
     //   err: `${err.message}?${err.message}:${null}`,
@@ -193,7 +194,7 @@ syncController.getSeddifyContract = async (req, res) => {
 // get liquidity balance
 syncController.getLiquidityContract = async (req, res) => {
   try {
-    const address = "0x74fa517715c4ec65ef01d55ad5335f90dce7cc87";
+    const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
     const startBlock = 6801618;
     const endBlock = +req.query.endBlock;
     const emailId = req.query.email;
@@ -213,7 +214,7 @@ syncController.getLiquidityContract = async (req, res) => {
     );
 
     res.status(200).send({
-      message: "liquidity contract details",
+      message: 'liquidity contract details',
       status: true,
     });
 
@@ -221,7 +222,7 @@ syncController.getLiquidityContract = async (req, res) => {
       getDataFromBSc,
       address,
       endBlock,
-      "liquidity"
+      'liquidity'
     );
 
     if (seedifyDataFromBSc.length) {
@@ -265,7 +266,7 @@ syncController.getLiquidityContract = async (req, res) => {
     }
   } catch (err) {
     return res.status(500).send({
-      message: "Something went wrong",
+      message: 'Something went wrong',
       err: `${err.message}?${err.message}:${null}`,
       status: false,
     });
@@ -298,6 +299,7 @@ syncController.getFarmingContract = async (req, res) => {
       address,
       true
     );
+
     const withdrawData = await syncHelper.getDataFromBScScanForFarming(
       startBlock,
       endBlock,
@@ -306,7 +308,7 @@ syncController.getFarmingContract = async (req, res) => {
     );
 
     res.status(200).send({
-      message: "farming contract details",
+      message: 'farming contract details',
       status: true,
     });
 
@@ -318,6 +320,7 @@ syncController.getFarmingContract = async (req, res) => {
       tokenSupply,
       tokenBalance
     );
+
     const getwithDrawnData = await syncHelper.getFarmingDetails(
       withdrawData,
       tokenSupply,
@@ -358,9 +361,9 @@ syncController.getFarmingContract = async (req, res) => {
     //   status: true,
     // });
   } catch (err) {
-    console.log("error is:", err);
+    console.log('error is:', err);
     return res.status(500).send({
-      message: "Something went wrong",
+      message: 'Something went wrong',
       err: `${err.message}?${err.message}:${null}`,
       status: false,
     });
@@ -409,7 +412,7 @@ syncController.getBakeryDetails = async (req, res) => {
     );
 
     res.status(200).send({
-      message: "Bakery contract details",
+      message: 'Bakery contract details',
       status: true,
     });
 
@@ -455,9 +458,9 @@ syncController.getBakeryDetails = async (req, res) => {
       emailId
     );
   } catch (err) {
-    console.log("error is:", err);
+    console.log('error is:', err);
     return res.status(500).send({
-      message: "Something went wrong",
+      message: 'Something went wrong',
       err: `${err.message}?${err.message}:${null}`,
       status: false,
     });
@@ -468,7 +471,7 @@ syncController.getBakeryDetails = async (req, res) => {
 
 syncController.getToshDishDetails = async (req, res) => {
   try {
-    console.log("tos dis called");
+    console.log('tos dis called');
 
     const address = process.env.STAKING_TOSDIS;
     const startBlock = +process.env.STAKING_TOSDIS_BLOCK;
@@ -490,24 +493,27 @@ syncController.getToshDishDetails = async (req, res) => {
     );
 
     res.status(200).send({
-      message: "Tosdis   contract details",
+      message: 'Tosdis   contract details',
       status: true,
     });
 
     const getFarmingData = await syncHelper.getToshDishDetails(farmingData);
 
-    const getwithDrawnData = await syncHelper.getFarmingDetails(withdrawData);
+    const getwithDrawnData = await syncHelper.getToshDishDetails(withdrawData);
 
     if (getwithDrawnData.length) {
       for (let i = 0; i < getwithDrawnData.length; i++) {
         const checkAddress = getFarmingData.findIndex(
           (x) =>
-            x.address === getwithDrawnData[i].address.toLocaleLowerCase().trim()
+            x.address.toLowerCase().trim() ===
+            getwithDrawnData[i].address.toLocaleLowerCase().trim()
         );
 
         if (checkAddress >= 0) {
           const balance =
-            getFarmingData[checkAddress].balance - getwithDrawnData[i].balance;
+            getFarmingData[checkAddress].balance - getwithDrawnData[i].balance
+              ? getwithDrawnData[i].balance
+              : 0;
           getFarmingData[checkAddress].balance = balance ? balance : 0;
           getFarmingData.tier = await syncHelper.getUserTier(balance);
         }
@@ -526,9 +532,9 @@ syncController.getToshDishDetails = async (req, res) => {
       emailId
     );
   } catch (err) {
-    console.log("error is:", err);
+    console.log('error is:', err);
     return res.status(500).send({
-      message: "Something went wrong",
+      message: 'Something went wrong',
       err: `${err.message}?${err.message}:${null}`,
       status: false,
     });
@@ -544,7 +550,7 @@ syncController.getSlpBalance = async (req, res) => {
     const emailId = req.query.email;
 
     res.status(200).send({
-      message: "Julswap contract details",
+      message: 'Julswap contract details',
       status: true,
     });
 
@@ -556,7 +562,7 @@ syncController.getSlpBalance = async (req, res) => {
       emailId
     );
   } catch (err) {
-    console.log("err is:", err);
+    console.log('err is:', err);
   }
 };
 
@@ -564,13 +570,13 @@ syncController.getSlpBalance = async (req, res) => {
 syncController.getLastestBlockSynched = async (req, res) => {
   try {
     res.status(200).send({
-      message: "All Request received ",
+      message: 'All Request received ',
       status: true,
       blockNo: blockNo.endBlock,
     });
   } catch (err) {
     return res.status(500).send({
-      message: "Some thing went worng please try again later ",
+      message: 'Some thing went worng please try again later ',
       status: false,
     });
   }

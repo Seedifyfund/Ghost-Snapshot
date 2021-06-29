@@ -111,6 +111,7 @@ syncHelper.getFarmingDetails = (data, totalSupply, totalBalance) => {
             const userAddress = address
               ? `0x${address.substring(26, address.length)}`
               : null;
+
             const transactionData = data[i].data.substring(2, 66);
 
             const transactionCount =
@@ -152,6 +153,7 @@ syncHelper.getFarmingDetails = (data, totalSupply, totalBalance) => {
         };
         itreateBlocks(0);
       } else {
+        console.log('IN ELSE');
         resolve(finalValues);
       }
     } catch (err) {
@@ -465,7 +467,7 @@ syncHelper.getDataFromBScScanForFarming = (
 
       const getResults = async (i) => {
         const url = status
-          ? `${process.env.BSC_API_URL}?module=logs&action=getLogs&address=${address}&fromBlock=${start}&toBlock=${end}&topic0=0xdd2a19c3bdd089cbe77c04f5655f83de0504d6140d12c8667646f55d0557c4dc&sort=desc&apikey=${process.env.BSC_API_KEY}`
+          ? `${process.env.BSC_API_URL}?module=logs&action=getLogs&address=${address}&fromBlock=${start}&toBlock=${end}&topic0=0x6363655a3c7ace10eb7a32098436bd120788e6c01329bb863799624f11b575f3&sort=desc&apikey=${process.env.BSC_API_KEY}`
           : `${process.env.BSC_API_URL}?module=logs&action=getLogs&address=${address}&fromBlock=${start}&toBlock=${end}&topic0=0x933735aa8de6d7547d0126171b2f31b9c34dd00f3ecd4be85a0ba047db4fafef&sort=desc&apikey=${process.env.BSC_API_KEY}`;
 
         const getResult = await axios.get(url);
@@ -601,7 +603,7 @@ syncHelper.getToshDishDetails = (data) => {
                 const checkAddressAvalaible = finalValues.findIndex(
                   (x) => x.address === userAddress.toLocaleLowerCase().trim()
                 );
-                if (checkAddressAvalaible > 0) {
+                if (checkAddressAvalaible >= 0) {
                   const balance =
                     finalValues[checkAddressAvalaible].balance + transaction;
                   finalValues[checkAddressAvalaible].balance = +balance;
@@ -663,7 +665,9 @@ syncHelper.getToshFarmBalance = async (start, end) => {
 
       const getFarmingData = await syncHelper.getToshDishDetails(farmingData);
 
-      const getwithDrawnData = await syncHelper.getFarmingDetails(withdrawData);
+      const getwithDrawnData = await syncHelper.getToshDishDetails(
+        withdrawData
+      );
 
       if (getwithDrawnData.length) {
         for (let i = 0; i < getwithDrawnData.length; i++) {
