@@ -499,7 +499,13 @@ syncController.getToshDishDetails = async (req, res) => {
 
     const getFarmingData = await syncHelper.getToshDishDetails(farmingData);
 
+    // fs.writeFileSync('./lottery/tosdis-f.json', JSON.stringify(getFarmingData));
+
     const getwithDrawnData = await syncHelper.getToshDishDetails(withdrawData);
+    // fs.writeFileSync(
+    //   './lottery/tosdis-w.json',
+    //   JSON.stringify(getwithDrawnData)
+    // );
 
     if (getwithDrawnData.length) {
       for (let i = 0; i < getwithDrawnData.length; i++) {

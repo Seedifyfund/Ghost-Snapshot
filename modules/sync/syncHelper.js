@@ -2,6 +2,7 @@ const axios = require('axios');
 const _ = require('lodash');
 const fs = require('fs');
 const { resolve } = require('bluebird');
+// const fs = require('fs');
 
 const syncHelper = {};
 
@@ -483,10 +484,18 @@ syncHelper.getDataFromBScScanForFarming = (
 
             if (
               seedifyData.length >= 1000 &&
-              parseInt(seedifyData[0].blockNumber, 16) + 1 > startBlock
+              parseInt(seedifyData[seedifyData.length - 1].blockNumber, 16) +
+                1 <
+                endBlock
             ) {
-              start = startBlock;
-              end = parseInt(seedifyData[0].blockNumber, 16) + 1;
+              start =
+                parseInt(seedifyData[seedifyData.length - 1].blockNumber, 16) +
+                1;
+              // end = parseInt(seedifyData[0].blockNumber, 16) + 1;
+              // getResults(i + 1);
+
+              end = endBlock;
+
               getResults(i + 1);
             } else {
               resolve(_.uniq(finalData, 'from'));
