@@ -22,7 +22,10 @@ syncHelper.getSeddifyContractDetails = async (
           console.log('i is:', i);
           if (i < blockData.length) {
             const fromAddress = blockData[i].from.trim();
-            const requiredAddress = fromAddress.substring(2, address.length);
+            const requiredAddress = fromAddress.substring(
+              2,
+              fromAddress.length
+            );
 
             // get balance for seedify token
 

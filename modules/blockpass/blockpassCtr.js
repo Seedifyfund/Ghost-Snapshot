@@ -166,13 +166,16 @@ async function getDatafromBlockPass(skip) {
 
 // get sfund balance
 async function getSfundBalance(address, userAddress, endBlock) {
+  const fromAddress = userAddress.trim();
+  const requiredAddress = fromAddress.substring(2, fromAddress.length);
+  console.log('requiredAddress is:', requiredAddress);
   const data = {
     jsonrpc: '2.0',
     method: 'eth_call',
     params: [
       {
         to: address,
-        data: `0x70a08231000000000000000000000000${userAddress}`,
+        data: `0x70a08231000000000000000000000000${requiredAddress}`,
       },
       `0x${endBlock.toString(16).toUpperCase()}`,
     ],

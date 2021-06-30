@@ -63,13 +63,13 @@ AdminCtr.login = async (req, res) => {
         });
       } else {
         return res.status(400).json({
-          message: 'INCORRECT_EMAIL_PASSWORD',
+          message: 'Invalid username or password',
           status: false,
         });
       }
     } else {
       return res.status(400).json({
-        message: 'INCORRECT_EMAIL_PASSWORD',
+        message: 'Invalid username or password',
         status: false,
       });
     }

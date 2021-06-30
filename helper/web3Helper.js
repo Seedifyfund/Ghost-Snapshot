@@ -1,24 +1,26 @@
-var Web3 = require("web3");
+const Web3 = require('web3');
+const lotteryAbi = require('../abi/lautry.json');
 
-provider = `https://bsc-dataseed.binance.org/`;
+provider =
+  process.env.NODE_ENV === 'development'
+    ? `https://data-seed-prebsc-1-s1.binance.org:8545/`
+    : `https://bsc-dataseed.binance.org/`;
 
-web3 = new Web3(new Web3.providers.HttpProvider(provider));
+const web3Helper = {};
 
-web3.getConractDetails = async (abi, address, userAddress, blockNumber) => {
-  const contract = new web3.eth.Contract(abi, address);
+web3Helper.getRandomNumber = async (requestNo, noOfAddress, Outof) => {
+  try {
+    web3 = new Web3(new Web3.providers.HttpProvider(provider));
+    const lotteryContract = new web3.eth.Contract(
+      lotteryAbi,
+      process.env.CONTRACT_ADDRESS
+    );
+    const getRandomNumbers = await lotteryContract.methods
+      .expand(requestNo, noOfAddress, Outof)
+      .call();
 
-  console.log("contract.methods", contract.methods);
-
-  console.log(contract.methods.balanceOf(userAddress).call({}, blockNumber));
-
-  return contract.methods.balanceOf(userAddress).call({}, blockNumber);
-  //   const getStakedBalance = await contract.methods.stakedBalance().call();
-  //   const getRate = await contract.methods.rate().call();
-
-  //   return {
-  //     bnfLocked: web3.utils.fromWei(getStakedBalance),
-  //     apy: (+getRate / (multiplier * 100)) * 12,
-  //   };
+    return getRandomNumbers;
+  } catch (err) {}
 };
 
-module.exports = web3;
+module.exports = web3Helper;
