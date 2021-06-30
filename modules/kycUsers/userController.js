@@ -155,4 +155,35 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
   }
 };
 
+UserCtr.addCsv = async (req, res) => {
+  try {
+    const getUsers = await UserModel.find({
+      isActive: true,
+      tier: req.query.tier.toLowerCase().trim(),
+    });
+    const userList = [];
+    for (let i = 0; i < getUsers.length; i++) {
+      userList.push({
+        name: getUsers[i].name,
+        walletAddress: getUsers[i].walletAddress,
+        email: getUsers[i].email,
+        tier: getUsers[i].tier,
+      });
+    }
+    const csv = new ObjectsToCsv(userList);
+    const fileName = `${+new Date()}_${req.query.tier}`;
+    await csv.toDisk(`./lottery/${fileName}.csv`);
+
+    res.status(200).json({
+      status: true,
+      message: 'Request received ',
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: true,
+      message: 'Something went wrong ',
+    });
+  }
+};
+
 module.exports = UserCtr;
