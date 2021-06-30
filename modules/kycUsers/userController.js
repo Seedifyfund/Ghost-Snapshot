@@ -62,7 +62,7 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
 
     console.log('records length ', fetchRecords.length);
 
-    if (num > records.length) {
+    if (+req.body.num > fetchRecords.length) {
       return res.status(400).json({
         status: false,
         message: 'Number cant excedd no of records',
@@ -128,7 +128,7 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
           let userIds = [];
 
           // fetch records
-          for (let j = 0; j < fetchRecords.length; i++) {
+          for (let j = 0; j < fetchRecords.length; j++) {
             userIds.push({
               _id: fetchRecords[j]._id,
               walletAddress: fetchRecords[j].walletAddress,
@@ -136,7 +136,7 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
           }
 
           const addNewLottery = new lotteryModel({
-            requestId: req.body.requestId,
+            requestNo: req.body.requestNo,
             walletAddress: JSON.stringify(userIds),
             lotteryNumbers: looteryNumbers,
             lotteryUsers: req.body.num,
@@ -150,6 +150,7 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
       itreate(req.body.num);
     }
   } catch (err) {
+    console.log('err is:', err);
     Utils.echoLog(`error in genrateLotteryNumbers ${err}`);
   }
 };
