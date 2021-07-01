@@ -1,5 +1,6 @@
 const UserModal = require('../kycUsers/usersModel');
 const SyncHelper = require('../sync/syncHelper');
+const Utils = require('../../helper/utils');
 const axios = require('axios');
 const syncHelper = require('../sync/syncHelper');
 const blockPassCtr = {};
@@ -166,36 +167,64 @@ async function getDatafromBlockPass(skip) {
 
 // get sfund balance
 async function getSfundBalance(address, userAddress, endBlock) {
-  const fromAddress = userAddress.trim();
-  const requiredAddress = fromAddress.substring(2, fromAddress.length);
-  console.log('requiredAddress is:', requiredAddress);
-  const data = {
-    jsonrpc: '2.0',
-    method: 'eth_call',
-    params: [
-      {
-        to: address,
-        data: `0x70a08231000000000000000000000000${requiredAddress}`,
-      },
-      `0x${endBlock.toString(16).toUpperCase()}`,
-    ],
-    id: 67,
-  };
-  const config = {
-    method: 'post',
-    url: 'https://bsc-private-dataseed1.nariox.org',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: JSON.stringify(data),
-  };
-  const fetchDetails = await axios(config);
+  // try {
+  //   const fromAddress = userAddress.trim();
+  //   const requiredAddress = fromAddress.substring(2, fromAddress.length);
 
-  if (!fetchDetails.data.error) {
-    const weiBalance = parseInt(fetchDetails.data.result, 16);
-    let seedifyBalance = (weiBalance / Math.pow(10, 18)).toFixed(2);
-    return seedifyBalance;
-  } else {
+  //   const data = {
+  //     jsonrpc: '2.0',
+  //     method: 'eth_call',
+  //     params: [
+  //       {
+  //         to: address,
+  //         data: `0x70a08231000000000000000000000000${requiredAddress}`,
+  //       },
+  //       `0x${endBlock.toString(16).toUpperCase()}`,
+  //     ],
+  //     id: 67,
+  //   };
+  //   const config = {
+  //     method: 'post',
+  //     url: 'https://bsc-private-dataseed1.nariox.org',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     data: JSON.stringify(data),
+  //   };
+  //   const fetchDetails = await axios(config);
+
+  //   if (!fetchDetails.data.error) {
+  //     const weiBalance = parseInt(fetchDetails.data.result, 16);
+  //     let seedifyBalance = (weiBalance / Math.pow(10, 18)).toFixed(2);
+  //     console.log('seedifyBalance', seedifyBalance);
+  //     return seedifyBalance;
+  //   } else {
+  //     return 0;
+  //   }
+  // } catch (err) {
+  //   console.log('err in api for fetching balnce', err);
+  // }
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    var config = {
+      method: 'get',
+      url: `https://api.bscscan.com/api?module=account&action=tokenbalancehistory&contractaddress=${address}&address=${userAddress}&blockno=${endBlock}&apikey=${process.env.BSC_API_KEY}`,
+      headers: {},
+    };
+
+    const getSfundBal = await axios(config);
+
+    if (getSfundBal.status === 200) {
+      const data = getSfundBal.data;
+
+      let seedifyBalance = (+data.result / Math.pow(10, 18)).toFixed(2);
+
+      return +seedifyBalance > 0 ? +seedifyBalance : 0;
+    }
+  } catch (err) {
+    Utils.echoLog(`error in getSfundBalance ${err}`);
     return 0;
   }
 }
@@ -219,7 +248,7 @@ async function getLiquidityBalance(userAddress, endBlock) {
     const transactionCount = +getSfundBal / tokenSupply;
     const total = transactionCount * tokenBalance;
 
-    return total;
+    return +total > 0 ? +total : 0;
   } else {
     return 0;
   }

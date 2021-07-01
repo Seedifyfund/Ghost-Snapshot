@@ -1,0 +1,12 @@
+{
+    "type": "service_account",
+    "project_id": "seedify",
+    "private_key_id": "d9476c2f241be63a0d34eaa1e1f697eab51bac0d",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCY62PwlB61vx8H\nu5fsfvomYsl5fMDu3cfFvbNml4uyNz9B3CrQPYUdMw5tclNR2ygrPWgZ04CA24by\nIYcf8WCBba9i/EJGkLnQSm02TvAhJH0fdlYuihbAUdIbaU7NH5pkpCcCZdOmE7b1\nb89JpMO+Jx0jnI74ILtI+9WgPFI4XyPm6UZYgDl0kFVK7/Ms0fCHC3HfPxDlnJ2K\ncmAU4fVZgglXDL0f85N/zsxXUHB7NM42YtgFMIGrCWRfDpF2P/84yalusCdk0Fir\nBKMA+afRGRzhq6+zIxw7L3z7e/zCuwo/Gfkbs5GoTBggjcAegldn2LBMm4zGOsi/\nZ0mwp6WDAgMBAAECggEAD7/lWKtgvaues19aUS9uGH2sg4MvpHUaH18fjDhH2TCV\n0XTZbKjRaMWlPZd8m7MnNXY1yRHUATGFpLLYUG1orkaQ6EXT66GknvPIwMMA5LZL\nNBjY3SKNdPxYV/NmJtE+R7xHukL+OUjRhgDLMtSx8QflQ+ba1hUaRPTkYS76nDc4\nwUFxkpp6fphACu3m/tPdKKfGKKI/Mvyj07TZYVieh7CVJ+lZ88huEbjo/dzOaJqJ\nsby94pLUnz1pxNRToHq4fH/1CGFWPmk+neRWwOw9IQJVW9yhU310qxdAKRiYuJIH\nc1ysryfJwV3qbZXWHZ3vxTlJRyCoSC4kSh8ZoPJiQQKBgQDV+pTN1Q67Jikg3NBb\ngqRc16mUBVzv9C+2p8kHAqgoxBKKl84iEKJIRVt/UXuDhQexV5mKAcU9G/8BTc0V\neIehF8PTm24hSKZ4V3YbL/pzZwTeaGsQJCNJGUq3eYX5ARqfu3xU78TkAlMqcoub\nbKW45IDnJkHZKXa2KHpd891CwwKBgQC28yfUvlREW4kX8/NPMl9WY2K++DDB5VOW\nId3EEW+G+emC/R84VmJisWVpWaHqlppBRqOLPZpxAAK+kCYtvIK/Ka9V4pd0q4is\nZJzmOBUXyGeUp7AfAdtAO8tgUxlTQER/4J0w1G+lSs8FTUJycLbPdTnEPdX9ynOj\nIAqlYaBmQQKBgQCOwK/Jahx7yoehvu7aPhv9PHuLntBT3Sp/xwwcOy+IktZz07bX\njxVU9cCG/gtSwMtTCsgKBAhcLnM/oXHyowiI9lvUrlsYpWk528+Vb7q8hrv+zNaw\nXAuWVuM76Dzy1EO40NGvsI5ANzTYmrZ8qE0fPoKosyM3B6yE9hg82daBFQKBgQCx\nXSrQZXTskJFoV2ka7orfBZtF6PfcAqf2dP66huzIvqBUDXGm/JiFddYLPIptE3SY\ntBL5es+vnYMLnFRnIsre6VrCuNp8kY//EcvKpbRNSkyhIbDtXq9gppeU2vtCapv+\nHZRHMqzKYqwxR6WTrRKOLefDCO/dC9jv3LB1hSAsAQKBgFFG2fcbctZhDEGKe/Uz\nrgjLLvM5uOEGui/fKtAHe5Ezq9uHhjOflMZJr0WCThYWuskmm8X2m3QoriqotM2E\nc6F+VlxPjRFVPJNW2qN3yagTA7a7zIdr08Agioxq07rmo4TniuXHQLg2Dx2TOmRT\nVP1Q7BtfW2boJ0rqPbwNzmHz\n-----END PRIVATE KEY-----\n",
+    "client_email": "seedify-email@seedify.iam.gserviceaccount.com",
+    "client_id": "105190704655353490586",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/seedify-email%40seedify.iam.gserviceaccount.com"
+}

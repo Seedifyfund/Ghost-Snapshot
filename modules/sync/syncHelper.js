@@ -23,47 +23,64 @@ syncHelper.getSeddifyContractDetails = async (
           console.log('i is:', i);
           if (i < blockData.length) {
             const fromAddress = blockData[i].from.trim();
-            const requiredAddress = fromAddress.substring(
-              2,
-              fromAddress.length
-            );
+            // const requiredAddress = fromAddress.substring(
+            //   2,
+            //   fromAddress.length
+            // );
 
-            // get balance for seedify token
+            // // get balance for seedify token
 
-            const data = {
-              jsonrpc: '2.0',
-              method: 'eth_call',
-              params: [
-                {
-                  to: address,
-                  data: `0x70a08231000000000000000000000000${requiredAddress}`,
-                },
-                `0x${endBlock.toString(16).toUpperCase()}`,
-              ],
-              id: 67,
+            // const data = {
+            //   jsonrpc: '2.0',
+            //   method: 'eth_call',
+            //   params: [
+            //     {
+            //       to: address,
+            //       data: `0x70a08231000000000000000000000000${requiredAddress}`,
+            //     },
+            //     `0x${endBlock.toString(16).toUpperCase()}`,
+            //   ],
+            //   id: 67,
+            // };
+            // const config = {
+            //   method: 'post',
+            //   url: 'https://bsc-private-dataseed1.nariox.org',
+            //   headers: {
+            //     'Content-Type': 'application/json',
+            //   },
+            //   data: JSON.stringify(data),
+            // };
+            // const fetchDetails = await axios(config);
+
+            // if (!fetchDetails.data.error) {
+            //   const weiBalance = parseInt(fetchDetails.data.result, 16);
+            //   let seedifyBalance = (weiBalance / Math.pow(10, 18)).toFixed(2);
+
+            // if (contractType === "liquidity") {
+            //   seedifyBalance *= 20.54;
+            // }
+
+            var config = {
+              method: 'get',
+              url: `https://api.bscscan.com/api?module=account&action=tokenbalancehistory&contractaddress=${address}&address=${fromAddress}&blockno=${endBlock}&apikey=${process.env.BSC_API_KEY}`,
+              headers: {},
             };
-            const config = {
-              method: 'post',
-              url: 'https://bsc-private-dataseed1.nariox.org',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              data: JSON.stringify(data),
-            };
-            const fetchDetails = await axios(config);
 
-            if (!fetchDetails.data.error) {
-              const weiBalance = parseInt(fetchDetails.data.result, 16);
-              let seedifyBalance = (weiBalance / Math.pow(10, 18)).toFixed(2);
+            const getSfundBal = await axios(config);
 
-              // if (contractType === "liquidity") {
-              //   seedifyBalance *= 20.54;
-              // }
+            if (getSfundBal.status === 200) {
+              const data = getSfundBal.data;
+
+              let seedifyBalance = (+data.result / Math.pow(10, 18)).toFixed(2);
+
+              console.log('sfund balance is:', seedifyBalance);
 
               result.push({
                 address: blockData[i].from.toLowerCase(),
-                balance: seedifyBalance,
-                tier: await syncHelper.getUserTier(seedifyBalance),
+                balance: +seedifyBalance > 0 ? +seedifyBalance : 0,
+                tier: await syncHelper.getUserTier(
+                  +seedifyBalance > 0 ? +seedifyBalance : 0
+                ),
               });
             } else {
               result.push({
@@ -75,7 +92,7 @@ syncHelper.getSeddifyContractDetails = async (
 
             setTimeout(function () {
               itreateBlocks(i + 1);
-            }, 500);
+            }, 1000);
           } else {
             resolve(result);
           }
@@ -85,6 +102,7 @@ syncHelper.getSeddifyContractDetails = async (
         resolve(result);
       }
     } catch (err) {
+      console.log('err is:', err);
       reject(err);
     }
   });
