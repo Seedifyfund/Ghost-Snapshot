@@ -174,6 +174,15 @@ UserCtr.addCsv = async (req, res) => {
     const fileName = `${+new Date()}_${req.query.tier}`;
     await csv.toDisk(`./lottery/${fileName}.csv`);
 
+    if (req.query.sendEmail === 'true') {
+      Utils.sendSmapshotEmail(
+        `./lottery/${fileName}.csv`,
+        fileName,
+        `snapshot for ${req.query.tier} taken at ${+new Date()}`,
+        `snapshot for ${req.query.tier}`
+      );
+    }
+
     res.status(200).json({
       status: true,
       message: 'Request received ',
