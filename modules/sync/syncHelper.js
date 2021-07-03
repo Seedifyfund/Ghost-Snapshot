@@ -113,10 +113,8 @@ syncHelper.getUserTier = (balance) => {
     return 'tier1';
   } else if (+balance >= 1000 && +balance <= 9999) {
     return 'tier2';
-  } else if (+balance >= 10000 && +balance <= 99999) {
+  } else if (+balance >= 10000) {
     return 'tier3';
-  } else if (+balance >= 100000) {
-    return 'tier4';
   } else {
     return 'tier0';
   }
