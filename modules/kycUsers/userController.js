@@ -125,6 +125,13 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
           const csv = new ObjectsToCsv(lotteryUsers);
           const fileName = `${+new Date()}_${req.body.requestNo}`;
           await csv.toDisk(`./lottery/${fileName}.csv`);
+
+          Utils.sendSmapshotEmail(
+            `./lottery/${fileName}.csv`,
+            fileName,
+            `Result of lottery genrated CSV on ${+Date} for ${req.body.tier}`,
+            `Result of lottery genrated CSV on ${+Date} for ${req.body.tier}`
+          );
           let userIds = [];
 
           // fetch records
