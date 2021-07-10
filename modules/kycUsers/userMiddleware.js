@@ -8,7 +8,7 @@ const UserMiddleware = {};
 UserMiddleware.validateCheck = async (req, res, next) => {
   const schema = Joi.object({
     requestNo: Joi.number().required(),
-    tier: Joi.string().required(),
+    snapshotId: Joi.string().required(),
     num: Joi.number().required(),
   });
   validate.validateRequest(req, res, next, schema);

@@ -26,6 +26,25 @@
     {
         "inputs": [
             {
+                "internalType": "string",
+                "name": "_fileHash",
+                "type": "string"
+            }
+        ],
+        "name": "addHash",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256",
                 "name": "_requestNumber",
                 "type": "uint256"
@@ -115,6 +134,16 @@
                 "internalType": "uint256",
                 "name": "timeStamp",
                 "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "fileHash",
+                "type": "string"
+            },
+            {
+                "internalType": "bool",
+                "name": "requested",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",

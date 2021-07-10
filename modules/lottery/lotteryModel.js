@@ -19,6 +19,11 @@ const lotterySchema = new Schema(
       },
     ],
 
+    snapshotId: {
+      type: Schema.Types.ObjectId,
+      ref: 'roles',
+      required: true,
+    },
     lotteryUsers: {
       type: Number,
       default: 0,

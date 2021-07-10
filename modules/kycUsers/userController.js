@@ -2,7 +2,10 @@ const UserModel = require('./usersModel');
 const Utils = require('../../helper/utils');
 const web3Helper = require('../../helper/web3Helper');
 const lotteryModel = require('../lottery/lotteryModel');
+const SnapshotModel = require('../snapshot/snapshotModel');
 const ObjectsToCsv = require('objects-to-csv');
+const crypto = require('crypto');
+const fs = require('fs');
 
 const UserCtr = {};
 
@@ -55,27 +58,35 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
     const tier = req.body.tier ? req.body.tier.toLowerCase().trim() : null;
     const requestNo = req.body.requestNo;
 
-    const fetchRecords = await UserModel.find(
-      { tier: tier, isActive: true },
-      { name: 1, walletAddress: 1, email: 1, tier: 1 }
-    );
+    const fetchRecords = await SnapshotModel.findOne({
+      _id: req.body.snapshotId,
+    });
 
-    console.log('records length ', fetchRecords.length);
+    if (
+      fetchRecords &&
+      fetchRecords.snapshotId &&
+      fetchRecords.isSnapshotDone
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: 'Lottery Already genrated',
+      });
+    }
 
-    if (+req.body.num > fetchRecords.length) {
+    if (fetchRecords && +req.body.num > fetchRecords.totalUsers) {
       return res.status(400).json({
         status: false,
         message: 'Number cant excedd no of records',
       });
     }
 
-    if (fetchRecords && fetchRecords.length) {
+    if (fetchRecords && fetchRecords.users.length) {
       res.status(200).json({
         status: true,
         message: 'Request received ',
       });
 
-      const recordsLength = fetchRecords.length;
+      const recordsLength = fetchRecords.totalUsers;
       let num = req.body.num;
       let looteryNumbers = [];
 
@@ -112,7 +123,7 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
           // find the records of pertilcar array
           for (let i = 0; i < req.body.num; i++) {
             let index = +looteryNumbers[i];
-            const userRecords = fetchRecords[index];
+            const userRecords = fetchRecords.users[index];
 
             lotteryUsers.push({
               name: userRecords.name,
@@ -129,16 +140,20 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
           Utils.sendSmapshotEmail(
             `./lottery/${fileName}.csv`,
             fileName,
-            `Result of lottery genrated CSV on ${+Date} for ${req.body.tier}`,
-            `Result of lottery genrated CSV on ${+Date} for ${req.body.tier}`
+            `Result of lottery genrated on  ${Math.floor(
+              Date.now() / 1000
+            )} for ${fetchRecords.tier}  `,
+            `Result of  lottery  genrated  on ${Math.floor(
+              Date.now() / 1000
+            )} for ${fetchRecords.tier} and  snapshot Id ${fetchRecords._id}`
           );
           let userIds = [];
 
           // fetch records
-          for (let j = 0; j < fetchRecords.length; j++) {
+          for (let j = 0; j < fetchRecords.users.length; j++) {
             userIds.push({
-              _id: fetchRecords[j]._id,
-              walletAddress: fetchRecords[j].walletAddress,
+              // _id: fetchRecords.[j]._id,
+              walletAddress: fetchRecords.users[j].walletAddress,
             });
           }
 
@@ -148,10 +163,16 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
             lotteryNumbers: looteryNumbers,
             lotteryUsers: req.body.num,
             totalRecords: fetchRecords.length,
+            snapshotId: req.body.snapshotId,
             noOfRecordsAdded: num,
           });
 
           await addNewLottery.save();
+
+          fetchRecords.snapshotId = req.body.requestNo;
+          fetchRecords.isSnapshotDone = true;
+
+          await fetchRecords.save();
         }
       };
       itreate(req.body.num);
@@ -164,6 +185,7 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
 
 UserCtr.addCsv = async (req, res) => {
   try {
+    console.log('add csv called');
     const getUsers = await UserModel.find({
       isActive: true,
       tier: req.query.tier.toLowerCase().trim(),
@@ -175,18 +197,38 @@ UserCtr.addCsv = async (req, res) => {
         walletAddress: getUsers[i].walletAddress,
         email: getUsers[i].email,
         tier: getUsers[i].tier,
+        totalbalance: getUsers[i].totalbalance,
       });
     }
+
+    // genate cs v and hash
     const csv = new ObjectsToCsv(userList);
-    const fileName = `${+new Date()}_${req.query.tier}`;
+    const fileName = `${+new Date()}`;
     await csv.toDisk(`./lottery/${fileName}.csv`);
+
+    // gnearte file hash
+    const fileBuffer = fs.readFileSync(`./lottery/${fileName}.csv`);
+    const hashSum = crypto.createHash('sha256');
+    hashSum.update(fileBuffer);
+    const hex = hashSum.digest('hex');
+
+    // add this record to snapshot model
+
+    const addNewSnapshotRecord = new SnapshotModel({
+      users: userList,
+      tier: req.query.tier.toLowerCase().trim(),
+      totalUsers: userList.length,
+      fileHash: hex,
+    });
+
+    const save = await addNewSnapshotRecord.save();
 
     if (req.query.sendEmail === 'true') {
       Utils.sendSmapshotEmail(
         `./lottery/${fileName}.csv`,
-        fileName,
-        `snapshot for ${req.query.tier} taken at ${+new Date()}`,
-        `snapshot for ${req.query.tier}`
+        save._id,
+        `snapshot for ${req.query.tier} taken at ${+new Date()} `,
+        `snapshot for ${req.query.tier} with file name ${save._id}`
       );
     }
 
@@ -195,9 +237,32 @@ UserCtr.addCsv = async (req, res) => {
       message: 'Request received ',
     });
   } catch (err) {
+    console.log('error', err);
+    res.status(500).json({
+      status: false,
+      message: 'Something went wrong ',
+    });
+  }
+};
+
+UserCtr.getGenratedSnapshotData = async (req, res) => {
+  try {
+    const getSnapshotDetails = await SnapshotModel.find({}, { users: 0 }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: 'Snapshot genrated',
+      data: {
+        getSnapshotDetails,
+      },
+    });
+  } catch (err) {
     res.status(500).json({
       status: true,
       message: 'Something went wrong ',
+      err: `${err.message}?${err.message}:null`,
     });
   }
 };

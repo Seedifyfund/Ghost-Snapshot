@@ -21,4 +21,11 @@ userRoute.post('/genrateRandom', getRandom);
 // genrate csv
 const genrateCsv = [auth.isAuthenticatedUser, UserCtr.addCsv];
 userRoute.get('/genrateCsv', genrateCsv);
+
+// get snapshot data
+const getSnapshotData = [
+  auth.isAuthenticatedUser,
+  UserCtr.getGenratedSnapshotData,
+];
+userRoute.get('/snapshotData', getSnapshotData);
 module.exports = userRoute;
