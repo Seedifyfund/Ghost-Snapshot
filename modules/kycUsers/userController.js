@@ -228,7 +228,7 @@ UserCtr.addCsv = async (req, res) => {
         `./lottery/${fileName}.csv`,
         save._id,
         `snapshot for ${req.query.tier} taken at ${+new Date()} `,
-        `snapshot for ${req.query.tier} with file name ${save._id}`
+        `snapshot for ${req.query.tier} with file name ${save._id} with following file Hash ${hex}`
       );
     }
 
