@@ -145,7 +145,9 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
             )} for ${fetchRecords.tier}  `,
             `Result of  lottery  genrated  on ${Math.floor(
               Date.now() / 1000
-            )} for ${fetchRecords.tier} and  snapshot Id ${fetchRecords._id}`
+            )} for ${fetchRecords.tier} and  snapshot Id ${
+              fetchRecords._id
+            } with following file hash ${fetchRecords.fileHash}`
           );
           let userIds = [];
 
