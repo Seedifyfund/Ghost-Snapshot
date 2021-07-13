@@ -15,8 +15,10 @@ web3Helper.getRandomNumber = async (requestNo, noOfAddress, Outof) => {
       lotteryAbi,
       process.env.CONTRACT_ADDRESS
     );
+
+    console.log('methods is ', lotteryContract.methods);
     const getRandomNumbers = await lotteryContract.methods
-      .expand(requestNo, noOfAddress, Outof)
+      .expand(+requestNo, +noOfAddress, +Outof)
       .call();
 
     console.log('get random numbers ', getRandomNumbers);
