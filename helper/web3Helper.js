@@ -19,6 +19,8 @@ web3Helper.getRandomNumber = async (requestNo, noOfAddress, Outof) => {
       .expand(requestNo, noOfAddress, Outof)
       .call();
 
+    console.log('get random numbers ', getRandomNumbers);
+
     return getRandomNumbers;
   } catch (err) {}
 };
