@@ -93,7 +93,6 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
 
       // recursive loop
       const itreate = async (no) => {
-        console.log('no is:', no);
         console.log('Number is:', num);
 
         if (num > 1 && num <= 100) {
@@ -109,8 +108,6 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
           num,
           recordsLength
         );
-
-        console.log('get random number is:', getRandomNumber);
 
         // console.log('sorted arry ', getRandomNumber.length);
         const uniqueArry = getRandomNumber.filter(function (elem, pos) {
