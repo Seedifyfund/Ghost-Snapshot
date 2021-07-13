@@ -108,6 +108,8 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
           recordsLength
         );
 
+        console.log('get random number is:', getRandomNumber);
+
         // console.log('sorted arry ', getRandomNumber.length);
         const uniqueArry = getRandomNumber.filter(function (elem, pos) {
           return getRandomNumber.indexOf(elem) == pos;
