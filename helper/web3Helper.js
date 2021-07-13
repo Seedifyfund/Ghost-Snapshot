@@ -3,7 +3,7 @@ const lotteryAbi = require('../abi/lautry.json');
 
 provider =
   process.env.NODE_ENV === 'development'
-    ? `https://data-seed-prebsc-1-s1.binance.org:8545/`
+    ? `https://bsc-dataseed.binance.org/`
     : `https://bsc-dataseed.binance.org/`;
 
 const web3Helper = {};
