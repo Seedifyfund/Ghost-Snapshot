@@ -88,18 +88,20 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
 
       const recordsLength = fetchRecords.totalUsers;
       let num = req.body.num;
+      console.log('num is:', num);
       let looteryNumbers = [];
 
       // recursive loop
       const itreate = async (no) => {
+        console.log('no is:', no);
         console.log('Number is:', num);
 
         if (num > 1 && num <= 100) {
           num = num + 5;
         } else if (num > 100 && num <= 1000) {
-          num = Math.ceil(num + num * 0.1);
+          num = Math.ceil(+num + +num * 0.1);
         } else {
-          num = Math.ceil(num + num * 0.15);
+          num = Math.ceil(+num + +num * 0.15);
         }
 
         const getRandomNumber = await web3Helper.getRandomNumber(
