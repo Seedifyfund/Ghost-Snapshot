@@ -22,7 +22,9 @@ web3Helper.getRandomNumber = async (requestNo, noOfAddress, Outof) => {
     console.log('get random numbers ', getRandomNumbers);
 
     return getRandomNumbers;
-  } catch (err) {}
+  } catch (err) {
+    console.log('error in contract ', err);
+  }
 };
 
 module.exports = web3Helper;
