@@ -3,7 +3,7 @@ const get = require('../../');
 const syncHelper = require('./syncHelper');
 const Utils = require('../../helper/utils');
 const { resolve, reject } = require('bluebird');
-const { getBakeryFarmBalance, getToshDishDetails } = require('./syncHelper');
+
 const blockNo = require('../../result/block.json');
 const fs = require('fs');
 const syncController = {};
@@ -492,16 +492,24 @@ syncController.getToshDishDetails = async (req, res) => {
       false
     );
 
+    // fs.writeFileSync('./lottery/tosdis-f.json', JSON.stringify(withdrawData));
+
     res.status(200).send({
       message: 'Tosdis   contract details',
       status: true,
     });
 
-    const getFarmingData = await syncHelper.getToshDishDetails(farmingData);
+    const getFarmingData = await syncHelper.getToshDishDetails(
+      farmingData,
+      true
+    );
 
     // fs.writeFileSync('./lottery/tosdis-f.json', JSON.stringify(getFarmingData));
 
-    const getwithDrawnData = await syncHelper.getToshDishDetails(withdrawData);
+    const getwithDrawnData = await syncHelper.getToshDishDetails(
+      withdrawData,
+      false
+    );
     // fs.writeFileSync(
     //   './lottery/tosdis-w.json',
     //   JSON.stringify(getwithDrawnData)
@@ -516,10 +524,13 @@ syncController.getToshDishDetails = async (req, res) => {
         );
 
         if (checkAddress >= 0) {
-          const balance =
-            getFarmingData[checkAddress].balance - getwithDrawnData[i].balance
-              ? getwithDrawnData[i].balance
-              : 0;
+          const farmingBalance = +getFarmingData[checkAddress].balance
+            ? +getFarmingData[checkAddress].balance
+            : 0;
+          const withDrawnBalance = +getwithDrawnData[i].balance
+            ? +getwithDrawnData[i].balance
+            : 0;
+          const balance = farmingBalance - withDrawnBalance;
           getFarmingData[checkAddress].balance = balance ? balance : 0;
           getFarmingData.tier = await syncHelper.getUserTier(balance);
         }

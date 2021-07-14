@@ -610,54 +610,118 @@ syncHelper.getBakeryFarmBalance = (start, end) => {
 
 // get toshdish details
 
-syncHelper.getToshDishDetails = (data) => {
+syncHelper.getToshDishDetails = (data, status) => {
   try {
     return new Promise((resolve, reject) => {
       const finalValues = [];
       try {
         if (data.length) {
-          const itreateBlocks = (i) => {
-            if (i < data.length) {
-              const address = data[i].topics[1];
-              const userAddress = address
-                ? `0x${address.substring(26, address.length)}`
-                : null;
-              const transactionData = data[i].data.substring(2, 66);
+          // get data  length
+          for (let i = 0; i < data.length; i++) {
+            const address = data[i].topics[1];
+            const userAddress = address
+              ? `0x${address.substring(26, address.length)}`
+              : null;
+            const transactionData = data[i].data.substring(2, 66);
+            let rewards = 0;
+            const lastChar = data[i].data.substring(data[i].data.length - 1);
 
-              const transaction =
-                parseInt(transactionData, 16) / Math.pow(10, 18);
+            if (+lastChar === 1 && status) {
+              const rewardsData = data[i].data.substring(2, 130);
+              rewards = parseInt(rewardsData, 16) / Math.pow(10, 18);
+            }
 
-              if (finalValues.length) {
-                const checkAddressAvalaible = finalValues.findIndex(
-                  (x) => x.address === userAddress.toLocaleLowerCase().trim()
-                );
-                if (checkAddressAvalaible >= 0) {
-                  const balance =
-                    finalValues[checkAddressAvalaible].balance + transaction;
-                  finalValues[checkAddressAvalaible].balance = +balance;
-                  finalValues.tier = syncHelper.getUserTier(+balance);
-                  itreateBlocks(i + 1);
-                } else {
-                  finalValues.push({
-                    address: userAddress.toLowerCase(),
-                    balance: +transaction ? transaction : 0,
-                    tier: syncHelper.getUserTier(transaction),
-                  });
-                  itreateBlocks(i + 1);
-                }
+            const transaction =
+              parseInt(transactionData, 16) / Math.pow(10, 18);
+
+            const totalBal = transaction ? +transaction + +rewards : rewards;
+
+            if (finalValues.length) {
+              const checkAddressAvalaible = finalValues.findIndex(
+                (x) => x.address === userAddress.toLocaleLowerCase().trim()
+              );
+              if (checkAddressAvalaible >= 0) {
+                const balance =
+                  +finalValues[checkAddressAvalaible].balance + +totalBal;
+                finalValues[checkAddressAvalaible].balance += totalBal;
+                // finalValues['rewards'] += rewards;
+                finalValues.tier = syncHelper.getUserTier(+balance);
+                // itreateBlocks(i + 1);
               } else {
                 finalValues.push({
                   address: userAddress.toLowerCase(),
-                  balance: +transaction ? transaction : 0,
+                  balance: totalBal,
+                  // rewards: rewards,
                   tier: syncHelper.getUserTier(transaction),
                 });
-                itreateBlocks(i + 1);
+                // itreateBlocks(i + 1);
               }
             } else {
-              resolve(finalValues);
+              finalValues.push({
+                address: userAddress.toLowerCase(),
+                balance: totalBal,
+                // rewards: rewards,
+                tier: syncHelper.getUserTier(transaction),
+              });
+              // itreateBlocks(i + 1);
             }
-          };
-          itreateBlocks(0);
+          }
+
+          resolve(finalValues);
+          // const itreateBlocks = (i) => {
+          //   if (i < data.length) {
+          //     const address = data[i].topics[1];
+          //     const userAddress = address
+          //       ? `0x${address.substring(26, address.length)}`
+          //       : null;
+          //     const transactionData = data[i].data.substring(2, 66);
+          //     let rewards = 0;
+          //     const lastChar = data[i].data.substring(data[i].data.length - 1);
+
+          //     if (+lastChar === 1 && status) {
+          //       const rewardsData = data[i].data.substring(2, 130);
+          //       rewards = parseInt(rewardsData, 16) / Math.pow(10, 18);
+          //     }
+
+          //     const transaction =
+          //       parseInt(transactionData, 16) / Math.pow(10, 18);
+
+          //     const totalBal = transaction ? +transaction + +rewards : rewards;
+
+          //     if (finalValues.length) {
+          //       const checkAddressAvalaible = finalValues.findIndex(
+          //         (x) => x.address === userAddress.toLocaleLowerCase().trim()
+          //       );
+          //       if (checkAddressAvalaible >= 0) {
+          //         const balance =
+          //           +finalValues[checkAddressAvalaible].balance + +totalBal;
+          //         finalValues[checkAddressAvalaible].balance += totalBal;
+          //         // finalValues['rewards'] += rewards;
+          //         finalValues.tier = syncHelper.getUserTier(+balance);
+          //         itreateBlocks(i + 1);
+          //       } else {
+          //         finalValues.push({
+          //           address: userAddress.toLowerCase(),
+          //           balance: totalBal,
+          //           // rewards: rewards,
+          //           tier: syncHelper.getUserTier(transaction),
+          //         });
+          //         itreateBlocks(i + 1);
+          //       }
+          //     } else {
+          //       finalValues.push({
+          //         address: userAddress.toLowerCase(),
+          //         balance: totalBal,
+          //         // rewards: rewards,
+          //         tier: syncHelper.getUserTier(transaction),
+          //       });
+          //       itreateBlocks(i + 1);
+          //     }
+          //   } else {
+          //     resolve(finalValues);
+          //   }
+          // };
+          // itreateBlocks(0);
         } else {
           resolve(finalValues);
         }
@@ -691,24 +755,32 @@ syncHelper.getToshFarmBalance = async (start, end) => {
         false
       );
 
-      const getFarmingData = await syncHelper.getToshDishDetails(farmingData);
+      const getFarmingData = await syncHelper.getToshDishDetails(
+        farmingData,
+        true
+      );
 
       const getwithDrawnData = await syncHelper.getToshDishDetails(
-        withdrawData
+        withdrawData,
+        false
       );
 
       if (getwithDrawnData.length) {
         for (let i = 0; i < getwithDrawnData.length; i++) {
           const checkAddress = getFarmingData.findIndex(
             (x) =>
-              x.address ===
+              x.address.toLowerCase().trim() ===
               getwithDrawnData[i].address.toLocaleLowerCase().trim()
           );
 
           if (checkAddress >= 0) {
-            const balance =
-              getFarmingData[checkAddress].balance -
-              getwithDrawnData[i].balance;
+            const farmingBalance = +getFarmingData[checkAddress].balance
+              ? +getFarmingData[checkAddress].balance
+              : 0;
+            const withDrawnBalance = +getwithDrawnData[i].balance
+              ? +getwithDrawnData[i].balance
+              : 0;
+            const balance = farmingBalance - withDrawnBalance;
             getFarmingData[checkAddress].balance = balance ? balance : 0;
             getFarmingData.tier = await syncHelper.getUserTier(balance);
           }
