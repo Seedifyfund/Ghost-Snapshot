@@ -27,85 +27,168 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
       const getRecords = await getDatafromBlockPass(skip);
 
       if (getRecords && getRecords.records.length) {
-        const itreateBlocks = async (i) => {
-          if (i < getRecords.records.length) {
-            console.log(
-              getRecords.records[i].identities.crypto_address_eth.value
-            );
+        console.log(
+          'getRecords.records.length ====>',
+          getRecords.records.length
+        );
+        // const itreateBlocks = async (i) => {
+        //   if (i < getRecords.records.length) {
+        //     console.log(
+        //       getRecords.records[i].identities.crypto_address_eth.value
+        //     );
 
-            const userAddress =
-              getRecords.records[i].identities.crypto_address_eth.value;
+        //     const userAddress =
+        //       getRecords.records[i].identities.crypto_address_eth.value;
 
-            const getSfund = await getSfundBalance(
-              '0x477bc8d23c634c154061869478bce96be6045d12',
-              userAddress,
-              latestBlock
-            );
+        //     const getSfund = await getSfundBalance(
+        //       '0x477bc8d23c634c154061869478bce96be6045d12',
+        //       userAddress,
+        //       latestBlock
+        //     );
 
-            const getLiquidity = await getLiquidityBalance(
-              userAddress,
-              latestBlock
-            );
+        //     const getLiquidity = await getLiquidityBalance(
+        //       userAddress,
+        //       latestBlock
+        //     );
 
-            const getFarming = await findData(getFarmingArray, userAddress);
+        //     const getFarming = await findData(getFarmingArray, userAddress);
 
-            const getBakery = await findData(getBakeryArray, userAddress);
+        //     const getBakery = await findData(getBakeryArray, userAddress);
 
-            const getTosdis = await findData(getTosdisArray, userAddress);
+        //     const getTosdis = await findData(getTosdisArray, userAddress);
 
-            const getSlp = await findData(getSlpArray, userAddress);
+        //     const getSlp = await findData(getSlpArray, userAddress);
 
-            const balObj = {
-              sfund: getSfund,
-              liquidity: getLiquidity,
-              farming: getFarming,
-              bakery: getBakery,
-              tosdis: getTosdis,
-              slp: getSlp,
-            };
+        //     const balObj = {
+        //       sfund: getSfund,
+        //       liquidity: getLiquidity,
+        //       farming: getFarming,
+        //       bakery: getBakery,
+        //       tosdis: getTosdis,
+        //       slp: getSlp,
+        //     };
 
-            const total =
-              getSfund +
-              getLiquidity +
-              getFarming +
-              getBakery +
-              getTosdis +
-              getSlp;
+        //     const total =
+        //       getSfund +
+        //       getLiquidity +
+        //       getFarming +
+        //       getBakery +
+        //       getTosdis +
+        //       getSlp;
 
-            const email = getRecords.records[i].identities.email.value;
-            const name = `${getRecords.records[i].identities.given_name.value}${getRecords.records[i].identities.family_name.value} `;
+        //     const email = getRecords.records[i].identities.email.value;
+        //     const name = `${getRecords.records[i].identities.given_name.value}${getRecords.records[i].identities.family_name.value} `;
 
-            const checkUserAvalaible = await UserModal.findOne({
-              walletAddress: userAddress.toLowerCase().trim(),
+        //     const checkUserAvalaible = await UserModal.findOne({
+        //       walletAddress: userAddress.toLowerCase().trim(),
+        //     });
+
+        //     if (checkUserAvalaible) {
+        //       checkUserAvalaible.balObj = balObj;
+        //       checkUserAvalaible.totalbalance = total;
+        //       checkUserAvalaible.tier = syncHelper.getUserTier(total);
+
+        //       await checkUserAvalaible.save();
+        //       itreateBlocks(i + 1);
+        //     } else {
+        //       const addNewUser = new UserModal({
+        //         recordId: getRecords.records[i].recordId,
+        //         walletAddress: userAddress,
+        //         email: email,
+        //         name: name,
+        //         totalbalance: total,
+        //         balObj: balObj,
+        //         tier: syncHelper.getUserTier(total),
+        //       });
+
+        //       await addNewUser.save();
+        //       itreateBlocks(i + 1);
+        //     }
+        //   }
+        // };
+        // itreateBlocks(0);
+
+        for (let i = 0; i < getRecords.records.length; i++) {
+          console.log(
+            getRecords.records[i].identities.crypto_address_eth.value
+          );
+
+          const userAddress =
+            getRecords.records[i].identities.crypto_address_eth.value;
+
+          const getSfund = await getSfundBalance(
+            '0x477bc8d23c634c154061869478bce96be6045d12',
+            userAddress,
+            latestBlock
+          );
+
+          const getLiquidity = await getLiquidityBalance(
+            userAddress,
+            latestBlock
+          );
+
+          const getFarming = await findData(getFarmingArray, userAddress);
+
+          const getBakery = await findData(getBakeryArray, userAddress);
+
+          const getTosdis = await findData(getTosdisArray, userAddress);
+
+          const getSlp = await findData(getSlpArray, userAddress);
+
+          const balObj = {
+            sfund: getSfund,
+            liquidity: getLiquidity,
+            farming: getFarming,
+            bakery: getBakery,
+            tosdis: getTosdis,
+            slp: getSlp,
+          };
+
+          const total =
+            getSfund +
+            getLiquidity +
+            getFarming +
+            getBakery +
+            getTosdis +
+            getSlp;
+
+          const email = getRecords.records[i].identities.email.value;
+          const name = `${getRecords.records[i].identities.given_name.value}${getRecords.records[i].identities.family_name.value} `;
+
+          const checkUserAvalaible = await UserModal.findOne({
+            walletAddress: userAddress.toLowerCase().trim(),
+          });
+
+          if (checkUserAvalaible) {
+            checkUserAvalaible.balObj = balObj;
+            checkUserAvalaible.totalbalance = total;
+            checkUserAvalaible.tier = syncHelper.getUserTier(total);
+
+            await checkUserAvalaible.save();
+            // itreateBlocks(i + 1);
+          } else {
+            const addNewUser = new UserModal({
+              recordId: getRecords.records[i].recordId,
+              walletAddress: userAddress,
+              email: email,
+              name: name,
+              totalbalance: total,
+              balObj: balObj,
+              tier: syncHelper.getUserTier(total),
             });
 
-            if (checkUserAvalaible) {
-              checkUserAvalaible.balObj = balObj;
-              checkUserAvalaible.totalbalance = total;
-              checkUserAvalaible.tier = syncHelper.getUserTier(total);
-
-              await checkUserAvalaible.save();
-              itreateBlocks(i + 1);
-            } else {
-              const addNewUser = new UserModal({
-                recordId: getRecords.records[i].recordId,
-                walletAddress: userAddress,
-                email: email,
-                name: name,
-                totalbalance: total,
-                balObj: balObj,
-                tier: syncHelper.getUserTier(total),
-              });
-
-              await addNewUser.save();
-              itreateBlocks(i + 1);
-            }
+            await addNewUser.save();
+            // itreateBlocks(i + 1);
           }
-        };
-        itreateBlocks(0);
+        }
 
         if (getRecords.total > getRecords.skip) {
-          getRecordsFromBlockPass(+getRecords.skip + 10);
+          let skip = +getRecords.skip + 10;
+
+          if (skip > getRecords.total) {
+            skip = +getRecords.skip;
+          }
+          getRecordsFromBlockPass(skip);
         } else {
           console.log('Cron fired successfully');
 
@@ -132,6 +215,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
 
 // get data from block pass
 async function getDatafromBlockPass(skip) {
+  console.log('skip is:', skip);
   let url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants/approved?limit=10`;
   if (skip > 0) {
     url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants/approved?limit=10&skip=${skip}`;
@@ -207,7 +291,7 @@ async function getSfundBalance(address, userAddress, endBlock) {
   // }
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     var config = {
       method: 'get',
