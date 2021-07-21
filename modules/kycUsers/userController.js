@@ -20,7 +20,7 @@ UserCtr.list = async (req, res) => {
     }
 
     if (req.query.address) {
-      query.walletAddress = req.query.walletAddress.toLowerCase().trim();
+      query.walletAddress = req.query.address.toLowerCase().trim();
     }
 
     const totalCount = await UserModel.countDocuments(query);
