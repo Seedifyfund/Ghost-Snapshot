@@ -6,6 +6,7 @@ const syncHelper = require('../sync/syncHelper');
 const blockPassCtr = {};
 
 blockPassCtr.getApprovedUserList = async (req, res) => {
+  console.log('Blockpass Cron Called ========>');
   try {
     const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
     const getLatestBlock = await axios.get(getLatestBlockNoUrl);
