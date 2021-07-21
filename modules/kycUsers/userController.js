@@ -19,6 +19,10 @@ UserCtr.list = async (req, res) => {
       query.tier = req.query.tier;
     }
 
+    if (req.query.address) {
+      query.walletAddress = req.query.walletAddress.toLowerCase().trim();
+    }
+
     const totalCount = await UserModel.countDocuments(query);
     const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
 
