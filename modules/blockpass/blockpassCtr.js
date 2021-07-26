@@ -21,7 +21,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
       latestBlock
     );
     const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
-    const getSlpArray = await SyncHelper.slpBalance(0, latestBlock);
+    // const getSlpArray = await SyncHelper.slpBalance(0, latestBlock);
 
     const getRecordsFromBlockPass = async (skip) => {
       const getRecords = await getDatafromBlockPass(skip);
