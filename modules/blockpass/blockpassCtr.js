@@ -133,7 +133,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
 
           const getTosdis = await findData(getTosdisArray, userAddress);
 
-          const getSlp = await findData(getSlpArray, userAddress);
+          // const getSlp = await findData(getSlpArray, userAddress);
 
           const balObj = {
             sfund: getSfund,
@@ -141,16 +141,12 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
             farming: getFarming,
             bakery: getBakery,
             tosdis: getTosdis,
-            slp: getSlp,
+            // slp: getSlp,
           };
 
           const total =
-            getSfund +
-            getLiquidity +
-            getFarming +
-            getBakery +
-            getTosdis +
-            getSlp;
+            getSfund + getLiquidity + getFarming + getBakery + getTosdis;
+          // getSlp;
 
           const email = getRecords.records[i].identities.email.value;
           const name = `${getRecords.records[i].identities.given_name.value}${getRecords.records[i].identities.family_name.value} `;
