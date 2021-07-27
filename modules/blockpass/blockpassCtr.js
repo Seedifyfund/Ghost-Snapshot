@@ -1,8 +1,10 @@
 const UserModal = require('../kycUsers/usersModel');
 const SyncHelper = require('../sync/syncHelper');
+
 const Utils = require('../../helper/utils');
 const axios = require('axios');
 const syncHelper = require('../sync/syncHelper');
+// const BlockPassCtr = require('../blockPassUsers/blockPassCtr');
 const blockPassCtr = {};
 
 blockPassCtr.getApprovedUserList = async (req, res) => {
@@ -347,5 +349,38 @@ async function findData(data, userAddress) {
     return 0;
   }
 }
+
+blockPassCtr.checkKycVerified = async (req, res) => {
+  try {
+    const checkIsVerified = await UserModal.findOne({
+      walletAddress: req.params.address.toLowerCase(),
+    });
+
+    if (checkIsVerified) {
+      res.status(200).json({
+        message: 'Kyc Status',
+        status: true,
+        data: {
+          kycStatus: true,
+        },
+      });
+    } else {
+      res.status(200).json({
+        message: 'Kyc Status',
+        status: true,
+        data: {
+          kycStatus: false,
+        },
+      });
+    }
+  } catch (err) {
+    Utils.echoLog(`error in getSfundBalance ${err}`);
+    res.status(200).json({
+      message: 'Somethig went wrong please try again',
+      status: true,
+      err: err.message ? err.message : null,
+    });
+  }
+};
 
 module.exports = blockPassCtr;

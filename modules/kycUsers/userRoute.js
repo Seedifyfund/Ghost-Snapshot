@@ -1,5 +1,6 @@
 const express = require('express');
 const UserCtr = require('./userController');
+
 const UserMiddleware = require('./userMiddleware');
 
 const Auth = require('../../helper/auth');
@@ -28,4 +29,5 @@ const getSnapshotData = [
   UserCtr.getGenratedSnapshotData,
 ];
 userRoute.get('/snapshotData', getSnapshotData);
+
 module.exports = userRoute;

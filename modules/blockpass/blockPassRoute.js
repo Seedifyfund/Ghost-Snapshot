@@ -7,4 +7,8 @@ const blockPassRoute = express.Router();
 const getApprovedUsers = [BlockPassCtr.getApprovedUserList];
 blockPassRoute.get('/approved', getApprovedUsers);
 
+// check address is kyc verified or not
+const checkIsVerified = [BlockPassCtr.checkKycVerified];
+blockPassRoute.get('/check/:address', checkIsVerified);
+
 module.exports = blockPassRoute;
