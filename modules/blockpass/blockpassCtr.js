@@ -23,6 +23,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
       latestBlock
     );
     const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
+    let blockScheduled = [];
     // const getSlpArray = await SyncHelper.slpBalance(0, latestBlock);
 
     const getRecordsFromBlockPass = async (skip) => {
@@ -180,8 +181,12 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           }
         }
 
-        if (getRecords.total > getRecords.skip) {
+        if (
+          getRecords.total > getRecords.skip &&
+          blockScheduled < getRecords.total
+        ) {
           let skip = +getRecords.skip + 10;
+          blockScheduled = skip;
 
           if (skip > getRecords.total) {
             skip = +getRecords.skip;

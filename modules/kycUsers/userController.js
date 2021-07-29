@@ -274,4 +274,24 @@ UserCtr.getGenratedSnapshotData = async (req, res) => {
   }
 };
 
+UserCtr.getUsersStakedBalance = async (req, res) => {
+  try {
+    console.log('getUsersStakedBalance called');
+    const getUsers = await UserModel.find({ isActive: true });
+    // console.log('get users is:', getUsers);
+    if (getUsers && getUsers.length) {
+      const users = [];
+
+      for (let i = 0; i < getUsers.length; i++) {
+        const getStakedBalance = await web3Helper.getUserStakedBalance(
+          getUsers[i].walletAddress
+        );
+
+        console.log('getStakedBalance', getStakedBalance);
+      }
+    }
+  } catch (err) {
+    console.log('err is:', err);
+  }
+};
 module.exports = UserCtr;
