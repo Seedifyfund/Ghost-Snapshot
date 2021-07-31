@@ -27,7 +27,8 @@ web3Helper.getRandomNumber = async (requestNo, noOfAddress, Outof) => {
   }
 };
 
-web3Helper.getUserStakedBalance = async (walletAddress) => {
+web3Helper.getUserStakedBalance = async (walletAddress, ContractAddress) => {
+  console.log('get balnce called');
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
@@ -37,13 +38,10 @@ web3Helper.getUserStakedBalance = async (walletAddress) => {
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
-      const contract = new web3.eth.Contract(
-        StakingContract,
-        process.env.STAKING_ADDRESS
-      );
+      const contract = new web3.eth.Contract(StakingContract, ContractAddress);
 
       const getStakedBalance = await contract.methods
-        .stakeOf(walletAddress)
+        .userDeposits(walletAddress)
         .call();
 
       resolve(getStakedBalance);

@@ -3,6 +3,9 @@ const Utils = require('../../helper/utils');
 const web3Helper = require('../../helper/web3Helper');
 const lotteryModel = require('../lottery/lotteryModel');
 const SnapshotModel = require('../snapshot/snapshotModel');
+const SyncHelper = require('../sync/syncHelper');
+const PoolsModel = require('../pools/poolsModel');
+const axios = require('axios');
 const ObjectsToCsv = require('objects-to-csv');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -277,21 +280,223 @@ UserCtr.getGenratedSnapshotData = async (req, res) => {
 UserCtr.getUsersStakedBalance = async (req, res) => {
   try {
     console.log('getUsersStakedBalance called');
+
+    const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
+    const getLatestBlock = await axios.get(getLatestBlockNoUrl);
+    const latestBlock = parseInt(getLatestBlock.data.result, 16);
+
+    const getFarmingArray = await await SyncHelper.getFarmingBalance(
+      0,
+      latestBlock
+    );
+    const getBakeryArray = await SyncHelper.getBakeryFarmBalance(
+      0,
+      latestBlock
+    );
+    const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
+
+    const getPools = await PoolsModel.find({});
     const getUsers = await UserModel.find({ isActive: true });
+    const getTimeStamp = Math.round(new Date().getTime() / 1000);
     // console.log('get users is:', getUsers);
     if (getUsers && getUsers.length) {
       const users = [];
 
       for (let i = 0; i < getUsers.length; i++) {
-        const getStakedBalance = await web3Helper.getUserStakedBalance(
-          getUsers[i].walletAddress
+        console.log('i is:', i);
+        const getBalance = await getUserBalance(
+          getUsers[i].walletAddress,
+          getPools,
+          getTimeStamp,
+          getFarmingArray,
+          getBakeryArray,
+          getTosdisArray,
+          latestBlock
         );
 
-        console.log('getStakedBalance', getStakedBalance);
+        getBalance.walletAddress = getUsers[i].walletAddress;
+
+        users.push(getBalance);
       }
+
+      const csv = new ObjectsToCsv(users);
+      const fileName = `${+new Date()}_${'staked'}`;
+      await csv.toDisk(`./lottery/${fileName}.csv`);
+
+      console.log('User staked balances fetched');
     }
   } catch (err) {
     console.log('err is:', err);
   }
 };
+
+async function getUserBalance(
+  walletAddress,
+  pool,
+  timestamp,
+  farming,
+  bakery,
+  tosdis,
+  endBlock
+) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let pools = [];
+
+      if (pool.length) {
+        for (let i = 0; i < pool.length; i++) {
+          const fetchBalance = await web3Helper.getUserStakedBalance(
+            walletAddress,
+            pool[i].contractAddress
+          );
+
+          const value = Utils.convertToEther(fetchBalance['0']);
+          const endDate = fetchBalance['2'];
+
+          if (endDate < timestamp) {
+            pools.push({
+              name: pool[i].poolName,
+              staked: 0,
+              loyalityPoints: 0,
+            });
+          } else {
+            const points = value * pool[i].loyalityPoints;
+            pools.push({
+              name: pool[i].poolName,
+              staked: value,
+              loyalityPoints: points,
+            });
+          }
+        }
+
+        // get farming balance
+        const getFarmingBalance = await findData(farming, walletAddress);
+
+        pools.push({
+          name: 'farming',
+          staked: getFarmingBalance,
+          loyalityPoints: +getFarmingBalance * 5,
+        });
+
+        // get bakery balance
+        const bakeryBalance = await findData(bakery, walletAddress);
+        pools.push({
+          name: 'bakery',
+          staked: bakeryBalance,
+          loyalityPoints: +bakeryBalance * 5,
+        });
+
+        // get tosdis balance
+        const tosdisBalance = await findData(tosdis, walletAddress);
+        pools.push({
+          name: 'tosdis',
+          staked: tosdisBalance,
+          loyalityPoints: +tosdisBalance * 5,
+        });
+
+        // get sfund bal
+        const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
+        const getSfund = await getSfundBalance(
+          address,
+          walletAddress,
+          endBlock
+        );
+        pools.push({
+          name: 'sfund',
+          staked: getSfund,
+          loyalityPoints: +getSfund * 3,
+        });
+
+        // get liquity balance
+        const getLiquidity = await getLiquidityBalance(walletAddress, endBlock);
+        pools.push({
+          name: 'liquidity',
+          staked: getLiquidity,
+          loyalityPoints: +getLiquidity * 2,
+        });
+
+        // console.log('pools is:', pools);
+
+        let points = 0;
+        const userStaked = {};
+
+        for (let j = 0; j < pools.length; j++) {
+          userStaked[pools[j].name] = pools[j].staked;
+          points += pools[j].loyalityPoints;
+        }
+
+        userStaked.points = points;
+
+        resolve(userStaked);
+      }
+    } catch (err) {
+      reject(false);
+    }
+  });
+}
+
+async function findData(data, userAddress) {
+  const findIndex = data.findIndex(
+    (user) =>
+      user.address.toLowerCase().trim() === userAddress.toLowerCase().trim()
+  );
+
+  if (findIndex >= 0) {
+    return data[findIndex].balance;
+  } else {
+    return 0;
+  }
+}
+
+// get sfund balance
+async function getSfundBalance(address, userAddress, endBlock) {
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    var config = {
+      method: 'get',
+      url: `https://api.bscscan.com/api?module=account&action=tokenbalancehistory&contractaddress=${address}&address=${userAddress}&blockno=${endBlock}&apikey=${process.env.BSC_API_KEY}`,
+      headers: {},
+    };
+
+    const getSfundBal = await axios(config);
+
+    if (getSfundBal.status === 200) {
+      const data = getSfundBal.data;
+
+      let seedifyBalance = (+data.result / Math.pow(10, 18)).toFixed(2);
+
+      return +seedifyBalance > 0 ? +seedifyBalance : 0;
+    }
+  } catch (err) {
+    Utils.echoLog(`error in getSfundBalance ${err}`);
+    return 0;
+  }
+}
+
+// get liquidy bal
+async function getLiquidityBalance(userAddress, endBlock) {
+  const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
+
+  const getTotalSupplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${address}&apikey=${process.env.BSC_API_KEY}`;
+  const tokenBalanceUrl = `https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=0x477bc8d23c634c154061869478bce96be6045d12&address=${address}&tag=latest&apikey=${process.env.BSC_API_KEY}`;
+
+  const getTotalSupply = await axios.get(getTotalSupplyUrl);
+  const getTokenBalance = await axios.get(tokenBalanceUrl);
+
+  const getSfundBal = await getSfundBalance(address, userAddress, endBlock);
+
+  const tokenSupply = +getTotalSupply.data.result / Math.pow(10, 18);
+  const tokenBalance = +getTokenBalance.data.result / Math.pow(10, 18);
+
+  if (getSfundBal) {
+    const transactionCount = +getSfundBal / tokenSupply;
+    const total = transactionCount * tokenBalance;
+
+    return +total > 0 ? +total : 0;
+  } else {
+    return 0;
+  }
+}
+
 module.exports = UserCtr;
