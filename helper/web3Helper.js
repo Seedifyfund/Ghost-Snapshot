@@ -1,6 +1,7 @@
 const Web3 = require('web3');
 const lotteryAbi = require('../abi/lautry.json');
 const StakingContract = require('../abi/staking.json');
+const FarmingContract = require('../abi/farming.json');
 
 provider =
   process.env.NODE_ENV === 'development'
@@ -28,7 +29,6 @@ web3Helper.getRandomNumber = async (requestNo, noOfAddress, Outof) => {
 };
 
 web3Helper.getUserStakedBalance = async (walletAddress, ContractAddress) => {
-  console.log('get balnce called');
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
@@ -47,6 +47,29 @@ web3Helper.getUserStakedBalance = async (walletAddress, ContractAddress) => {
       resolve(getStakedBalance);
     } catch (err) {
       console.log('error in web3 data ', err);
+
+      resolve(0);
+    }
+  });
+};
+
+web3Helper.getFarmingContractEndDate = async (contractAddress) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const provider =
+        process.env.NODE_ENV === 'development'
+          ? 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+          : 'https://data-seed-prebsc-2-s1.binance.org:8545/';
+
+      const web3 = new Web3(new Web3.providers.HttpProvider(provider));
+
+      const contract = new web3.eth.Contract(FarmingContract, contractAddress);
+
+      const getEndDate = await contract.methods.stakingEnd().call();
+
+      resolve(getEndDate);
+    } catch (err) {
+      console.log('Error in getting end date', err);
 
       resolve(0);
     }

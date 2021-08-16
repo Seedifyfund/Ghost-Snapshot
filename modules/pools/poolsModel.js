@@ -14,6 +14,7 @@ const poolSchema = new Schema(
       lowercase: true,
       unique: true,
     },
+
     tokenAddress: {
       type: String,
       require: true,
@@ -21,7 +22,16 @@ const poolSchema = new Schema(
     },
     loyalityPoints: {
       type: Number,
-      require: true,
+      required: true,
+    },
+    contractType: {
+      type: String,
+      enum: ['farming', 'staking'],
+      required: true,
+    },
+    endDate: {
+      type: Number,
+      default: 0,
     },
   },
 

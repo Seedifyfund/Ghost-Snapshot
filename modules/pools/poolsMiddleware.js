@@ -12,6 +12,7 @@ poolsMiddleware.validateCheck = async (req, res, next) => {
     contractAddress: Joi.string().required(),
     tokenAddress: Joi.string().required(),
     loyalityPoints: Joi.number().required(),
+    contractType: Joi.string().valid('staking', 'farming').required(),
   });
   validate.validateRequest(req, res, next, schema);
 };
@@ -22,6 +23,7 @@ poolsMiddleware.validateUpdateCheck = async (req, res, next) => {
     contractAddress: Joi.string(),
     tokenAddress: Joi.string(),
     loyalityPoints: Joi.number(),
+    contractType: Joi.string().valid('staking', 'farming'),
   });
   validate.validateRequest(req, res, next, schema);
 };

@@ -1,18 +1,25 @@
 const PoolsModel = require('./poolsModel');
 const Utils = require('../../helper/utils');
-const { find } = require('lodash');
-const e = require('express');
-
+const Web3Helper = require('../../helper/web3Helper');
 const poolCtr = {};
 
 // add new pool
 poolCtr.addNewPool = async (req, res) => {
+  let endDate = 0;
+  if (req.body.contractType === 'farming') {
+    endDate = await Web3Helper.getFarmingContractEndDate(
+      req.body.contractAddress
+    );
+  }
+
   try {
     const addNewPool = new PoolsModel({
       poolName: req.body.poolName,
       contractAddress: req.body.contractAddress,
       tokenAddress: req.body.tokenAddress,
       loyalityPoints: req.body.loyalityPoints,
+      contractType: req.body.contractType,
+      endDate: endDate,
     });
 
     await addNewPool.save();
@@ -40,6 +47,13 @@ poolCtr.updatePool = async (req, res) => {
         findPool.poolName = req.body.poolName;
       }
       if (req.body.contractAddress) {
+        let endDate = 0;
+        if (findPool.contractType === 'farming') {
+          endDate = await Web3Helper.getFarmingContractEndDate(
+            req.body.contractAddress
+          );
+        }
+        findPool.endDate = endDate;
         findPool.contractAddress = req.body.contractAddress;
       }
       if (req.body.tokenAddress) {
@@ -48,6 +62,10 @@ poolCtr.updatePool = async (req, res) => {
 
       if (req.body.loyalityPoints) {
         findPool.loyalityPoints = req.body.loyalityPoints;
+      }
+
+      if (req.body.contractType) {
+        findPool.contractType = req.body.contractType;
       }
 
       await findPool.save();
@@ -118,6 +136,54 @@ poolCtr.listPools = async (req, res) => {
         data: listPool,
       });
     }
+  } catch (err) {
+    Utils.echoLog(`Error in listing  Pool ${err}`);
+    return res.status(500).json({
+      status: false,
+      message: 'Something went wrong ',
+      error: err.message ? err.message : err,
+    });
+  }
+};
+
+// list pools for user
+poolCtr.listPoolsForUser = async (req, res) => {
+  try {
+    const query = {};
+    if (req.query.pools) {
+      query.contractType = req.query.pools.toLowerCase().trim();
+    }
+
+    const listPool = await PoolsModel.find(query);
+    return res.status(200).json({
+      status: true,
+      message: 'Pool List',
+      data: listPool,
+    });
+  } catch (err) {
+    Utils.echoLog(`Error in listing  Pool ${err}`);
+    return res.status(500).json({
+      status: false,
+      message: 'Something went wrong ',
+      error: err.message ? err.message : err,
+    });
+  }
+};
+
+// list farming pools
+poolCtr.listFarmingPools = async (req, res) => {
+  try {
+    let query = { contractType: 'farming' };
+    if (req.query.status === 'closed') {
+      query.endDate = { $lte: Math.floor(Date.now() / 1000) };
+    }
+    const getPools = await PoolsModel.find(query);
+
+    return res.status(200).json({
+      status: true,
+      message: 'Pool List',
+      data: getPools,
+    });
   } catch (err) {
     Utils.echoLog(`Error in listing  Pool ${err}`);
     return res.status(500).json({

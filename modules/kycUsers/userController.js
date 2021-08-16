@@ -5,6 +5,7 @@ const lotteryModel = require('../lottery/lotteryModel');
 const SnapshotModel = require('../snapshot/snapshotModel');
 const SyncHelper = require('../sync/syncHelper');
 const PoolsModel = require('../pools/poolsModel');
+const genrateSpreadSheet = require('../../helper/genrateSpreadsheet');
 const axios = require('axios');
 const ObjectsToCsv = require('objects-to-csv');
 const crypto = require('crypto');
@@ -300,7 +301,18 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     const getTimeStamp = Math.round(new Date().getTime() / 1000);
     // console.log('get users is:', getUsers);
     if (getUsers && getUsers.length) {
-      const users = [];
+      const users = {
+        tier0: [],
+        tier1: [],
+        tier2: [],
+        tier3: [],
+        tier4: [],
+        tier5: [],
+        tier6: [],
+        tier7: [],
+        tier8: [],
+        tier9: [],
+      };
 
       for (let i = 0; i < getUsers.length; i++) {
         console.log('i is:', i);
@@ -316,13 +328,17 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
 
         getBalance.walletAddress = getUsers[i].walletAddress;
 
-        users.push(getBalance);
+        getBalance.tier = SyncHelper.getUserTier(getBalance.eTokens);
+
+        users[getBalance.tier].push(getBalance);
+        // users.push(getBalance);
       }
 
-      const csv = new ObjectsToCsv(users);
-      const fileName = `${+new Date()}_${'staked'}`;
-      await csv.toDisk(`./lottery/${fileName}.csv`);
-
+      // const csv = new ObjectsToCsv(users);
+      // const fileName = `${+new Date()}_${'staked'}`;
+      // await csv.toDisk(`./lottery/${fileName}.csv`);
+      // console.log('users is:', users);
+      genrateSpreadSheet.genrateExcel(users);
       console.log('User staked balances fetched');
     }
   } catch (err) {
@@ -360,7 +376,7 @@ async function getUserBalance(
               loyalityPoints: 0,
             });
           } else {
-            const points = value * pool[i].loyalityPoints;
+            const points = +value + (value * pool[i].loyalityPoints) / 100;
             pools.push({
               name: pool[i].poolName,
               staked: value,
@@ -375,7 +391,7 @@ async function getUserBalance(
         pools.push({
           name: 'farming',
           staked: getFarmingBalance,
-          loyalityPoints: +getFarmingBalance * 5,
+          loyalityPoints: +getFarmingBalance + (+getFarmingBalance * 5) / 100,
         });
 
         // get bakery balance
@@ -383,15 +399,16 @@ async function getUserBalance(
         pools.push({
           name: 'bakery',
           staked: bakeryBalance,
-          loyalityPoints: +bakeryBalance * 5,
+          loyalityPoints: +bakeryBalance + (+bakeryBalance * 5) / 100,
         });
 
         // get tosdis balance
         const tosdisBalance = await findData(tosdis, walletAddress);
+        console.log('+tosdisBalance * 5) / 100', (+tosdisBalance * 5) / 100);
         pools.push({
           name: 'tosdis',
           staked: tosdisBalance,
-          loyalityPoints: +tosdisBalance * 5,
+          loyalityPoints: +tosdisBalance + (+tosdisBalance * 5) / 100,
         });
 
         // get sfund bal
@@ -404,7 +421,7 @@ async function getUserBalance(
         pools.push({
           name: 'sfund',
           staked: getSfund,
-          loyalityPoints: +getSfund * 3,
+          loyalityPoints: +getSfund + (+getSfund * 3) / 100,
         });
 
         // get liquity balance
@@ -412,7 +429,7 @@ async function getUserBalance(
         pools.push({
           name: 'liquidity',
           staked: getLiquidity,
-          loyalityPoints: +getLiquidity * 2,
+          loyalityPoints: +getLiquidity + (+getLiquidity * 2) / 100,
         });
 
         // console.log('pools is:', pools);
@@ -425,7 +442,7 @@ async function getUserBalance(
           points += pools[j].loyalityPoints;
         }
 
-        userStaked.points = points;
+        userStaked.eTokens = points;
 
         resolve(userStaked);
       }
