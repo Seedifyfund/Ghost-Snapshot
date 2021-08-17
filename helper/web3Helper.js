@@ -66,12 +66,18 @@ web3Helper.getFarmingContractEndDate = async (contractAddress) => {
       const contract = new web3.eth.Contract(FarmingContract, contractAddress);
 
       const getEndDate = await contract.methods.stakingEnd().call();
+      const startDate = await contract.methods.stakingStart().call();
+      const withdrawDate = await contract.methods.withdrawStart().call();
 
-      resolve(getEndDate);
+      resolve({
+        endDate: getEndDate,
+        startDate: startDate,
+        withdrawDate: withdrawDate,
+      });
     } catch (err) {
       console.log('Error in getting end date', err);
 
-      resolve(0);
+      resolve({ endDate: 0, startDate: 0, withdrawDate: 0 });
     }
   });
 };

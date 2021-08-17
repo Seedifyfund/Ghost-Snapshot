@@ -20,6 +20,12 @@ const poolSchema = new Schema(
       require: true,
       lowercase: true,
     },
+
+    lpTokenAddress: {
+      type: String,
+      lowercase: true,
+      default: null,
+    },
     loyalityPoints: {
       type: Number,
       required: true,
@@ -30,6 +36,14 @@ const poolSchema = new Schema(
       required: true,
     },
     endDate: {
+      type: Number,
+      default: 0,
+    },
+    startDate: {
+      type: Number,
+      default: 0,
+    },
+    withdrawDate: {
       type: Number,
       default: 0,
     },

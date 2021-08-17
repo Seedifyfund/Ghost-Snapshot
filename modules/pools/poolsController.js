@@ -5,9 +5,13 @@ const poolCtr = {};
 
 // add new pool
 poolCtr.addNewPool = async (req, res) => {
-  let endDate = 0;
+  let contractData = {
+    endDate: 0,
+    startDate: 0,
+    withdrawDate: 0,
+  };
   if (req.body.contractType === 'farming') {
-    endDate = await Web3Helper.getFarmingContractEndDate(
+    contractData = await Web3Helper.getFarmingContractEndDate(
       req.body.contractAddress
     );
   }
@@ -19,7 +23,10 @@ poolCtr.addNewPool = async (req, res) => {
       tokenAddress: req.body.tokenAddress,
       loyalityPoints: req.body.loyalityPoints,
       contractType: req.body.contractType,
-      endDate: endDate,
+      endDate: contractData.endDate,
+      startDate: contractData.startDate,
+      withdrawDate: contractData.withdrawDate,
+      lpTokenAddress: req.body.lpTokenAddress,
     });
 
     await addNewPool.save();
@@ -47,17 +54,27 @@ poolCtr.updatePool = async (req, res) => {
         findPool.poolName = req.body.poolName;
       }
       if (req.body.contractAddress) {
-        let endDate = 0;
+        let contractData = {
+          endDate: 0,
+          startDate: 0,
+          withdrawDate: 0,
+        };
         if (findPool.contractType === 'farming') {
-          endDate = await Web3Helper.getFarmingContractEndDate(
+          contractData = await Web3Helper.getFarmingContractEndDate(
             req.body.contractAddress
           );
         }
-        findPool.endDate = endDate;
+        findPool.endDate = contractData.endDate;
+        findPool.startDate = contractData.startDate;
+        findPool.withdrawDate = contractData.withdrawDate;
         findPool.contractAddress = req.body.contractAddress;
       }
       if (req.body.tokenAddress) {
         findPool.tokenAddress = req.body.tokenAddress;
+      }
+
+      if (req.body.lpTokenAddress) {
+        findPool.lpTokenAddress = req.body.lpTokenAddress;
       }
 
       if (req.body.loyalityPoints) {
