@@ -192,7 +192,7 @@ poolCtr.listFarmingPools = async (req, res) => {
   try {
     let query = {
       contractType: 'farming',
-      endDate: { gte: Math.floor(Date.now() / 1000) },
+      endDate: { $gte: Math.floor(Date.now() / 1000) },
     };
     if (req.query.status === 'closed') {
       query.endDate = { $lte: Math.floor(Date.now() / 1000) };
