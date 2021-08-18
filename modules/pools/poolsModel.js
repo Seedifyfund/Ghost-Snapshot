@@ -25,6 +25,7 @@ const poolSchema = new Schema(
       type: String,
       lowercase: true,
       default: null,
+      lowercase: true,
     },
     loyalityPoints: {
       type: Number,

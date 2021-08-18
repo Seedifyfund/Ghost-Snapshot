@@ -2,6 +2,7 @@ const Web3 = require('web3');
 const lotteryAbi = require('../abi/lautry.json');
 const StakingContract = require('../abi/staking.json');
 const FarmingContract = require('../abi/farming.json');
+const Utils = require('../helper/utils');
 
 provider =
   process.env.NODE_ENV === 'development'
@@ -78,6 +79,31 @@ web3Helper.getFarmingContractEndDate = async (contractAddress) => {
       console.log('Error in getting end date', err);
 
       resolve({ endDate: 0, startDate: 0, withdrawDate: 0 });
+    }
+  });
+};
+
+web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const provider =
+        process.env.NODE_ENV === 'development'
+          ? 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+          : 'https://data-seed-prebsc-1-s1.binance.org:8545/';
+
+      const web3 = new Web3(new Web3.providers.HttpProvider(provider));
+
+      const contract = new web3.eth.Contract(FarmingContract, ContractAddress);
+
+      const getStakedBalance = await contract.methods
+        .userDeposits(walletAddress)
+        .call();
+      const value = Utils.convertToEther(getStakedBalance);
+      resolve(value);
+    } catch (err) {
+      console.log('error in web3 data ', err);
+
+      resolve(0);
     }
   });
 };

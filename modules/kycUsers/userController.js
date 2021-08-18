@@ -6,10 +6,12 @@ const SnapshotModel = require('../snapshot/snapshotModel');
 const SyncHelper = require('../sync/syncHelper');
 const PoolsModel = require('../pools/poolsModel');
 const genrateSpreadSheet = require('../../helper/genrateSpreadsheet');
+const asyncRedis = require('async-redis');
 const axios = require('axios');
 const ObjectsToCsv = require('objects-to-csv');
 const crypto = require('crypto');
 const fs = require('fs');
+const client = asyncRedis.createClient();
 
 const UserCtr = {};
 
@@ -334,10 +336,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
         // users.push(getBalance);
       }
 
-      // const csv = new ObjectsToCsv(users);
-      // const fileName = `${+new Date()}_${'staked'}`;
-      // await csv.toDisk(`./lottery/${fileName}.csv`);
-      // console.log('users is:', users);
+      await client.flushall();
       genrateSpreadSheet.genrateExcel(users);
       console.log('User staked balances fetched');
     }
@@ -361,27 +360,54 @@ async function getUserBalance(
 
       if (pool.length) {
         for (let i = 0; i < pool.length; i++) {
-          const fetchBalance = await web3Helper.getUserStakedBalance(
-            walletAddress,
-            pool[i].contractAddress
-          );
+          if (pool[i].contractType !== 'farming') {
+            const fetchBalance = await web3Helper.getUserStakedBalance(
+              walletAddress,
+              pool[i].contractAddress
+            );
 
-          const value = Utils.convertToEther(fetchBalance['0']);
-          const endDate = fetchBalance['2'];
-
-          if (endDate < timestamp) {
-            pools.push({
-              name: pool[i].poolName,
-              staked: 0,
-              loyalityPoints: 0,
-            });
+            const value = Utils.convertToEther(fetchBalance['0']);
+            const endDate = fetchBalance['2'];
+            // check if token expired
+            if (endDate < timestamp) {
+              pools.push({
+                name: pool[i].poolName,
+                staked: 0,
+                loyalityPoints: 0,
+              });
+            } else {
+              const points = +value + (value * pool[i].loyalityPoints) / 100;
+              pools.push({
+                name: pool[i].poolName,
+                staked: value,
+                loyalityPoints: points,
+              });
+            }
           } else {
-            const points = +value + (value * pool[i].loyalityPoints) / 100;
-            pools.push({
-              name: pool[i].poolName,
-              staked: value,
-              loyalityPoints: points,
-            });
+            if (pools[i].endDate > 0 && pools[i].endDate < timestamp) {
+              const getLiquidityData = await UserCtr.checkRedis(
+                pools[i].lpTokenAddress
+              );
+
+              const getLockedTokens = await web3Helper.getUserFarmedBalance(
+                walletAddress
+              );
+
+              const totalSupplyCount =
+                getLockedTokens / getLiquidityData.totalSupply;
+
+              const transaction =
+                totalSupplyCount * getLiquidityData.totalBalance;
+
+              const points =
+                +transaction + (transaction * pool[i].loyalityPoints) / 100;
+
+              pools.push({
+                name: pool[i].poolName,
+                staked: transaction,
+                loyalityPoints: points,
+              });
+            }
           }
         }
 
@@ -515,5 +541,58 @@ async function getLiquidityBalance(userAddress, endBlock) {
     return 0;
   }
 }
+
+UserCtr.fetchLiquidityLocked = async (contractAddress) => {
+  try {
+    return new Promise(async (resolve, reject) => {
+      const getTotalSupplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${contractAddress}&apikey=${process.env.BSC_API_KEY}`;
+      const tokenBalanceUrl = `https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=0x477bc8d23c634c154061869478bce96be6045d12&address=${contractAddress}&tag=latest&apikey=${process.env.BSC_API_KEY}`;
+
+      const getTotalSupply = await axios.get(getTotalSupplyUrl);
+      const getTokenBalance = await axios.get(tokenBalanceUrl);
+
+      const totalSupply = +getTotalSupply.data.result / Math.pow(10, 18);
+      const tokenBalance = +getTokenBalance.data.result / Math.pow(10, 18);
+
+      const data = {
+        totalSupply: totalSupply,
+        totalBalance: tokenBalance,
+      };
+      await client.set(
+        `${contractAddress.toLowerCase()}`,
+        JSON.stringify(data),
+        'EX',
+        60 * 10000
+      );
+      resolve(data);
+    });
+  } catch (err) {
+    return {
+      totalSupply: 0,
+      totalBalance: 0,
+    };
+  }
+};
+
+UserCtr.checkRedis = async (contractAddress) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const checkRedisAvalaible = await client.get(
+        `${contractAddress.toLowerCase()}`
+      );
+
+      if (checkRedisAvalaible) {
+        resolve(JSON.parse(checkRedisAvalaible));
+      } else {
+        const getLiquidity = await UserCtr.fetchLiquidityLocked(
+          contractAddress
+        );
+        resolve(getLiquidity);
+      }
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
 
 module.exports = UserCtr;

@@ -12,7 +12,7 @@ poolCtr.addNewPool = async (req, res) => {
   };
   if (req.body.contractType === 'farming') {
     contractData = await Web3Helper.getFarmingContractEndDate(
-      req.body.contractAddress
+      req.body.contractAddress.trim()
     );
   }
 
