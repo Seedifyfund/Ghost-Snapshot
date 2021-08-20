@@ -2,6 +2,9 @@ const Web3 = require('web3');
 const lotteryAbi = require('../abi/lautry.json');
 const StakingContract = require('../abi/staking.json');
 const FarmingContract = require('../abi/farming.json');
+const PanCakeSwapAbi = require('../abi/pancakeswap.json');
+const TosdisStakingAbi = require('../abi/tosdisStaking.json');
+const TosdisFarmingAbi = require('../abi/tosdisFarming.json');
 const Utils = require('../helper/utils');
 
 provider =
@@ -108,4 +111,84 @@ web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
   });
 };
 
+// pancake swap
+web3Helper.getPanCakeSwapFarmBalance = async (walletAddress) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const provider =
+        process.env.NODE_ENV === 'development'
+          ? 'https://bsc-dataseed.binance.org/'
+          : 'https://bsc-dataseed.binance.org/';
+
+      const web3 = new Web3(new Web3.providers.HttpProvider(provider));
+
+      const contract = new web3.eth.Contract(
+        PanCakeSwapAbi,
+        '0x73feaa1eE314F8c655E354234017bE2193C9E24E'
+      );
+
+      const getStakedBalance = await contract.methods
+        .userInfo(450, walletAddress)
+        .call();
+      const value = Utils.convertToEther(getStakedBalance);
+      resolve(value);
+    } catch (err) {
+      console.log('error in getPanCakeSwapFarmBalance', err);
+    }
+  });
+};
+
+// tosdis staking
+web3Helper.getTosdisStakingBal = async (walletAddress) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const provider =
+        process.env.NODE_ENV === 'development'
+          ? 'https://bsc-dataseed.binance.org/'
+          : 'https://bsc-dataseed.binance.org/';
+
+      const web3 = new Web3(new Web3.providers.HttpProvider(provider));
+
+      const contract = new web3.eth.Contract(
+        TosdisStakingAbi,
+        process.env.STAKING_TOSDIS
+      );
+
+      const getStakedBalance = await contract.methods
+        .getUserInfo(walletAddress)
+        .call();
+
+      const value = Utils.convertToEther(getStakedBalance['0']);
+      resolve(value);
+    } catch (err) {
+      console.log('error in getPanCakeSwapFarmBalance', err);
+    }
+  });
+};
+
+// tosdis farming
+
+web3Helper.getTosdisFarmingBal = async (walletAddress, contractAddress) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const provider =
+        process.env.NODE_ENV === 'development'
+          ? 'https://bsc-dataseed.binance.org/'
+          : 'https://bsc-dataseed.binance.org/';
+
+      const web3 = new Web3(new Web3.providers.HttpProvider(provider));
+
+      const contract = new web3.eth.Contract(TosdisFarmingAbi, contractAddress);
+
+      const getStakedBalance = await contract.methods
+        .getUserInfo(walletAddress)
+        .call();
+
+      const value = Utils.convertToEther(getStakedBalance['0']);
+      resolve(value);
+    } catch (err) {
+      console.log('error in farming', err);
+    }
+  });
+};
 module.exports = web3Helper;

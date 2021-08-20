@@ -27,6 +27,7 @@ poolCtr.addNewPool = async (req, res) => {
       startDate: contractData.startDate,
       withdrawDate: contractData.withdrawDate,
       lpTokenAddress: req.body.lpTokenAddress,
+      url: req.body.url,
     });
 
     await addNewPool.save();
@@ -75,6 +76,10 @@ poolCtr.updatePool = async (req, res) => {
 
       if (req.body.lpTokenAddress) {
         findPool.lpTokenAddress = req.body.lpTokenAddress;
+      }
+
+      if (req.body.url) {
+        findPool.url = req.body.url;
       }
 
       if (req.body.loyalityPoints) {

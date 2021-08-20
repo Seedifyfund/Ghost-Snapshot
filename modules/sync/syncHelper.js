@@ -1,7 +1,7 @@
 const axios = require('axios');
 const _ = require('lodash');
 const fs = require('fs');
-const { resolve } = require('bluebird');
+const web3Helper = require('../../helper/web3Helper');
 // const fs = require('fs');
 
 const syncHelper = {};
@@ -147,53 +147,46 @@ syncHelper.getFarmingDetails = (data, totalSupply, totalBalance) => {
     const finalValues = [];
     try {
       if (data.length) {
-        const itreateBlocks = (i) => {
-          if (i < data.length) {
-            const address = data[i].topics[1];
-            const userAddress = address
-              ? `0x${address.substring(26, address.length)}`
-              : null;
+        for (let i = 0; i < data.length; i++) {
+          const address = data[i].topics[1];
+          const userAddress = address
+            ? `0x${address.substring(26, address.length)}`
+            : null;
 
-            const transactionData = data[i].data.substring(2, 66);
+          const transactionData = data[i].data.substring(2, 66);
 
-            const transactionCount =
-              parseInt(transactionData, 16) / Math.pow(10, 18);
+          const transactionCount =
+            parseInt(transactionData, 16) / Math.pow(10, 18);
 
-            const totalSupplyCount = transactionCount / totalSupply;
+          const totalSupplyCount = transactionCount / totalSupply;
 
-            const transaction = totalSupplyCount * totalBalance;
+          const transaction = totalSupplyCount * totalBalance;
 
-            if (finalValues.length) {
-              const checkAddressAvalaible = finalValues.findIndex(
-                (x) => x.address === userAddress.toLocaleLowerCase().trim()
-              );
-              if (checkAddressAvalaible > 0) {
-                const balance =
-                  finalValues[checkAddressAvalaible].balance + transaction;
-                finalValues[checkAddressAvalaible].balance = +balance;
-                finalValues.tier = syncHelper.getUserTier(+balance);
-                itreateBlocks(i + 1);
-              } else {
-                finalValues.push({
-                  address: userAddress.toLowerCase(),
-                  balance: +transaction,
-                  tier: syncHelper.getUserTier(transaction),
-                });
-                itreateBlocks(i + 1);
-              }
+          if (finalValues.length) {
+            const checkAddressAvalaible = finalValues.findIndex(
+              (x) => x.address === userAddress.toLocaleLowerCase().trim()
+            );
+            if (checkAddressAvalaible > 0) {
+              const balance =
+                finalValues[checkAddressAvalaible].balance + transaction;
+              finalValues[checkAddressAvalaible].balance = +balance;
+              finalValues.tier = syncHelper.getUserTier(+balance);
             } else {
               finalValues.push({
                 address: userAddress.toLowerCase(),
                 balance: +transaction,
                 tier: syncHelper.getUserTier(transaction),
               });
-              itreateBlocks(i + 1);
             }
           } else {
-            resolve(finalValues);
+            finalValues.push({
+              address: userAddress.toLowerCase(),
+              balance: +transaction,
+              tier: syncHelper.getUserTier(transaction),
+            });
           }
-        };
-        itreateBlocks(0);
+        }
+        resolve(finalValues);
       } else {
         console.log('IN ELSE');
         resolve(finalValues);
@@ -392,6 +385,7 @@ syncHelper.getFarmingBalance = (start, end) => {
       //   status: true,
       // });
     } catch (err) {
+      console.log('err is:', err);
       resolve([]);
     }
   });
@@ -899,5 +893,15 @@ syncHelper.slpBalance = (start, end) => {
     }
   });
 };
+
+// syncHelper.getTosdisStakingBalance = async (walletAddress) => {
+
+//   try {
+//     const fetchStakedBalance = await web3Helper.getTosdisStakingBal(
+//       walletAddress
+//     );
+
+//   } catch (err) {}
+// };
 
 module.exports = syncHelper;

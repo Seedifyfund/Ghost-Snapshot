@@ -10,19 +10,19 @@ const blockPassCtr = {};
 blockPassCtr.getApprovedUserList = async (req, res) => {
   console.log('Blockpass Cron Called ========>');
   try {
-    const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
-    const getLatestBlock = await axios.get(getLatestBlockNoUrl);
-    const latestBlock = parseInt(getLatestBlock.data.result, 16);
+    // const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
+    // const getLatestBlock = await axios.get(getLatestBlockNoUrl);
+    // const latestBlock = parseInt(getLatestBlock.data.result, 16);
 
-    const getFarmingArray = await await SyncHelper.getFarmingBalance(
-      0,
-      latestBlock
-    );
-    const getBakeryArray = await SyncHelper.getBakeryFarmBalance(
-      0,
-      latestBlock
-    );
-    const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
+    // const getFarmingArray = await await SyncHelper.getFarmingBalance(
+    //   0,
+    //   latestBlock
+    // );
+    // const getBakeryArray = await SyncHelper.getBakeryFarmBalance(
+    //   0,
+    //   latestBlock
+    // );
+    // const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
     let blockScheduled = [];
     // const getSlpArray = await SyncHelper.slpBalance(0, latestBlock);
 
@@ -119,36 +119,35 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           const userAddress =
             getRecords.records[i].identities.crypto_address_eth.value;
 
-          const getSfund = await getSfundBalance(
-            '0x477bc8d23c634c154061869478bce96be6045d12',
-            userAddress,
-            latestBlock
-          );
+          // const getSfund = await getSfundBalance(
+          //   '0x477bc8d23c634c154061869478bce96be6045d12',
+          //   userAddress,
+          //   latestBlock
+          // );
 
-          const getLiquidity = await getLiquidityBalance(
-            userAddress,
-            latestBlock
-          );
+          // const getLiquidity = await getLiquidityBalance(
+          //   userAddress,
+          //   latestBlock
+          // );
 
-          const getFarming = await findData(getFarmingArray, userAddress);
+          // const getFarming = await findData(getFarmingArray, userAddress);
 
-          const getBakery = await findData(getBakeryArray, userAddress);
+          // const getBakery = await findData(getBakeryArray, userAddress);
 
-          const getTosdis = await findData(getTosdisArray, userAddress);
+          // const getTosdis = await findData(getTosdisArray, userAddress);
 
           // const getSlp = await findData(getSlpArray, userAddress);
 
           const balObj = {
-            sfund: getSfund,
-            liquidity: getLiquidity,
-            farming: getFarming,
-            bakery: getBakery,
-            tosdis: getTosdis,
+            sfund: 0,
+            liquidity: 0,
+            farming: 0,
+            bakery: 0,
+            tosdis: 0,
             // slp: getSlp,
           };
 
-          const total =
-            getSfund + getLiquidity + getFarming + getBakery + getTosdis;
+          const total = 0;
           // getSlp;
 
           const email = getRecords.records[i].identities.email.value;
@@ -161,7 +160,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           if (checkUserAvalaible) {
             checkUserAvalaible.balObj = balObj;
             checkUserAvalaible.totalbalance = total;
-            checkUserAvalaible.tier = syncHelper.getUserTier(total);
+            checkUserAvalaible.tier = syncHelper.getUserTier(0);
 
             await checkUserAvalaible.save();
             // itreateBlocks(i + 1);
@@ -173,7 +172,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
               name: name,
               totalbalance: total,
               balObj: balObj,
-              tier: syncHelper.getUserTier(total),
+              tier: syncHelper.getUserTier(0),
             });
 
             await addNewUser.save();

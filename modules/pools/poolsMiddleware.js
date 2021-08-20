@@ -14,6 +14,7 @@ poolsMiddleware.validateCheck = async (req, res, next) => {
     loyalityPoints: Joi.number().required(),
     contractType: Joi.string().valid('staking', 'farming').required(),
     lptokenAddress: Joi.string().allow(null),
+    url: Joi.string().uri().allow(null, ''),
   });
   validate.validateRequest(req, res, next, schema);
 };
@@ -26,6 +27,7 @@ poolsMiddleware.validateUpdateCheck = async (req, res, next) => {
     loyalityPoints: Joi.number(),
     contractType: Joi.string().valid('staking', 'farming'),
     lptokenAddress: Joi.string().allow(null),
+    url: Joi.string().uri().allow(null, ''),
   });
   validate.validateRequest(req, res, next, schema);
 };

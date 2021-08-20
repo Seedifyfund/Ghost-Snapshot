@@ -31,6 +31,10 @@ const poolSchema = new Schema(
       type: Number,
       required: true,
     },
+    url: {
+      type: String,
+      default: null,
+    },
     contractType: {
       type: String,
       enum: ['farming', 'staking'],
