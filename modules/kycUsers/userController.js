@@ -336,7 +336,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
           getLiquidityLocked.totalBalance
         );
 
-        console.log('getBalance', getBalance);
+        // console.log('getBalance', getBalance);
 
         getBalance.walletAddress = getUsers[i].walletAddress;
 
