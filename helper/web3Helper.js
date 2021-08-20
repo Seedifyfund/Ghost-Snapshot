@@ -134,6 +134,7 @@ web3Helper.getPanCakeSwapFarmBalance = async (walletAddress) => {
       const value = Utils.convertToEther(getStakedBalance['amount']);
       resolve(value);
     } catch (err) {
+      resolve(0);
       console.log('error in getPanCakeSwapFarmBalance', err);
     }
   });
@@ -162,6 +163,7 @@ web3Helper.getTosdisStakingBal = async (walletAddress) => {
       const value = Utils.convertToEther(getStakedBalance['0']);
       resolve(value);
     } catch (err) {
+      resolve(0);
       console.log('error in getPanCakeSwapFarmBalance', err);
     }
   });
@@ -189,6 +191,7 @@ web3Helper.getTosdisFarmingBal = async (walletAddress, contractAddress) => {
       resolve(value);
     } catch (err) {
       console.log('error in farming', err);
+      resolve(0);
     }
   });
 };
