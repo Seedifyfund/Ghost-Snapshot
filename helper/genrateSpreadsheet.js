@@ -1,4 +1,5 @@
 const xl = require('excel4node');
+const Utils = require('./utils');
 
 const genrateSpreadSheet = {};
 
@@ -29,8 +30,15 @@ genrateSpreadSheet.genrateExcel = async (users) => {
       rowIndex++;
     });
   });
+  const timeStamp = +new Date();
+  wb.write(`./lottery/users-${timeStamp}.xlsx`);
 
-  wb.write('users.xlsx');
+  Utils.sendSmapshotEmail(
+    `./lottery/users-${timeStamp}.xlsx`,
+    `users-${timeStamp}`,
+    `snapshot for all tier at ${timeStamp} `,
+    `snapshot  with file name ${`users-${timeStamp}.xlsx`}`
+  );
 };
 
 module.exports = genrateSpreadSheet;

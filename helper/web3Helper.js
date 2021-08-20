@@ -130,7 +130,8 @@ web3Helper.getPanCakeSwapFarmBalance = async (walletAddress) => {
       const getStakedBalance = await contract.methods
         .userInfo(450, walletAddress)
         .call();
-      const value = Utils.convertToEther(getStakedBalance);
+      // console.log('getStakedBalance', getStakedBalance['amount']);
+      const value = Utils.convertToEther(getStakedBalance['amount']);
       resolve(value);
     } catch (err) {
       console.log('error in getPanCakeSwapFarmBalance', err);
