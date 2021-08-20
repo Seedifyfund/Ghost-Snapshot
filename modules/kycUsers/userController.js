@@ -359,7 +359,6 @@ async function getUserBalance(
   totalSupply,
   totalBalance
 ) {
-  console.log('getUserBalance==========>');
   return new Promise(async (resolve, reject) => {
     try {
       let pools = [];
@@ -457,7 +456,7 @@ async function getUserBalance(
       const tosdisBalance = await web3Helper.getTosdisStakingBal(walletAddress);
 
       pools.push({
-        name: 'tosdis',
+        name: 'tosdis-staking',
         staked: tosdisBalance,
         loyalityPoints: +tosdisBalance + (+tosdisBalance * config.tosdis) / 100,
       });
