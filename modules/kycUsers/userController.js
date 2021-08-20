@@ -303,6 +303,10 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
       process.env.LIQUIDITY_ADDRESS
     );
 
+    res.status(200).json({
+      message: 'Your request received',
+    });
+
     const getPools = await PoolsModel.find({});
     const getUsers = await UserModel.find({ isActive: true });
     const getTimeStamp = Math.round(new Date().getTime() / 1000);

@@ -32,7 +32,7 @@ userRoute.get('/snapshotData', getSnapshotData);
 
 // get user staked balance
 
-const getUserStaked = [UserCtr.getUsersStakedBalance];
+const getUserStaked = [auth.isAuthenticatedUser, UserCtr.getUsersStakedBalance];
 userRoute.get('/getUserStake', getUserStaked);
 
 module.exports = userRoute;
