@@ -513,8 +513,10 @@ async function getUserBalance(
       const tosdisBalance = web3Helper.getTosdisStakingBal(walletAddress);
 
       // get sfund bal
-      const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
-      const getSfund = getSfundBalance(address, walletAddress, endBlock);
+      // const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
+      // const getSfund = getSfundBalance(address, walletAddress, endBlock);
+
+      const getSfund = web3Helper.sfundBalance(walletAddress);
 
       // get liquity balance
       const getLiquidity = getLiquidityBalance(walletAddress, endBlock);

@@ -5,6 +5,7 @@ const FarmingContract = require('../abi/farming.json');
 const PanCakeSwapAbi = require('../abi/pancakeswap.json');
 const TosdisStakingAbi = require('../abi/tosdisStaking.json');
 const TosdisFarmingAbi = require('../abi/tosdisFarming.json');
+const sfundAbi = require('../abi/sfund.json');
 const Utils = require('../helper/utils');
 
 provider =
@@ -188,6 +189,33 @@ web3Helper.getTosdisFarmingBal = async (walletAddress, contractAddress) => {
         .call();
 
       const value = Utils.convertToEther(getStakedBalance['0']);
+      resolve(value);
+    } catch (err) {
+      console.log('error in farming', err);
+      resolve(0);
+    }
+  });
+};
+
+// sfund balance
+
+web3Helper.sfundBalance = async (walletAddress) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const provider =
+        process.env.NODE_ENV === 'development'
+          ? 'https://bsc-dataseed.binance.org/'
+          : 'https://bsc-dataseed.binance.org/';
+
+      const web3 = new Web3(new Web3.providers.HttpProvider(provider));
+
+      const contract = new web3.eth.Contract(sfundAbi, process.env.SFUND_TOKEN);
+
+      const getStakedBalance = await contract.methods
+        .balanceOf(walletAddress)
+        .call();
+
+      const value = Utils.convertToEther(getStakedBalance);
       resolve(value);
     } catch (err) {
       console.log('error in farming', err);
