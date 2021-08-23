@@ -12,6 +12,7 @@ const ObjectsToCsv = require('objects-to-csv');
 const crypto = require('crypto');
 const config = require('../../config/config.json');
 const fs = require('fs');
+const { values } = require('lodash');
 const client = asyncRedis.createClient();
 
 const UserCtr = {};
@@ -423,80 +424,173 @@ async function getUserBalance(
       }
 
       // get farming balance
-      const getFarmingBalance = await web3Helper.getTosdisFarmingBal(
+      // const getFarmingBalance = await web3Helper.getTosdisFarmingBal(
+      //   walletAddress,
+      //   process.env.FARMING_ADDRESS
+      // );
+
+      // const totalSupplyCount = +getFarmingBalance / totalSupply;
+
+      // const farmingTransaction = +totalSupplyCount * totalBalance;
+
+      // pools.push({
+      //   name: 'farming',
+      //   staked: farmingTransaction,
+      //   loyalityPoints:
+      //     +farmingTransaction + (+farmingTransaction * config.farming) / 100,
+      // });
+
+      // // get bakery balance
+      // const bakeryBalance = await web3Helper.getTosdisFarmingBal(
+      //   walletAddress,
+      //   process.env.FARMING_BAKERY
+      // );
+
+      // const bakeryCount = +bakeryBalance / totalSupply;
+
+      // const bakeryTransaction = +bakeryCount * totalBalance;
+
+      // pools.push({
+      //   name: 'bakery',
+      //   staked: bakeryTransaction,
+      //   loyalityPoints:
+      //     +bakeryTransaction + (+bakeryTransaction * config.bakery) / 100,
+      // });
+
+      // // get tosdis balance
+      // const tosdisBalance = await web3Helper.getTosdisStakingBal(walletAddress);
+
+      // pools.push({
+      //   name: 'tosdis-staking',
+      //   staked: tosdisBalance,
+      //   loyalityPoints: +tosdisBalance + (+tosdisBalance * config.tosdis) / 100,
+      // });
+
+      // // get sfund bal
+      // const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
+      // const getSfund = await getSfundBalance(address, walletAddress, endBlock);
+      // pools.push({
+      //   name: 'sfund',
+      //   staked: getSfund,
+      //   loyalityPoints: +getSfund + (+getSfund * config.sfund) / 100,
+      // });
+
+      // // get liquity balance
+      // const getLiquidity = await getLiquidityBalance(walletAddress, endBlock);
+      // pools.push({
+      //   name: 'liquidity',
+      //   staked: getLiquidity,
+      //   loyalityPoints:
+      //     +getLiquidity + (+getLiquidity * config.liquidity) / 100,
+      // });
+
+      // const getFarmingFromPanCakeSwap = await UserCtr.getPancakeSwapInvestment(
+      //   walletAddress,
+      //   totalSupply,
+      //   totalBalance
+      // );
+
+      // pools.push({
+      //   name: 'pancakeSwapFarming',
+      //   staked: getFarmingFromPanCakeSwap,
+      //   loyalityPoints:
+      //     +getFarmingFromPanCakeSwap +
+      //     (+getFarmingFromPanCakeSwap * config.farmingPancakeSwap) / 100,
+      // });
+
+      const getFarmingBalance = web3Helper.getTosdisFarmingBal(
         walletAddress,
         process.env.FARMING_ADDRESS
       );
 
-      const totalSupplyCount = +getFarmingBalance / totalSupply;
-
-      const farmingTransaction = +totalSupplyCount * totalBalance;
-
-      pools.push({
-        name: 'farming',
-        staked: farmingTransaction,
-        loyalityPoints:
-          +farmingTransaction + (+farmingTransaction * config.farming) / 100,
-      });
-
       // get bakery balance
-      const bakeryBalance = await web3Helper.getTosdisFarmingBal(
+      const bakeryBalance = web3Helper.getTosdisFarmingBal(
         walletAddress,
         process.env.FARMING_BAKERY
       );
 
-      const bakeryCount = +bakeryBalance / totalSupply;
-
-      const bakeryTransaction = +bakeryCount * totalBalance;
-
-      pools.push({
-        name: 'bakery',
-        staked: bakeryTransaction,
-        loyalityPoints:
-          +bakeryTransaction + (+bakeryTransaction * config.bakery) / 100,
-      });
-
       // get tosdis balance
-      const tosdisBalance = await web3Helper.getTosdisStakingBal(walletAddress);
-
-      pools.push({
-        name: 'tosdis-staking',
-        staked: tosdisBalance,
-        loyalityPoints: +tosdisBalance + (+tosdisBalance * config.tosdis) / 100,
-      });
+      const tosdisBalance = web3Helper.getTosdisStakingBal(walletAddress);
 
       // get sfund bal
       const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
-      const getSfund = await getSfundBalance(address, walletAddress, endBlock);
-      pools.push({
-        name: 'sfund',
-        staked: getSfund,
-        loyalityPoints: +getSfund + (+getSfund * config.sfund) / 100,
-      });
+      const getSfund = getSfundBalance(address, walletAddress, endBlock);
 
       // get liquity balance
-      const getLiquidity = await getLiquidityBalance(walletAddress, endBlock);
-      pools.push({
-        name: 'liquidity',
-        staked: getLiquidity,
-        loyalityPoints:
-          +getLiquidity + (+getLiquidity * config.liquidity) / 100,
-      });
+      const getLiquidity = getLiquidityBalance(walletAddress, endBlock);
 
-      const getFarmingFromPanCakeSwap = await UserCtr.getPancakeSwapInvestment(
+      const getFarmingFromPanCakeSwap = UserCtr.getPancakeSwapInvestment(
         walletAddress,
         totalSupply,
         totalBalance
       );
 
-      pools.push({
-        name: 'pancakeSwapFarming',
-        staked: getFarmingFromPanCakeSwap,
-        loyalityPoints:
-          +getFarmingFromPanCakeSwap +
-          (+getFarmingFromPanCakeSwap * config.farmingPancakeSwap) / 100,
-      });
+      await Promise.all([
+        getFarmingBalance,
+        bakeryBalance,
+        tosdisBalance,
+        getSfund,
+        getLiquidity,
+        getFarmingFromPanCakeSwap,
+      ]).then((result) => {
+        if (result.length) {
+          for (let k = 0; k < result.length; k++) {
+            if (k === 0) {
+              const totalSupplyCount = +result[k] / totalSupply;
 
+              const farmingTransaction = +totalSupplyCount * totalBalance;
+
+              pools.push({
+                name: 'farming',
+                staked: farmingTransaction,
+                loyalityPoints:
+                  +farmingTransaction +
+                  (+farmingTransaction * config.farming) / 100,
+              });
+            } else if (k === 1) {
+              const bakeryCount = +result[k] / totalSupply;
+
+              const bakeryTransaction = +bakeryCount * totalBalance;
+
+              pools.push({
+                name: 'bakery',
+                staked: bakeryTransaction,
+                loyalityPoints:
+                  +bakeryTransaction +
+                  (+bakeryTransaction * config.bakery) / 100,
+              });
+            } else if (k === 2) {
+              pools.push({
+                name: 'tosdis-staking',
+                staked: result[k],
+                loyalityPoints: +result[k] + (+result[k] * config.tosdis) / 100,
+              });
+            } else if (k === 3) {
+              pools.push({
+                name: 'sfund',
+                staked: result[k],
+                loyalityPoints: +result[k] + (+result[k] * config.sfund) / 100,
+              });
+            } else if (k === 4) {
+              pools.push({
+                name: 'liquidity',
+                staked: result[k],
+                loyalityPoints:
+                  +result[k] + (+result[k] * config.liquidity) / 100,
+              });
+            } else if (k === 5) {
+              pools.push({
+                name: 'pancakeSwapFarming',
+                staked: result[k],
+                loyalityPoints:
+                  +result[k] + (+result[k] * config.farmingPancakeSwap) / 100,
+              });
+            } else {
+              console.log('IN ELSE');
+            }
+          }
+        }
+      });
       let points = 0;
       const userStaked = {};
 
