@@ -379,60 +379,60 @@ async function getUserBalance(
     try {
       let pools = [];
 
-      if (pool.length) {
-        for (let i = 0; i < pool.length; i++) {
-          if (pool[i].contractType !== 'farming') {
-            const fetchBalance = await web3Helper.getUserStakedBalance(
-              walletAddress,
-              pool[i].contractAddress
-            );
+      // if (pool.length) {
+      //   for (let i = 0; i < pool.length; i++) {
+      //     if (pool[i].contractType !== 'farming') {
+      //       const fetchBalance = await web3Helper.getUserStakedBalance(
+      //         walletAddress,
+      //         pool[i].contractAddress
+      //       );
 
-            const value = Utils.convertToEther(fetchBalance['0']);
-            const endDate = fetchBalance['2'];
-            // check if token expired
-            if (endDate < timestamp) {
-              pools.push({
-                name: pool[i].poolName,
-                staked: 0,
-                loyalityPoints: 0,
-              });
-            } else {
-              const points = +value + (value * pool[i].loyalityPoints) / 100;
-              pools.push({
-                name: pool[i].poolName,
-                staked: value,
-                loyalityPoints: points,
-              });
-            }
-          } else {
-            if (pool[i].endDate > 0 && pool[i].endDate >= timestamp) {
-              const getLiquidityData = await UserCtr.checkRedis(
-                pool[i].lpTokenAddress
-              );
+      //       const value = Utils.convertToEther(fetchBalance['0']);
+      //       const endDate = fetchBalance['2'];
+      //       // check if token expired
+      //       if (endDate < timestamp) {
+      //         pools.push({
+      //           name: pool[i].poolName,
+      //           staked: 0,
+      //           loyalityPoints: 0,
+      //         });
+      //       } else {
+      //         const points = +value + (value * pool[i].loyalityPoints) / 100;
+      //         pools.push({
+      //           name: pool[i].poolName,
+      //           staked: value,
+      //           loyalityPoints: points,
+      //         });
+      //       }
+      //     } else {
+      //       if (pool[i].endDate > 0 && pool[i].endDate >= timestamp) {
+      //         const getLiquidityData = await UserCtr.checkRedis(
+      //           pool[i].lpTokenAddress
+      //         );
 
-              const getLockedTokens = await web3Helper.getUserFarmedBalance(
-                walletAddress,
-                pool[i].contractAddress
-              );
+      //         const getLockedTokens = await web3Helper.getUserFarmedBalance(
+      //           walletAddress,
+      //           pool[i].contractAddress
+      //         );
 
-              const totalSupplyCount =
-                getLockedTokens / getLiquidityData.totalSupply;
+      //         const totalSupplyCount =
+      //           getLockedTokens / getLiquidityData.totalSupply;
 
-              const transaction =
-                totalSupplyCount * getLiquidityData.totalBalance;
+      //         const transaction =
+      //           totalSupplyCount * getLiquidityData.totalBalance;
 
-              const points =
-                +transaction + (transaction * pool[i].loyalityPoints) / 100;
+      //         const points =
+      //           +transaction + (transaction * pool[i].loyalityPoints) / 100;
 
-              pools.push({
-                name: pool[i].poolName,
-                staked: transaction,
-                loyalityPoints: points,
-              });
-            }
-          }
-        }
-      }
+      //         pools.push({
+      //           name: pool[i].poolName,
+      //           staked: transaction,
+      //           loyalityPoints: points,
+      //         });
+      //       }
+      //     }
+      //   }
+      // }
 
       // get farming balance
       // const getFarmingBalance = await web3Helper.getTosdisFarmingBal(
