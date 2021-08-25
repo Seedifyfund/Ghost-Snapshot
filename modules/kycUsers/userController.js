@@ -337,11 +337,22 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
           getLiquidityLocked.totalBalance
         );
 
-        // console.log('getBalance', getBalance);
+        const userBal = JSON.stringify(getBalance);
 
         getBalance.walletAddress = getUsers[i].walletAddress;
 
         getBalance.tier = SyncHelper.getUserTier(getBalance.eTokens);
+
+        console.log('user bal ', userBal);
+
+        const updateUser = await UserModel.updateOne(
+          { _id: getUsers[i]._id },
+          {
+            balObj: JSON.parse(userBal),
+            tier: getBalance.tier,
+            timestamp: getTimeStamp,
+          }
+        );
 
         users[getBalance.tier].push(getBalance);
         // users.push(getBalance);

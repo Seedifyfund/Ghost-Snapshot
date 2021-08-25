@@ -366,6 +366,12 @@ blockPassCtr.checkKycVerified = async (req, res) => {
         status: true,
         data: {
           kycStatus: true,
+          data: {
+            name: checkIsVerified.name,
+            snapshot: checkIsVerified.balObj,
+            tier: checkIsVerified.tier,
+            timestamp: checkIsVerified.timestamp,
+          },
         },
       });
     } else {
@@ -374,6 +380,7 @@ blockPassCtr.checkKycVerified = async (req, res) => {
         status: true,
         data: {
           kycStatus: false,
+          data: {},
         },
       });
     }

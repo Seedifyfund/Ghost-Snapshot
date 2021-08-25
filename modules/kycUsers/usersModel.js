@@ -41,6 +41,11 @@ const userSchema = new Schema(
       default: {},
     },
 
+    timestamp: {
+      type: Number,
+      default: 0,
+    },
+
     tier: {
       type: String,
       default: 'tier0',
