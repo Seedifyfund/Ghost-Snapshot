@@ -39,8 +39,6 @@ UserCtr.list = async (req, res) => {
     const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
 
     const list = await UserModel.find(query, {
-      recordId: 0,
-
       balObj: 0,
       createdAt: 0,
       updatedAt: 0,
