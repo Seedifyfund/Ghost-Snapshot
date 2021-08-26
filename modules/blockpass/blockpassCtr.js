@@ -34,82 +34,6 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           'getRecords.records.length ====>',
           getRecords.records.length
         );
-        // const itreateBlocks = async (i) => {
-        //   if (i < getRecords.records.length) {
-        //     console.log(
-        //       getRecords.records[i].identities.crypto_address_eth.value
-        //     );
-
-        //     const userAddress =
-        //       getRecords.records[i].identities.crypto_address_eth.value;
-
-        //     const getSfund = await getSfundBalance(
-        //       '0x477bc8d23c634c154061869478bce96be6045d12',
-        //       userAddress,
-        //       latestBlock
-        //     );
-
-        //     const getLiquidity = await getLiquidityBalance(
-        //       userAddress,
-        //       latestBlock
-        //     );
-
-        //     const getFarming = await findData(getFarmingArray, userAddress);
-
-        //     const getBakery = await findData(getBakeryArray, userAddress);
-
-        //     const getTosdis = await findData(getTosdisArray, userAddress);
-
-        //     const getSlp = await findData(getSlpArray, userAddress);
-
-        //     const balObj = {
-        //       sfund: getSfund,
-        //       liquidity: getLiquidity,
-        //       farming: getFarming,
-        //       bakery: getBakery,
-        //       tosdis: getTosdis,
-        //       slp: getSlp,
-        //     };
-
-        //     const total =
-        //       getSfund +
-        //       getLiquidity +
-        //       getFarming +
-        //       getBakery +
-        //       getTosdis +
-        //       getSlp;
-
-        //     const email = getRecords.records[i].identities.email.value;
-        //     const name = `${getRecords.records[i].identities.given_name.value}${getRecords.records[i].identities.family_name.value} `;
-
-        //     const checkUserAvalaible = await UserModal.findOne({
-        //       walletAddress: userAddress.toLowerCase().trim(),
-        //     });
-
-        //     if (checkUserAvalaible) {
-        //       checkUserAvalaible.balObj = balObj;
-        //       checkUserAvalaible.totalbalance = total;
-        //       checkUserAvalaible.tier = syncHelper.getUserTier(total);
-
-        //       await checkUserAvalaible.save();
-        //       itreateBlocks(i + 1);
-        //     } else {
-        //       const addNewUser = new UserModal({
-        //         recordId: getRecords.records[i].recordId,
-        //         walletAddress: userAddress,
-        //         email: email,
-        //         name: name,
-        //         totalbalance: total,
-        //         balObj: balObj,
-        //         tier: syncHelper.getUserTier(total),
-        //       });
-
-        //       await addNewUser.save();
-        //       itreateBlocks(i + 1);
-        //     }
-        //   }
-        // };
-        // itreateBlocks(0);
 
         for (let i = 0; i < getRecords.records.length; i++) {
           console.log(
@@ -182,6 +106,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           }
         }
 
+        console.log('total is:', getRecords.total);
         if (
           getRecords.total > getRecords.skip &&
           blockScheduled < getRecords.total
