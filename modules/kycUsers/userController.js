@@ -27,6 +27,10 @@ UserCtr.list = async (req, res) => {
       query.tier = req.query.tier;
     }
 
+    if (req.query.kycStatus) {
+      query.kycStatus = req.query.kycStatus.toLowerCase().trim();
+    }
+
     if (req.query.address) {
       query.walletAddress = req.query.address.toLowerCase().trim();
     }
