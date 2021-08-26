@@ -158,9 +158,10 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           });
 
           if (checkUserAvalaible) {
-            checkUserAvalaible.balObj = balObj;
-            checkUserAvalaible.totalbalance = total;
-            checkUserAvalaible.tier = syncHelper.getUserTier(0);
+            checkUserAvalaible.kycStatus = getRecords.records[i].status;
+            // checkUserAvalaible.balObj = balObj;
+            // checkUserAvalaible.totalbalance = total;
+            // checkUserAvalaible.tier = syncHelper.getUserTier(0);
 
             await checkUserAvalaible.save();
             // itreateBlocks(i + 1);
@@ -172,6 +173,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
               name: name,
               totalbalance: total,
               balObj: balObj,
+              kycStatus: getRecords.records[i].status,
               tier: syncHelper.getUserTier(0),
             });
 
@@ -218,9 +220,9 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
 // get data from block pass
 async function getDatafromBlockPass(skip) {
   console.log('skip is:', skip);
-  let url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants/approved?limit=10`;
+  let url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants?limit=10`;
   if (skip > 0) {
-    url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants/approved?limit=10&skip=${skip}`;
+    url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants?limit=10&skip=${skip}`;
   }
 
   var config = {

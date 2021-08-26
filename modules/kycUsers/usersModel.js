@@ -46,6 +46,11 @@ const userSchema = new Schema(
       default: 0,
     },
 
+    kycStatus: {
+      type: String,
+      enum: ['approved', 'waiting', 'inreview', 'resubmit'],
+    },
+
     tier: {
       type: String,
       default: 'tier0',

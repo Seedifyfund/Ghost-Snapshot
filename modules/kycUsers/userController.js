@@ -309,7 +309,10 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     });
 
     const getPools = await PoolsModel.find({});
-    const getUsers = await UserModel.find({ isActive: true });
+    const getUsers = await UserModel.find({
+      isActive: true,
+      kycStatus: 'approved',
+    });
     const getTimeStamp = Math.round(new Date().getTime() / 1000);
     // console.log('get users is:', getUsers);
     if (getUsers && getUsers.length) {
