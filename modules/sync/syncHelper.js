@@ -109,16 +109,6 @@ syncHelper.getSeddifyContractDetails = async (
 };
 
 syncHelper.getUserTier = (balance) => {
-  // if (+balance >= 100 && +balance <= 999) {
-  //   return 'tier1';
-  // } else if (+balance >= 1000 && +balance <= 9999) {
-  //   return 'tier2';
-  // } else if (+balance >= 10000) {
-  //   return 'tier3';
-  // } else {
-  //   return 'tier0';
-  // }
-
   if (+balance >= 250 && +balance <= 999) {
     return 'tier1';
   } else if (+balance >= 1000 && +balance <= 2499) {
