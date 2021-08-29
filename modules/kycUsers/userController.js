@@ -346,7 +346,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
 
         getBalance.walletAddress = getUsers[i].walletAddress;
 
-        getBalance.tier = SyncHelper.getUserTier(getBalance.eTokens);
+        getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
 
         console.log('user bal ', userBal);
 
