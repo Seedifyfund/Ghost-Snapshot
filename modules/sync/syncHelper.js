@@ -109,21 +109,21 @@ syncHelper.getSeddifyContractDetails = async (
 };
 
 syncHelper.getUserTier = (balance) => {
-  if (+balance >= 250 && +balance <= 999) {
+  if (+balance >= 250 && +balance <= 999.999) {
     return 'tier1';
-  } else if (+balance >= 1000 && +balance <= 2499) {
+  } else if (+balance >= 1000 && +balance <= 2499.999) {
     return 'tier2';
-  } else if (+balance >= 2500 && +balance <= 4999) {
+  } else if (+balance >= 2500 && +balance <= 4999.999) {
     return 'tier3';
-  } else if (+balance >= 5000 && +balance <= 7499) {
+  } else if (+balance >= 5000 && +balance <= 7499.999) {
     return 'tier4';
-  } else if (+balance >= 7500 && +balance <= 9999) {
+  } else if (+balance >= 7500 && +balance <= 9999.999) {
     return 'tier5';
-  } else if (+balance >= 10000 && +balance <= 24999) {
+  } else if (+balance >= 10000 && +balance <= 24999.999) {
     return 'tier6';
-  } else if (+balance >= 25000 && +balance <= 49999) {
+  } else if (+balance >= 25000 && +balance <= 49999.999) {
     return 'tier7';
-  } else if (+balance >= 50000 && +balance <= 99999) {
+  } else if (+balance >= 50000 && +balance <= 99999.999) {
     return 'tier8';
   } else if (+balance >= 100000) {
     return 'tier9';

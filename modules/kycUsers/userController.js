@@ -346,9 +346,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
 
         getBalance.walletAddress = getUsers[i].walletAddress;
 
-        getBalance.tier = await SyncHelper.getUserTier(
-          +getBalance.eTokens.toFixed(2)
-        );
+        getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
 
         console.log('getBalance.tier', getBalance.tier);
 
@@ -409,7 +407,7 @@ async function getUserBalance(
               const points = +value + (value * pool[i].loyalityPoints) / 100;
               pools.push({
                 name: pool[i].poolName,
-                staked: value,
+                staked: +Utils.toTruncFixed(value, 3),
                 loyalityPoints: points,
               });
             }
@@ -435,7 +433,7 @@ async function getUserBalance(
 
               pools.push({
                 name: pool[i].poolName,
-                staked: transaction,
+                staked: +Utils.toTruncFixed(transaction, 3),
                 loyalityPoints: points,
               });
             }
@@ -564,7 +562,7 @@ async function getUserBalance(
 
               pools.push({
                 name: 'farming',
-                staked: farmingTransaction,
+                staked: +Utils.toTruncFixed(farmingTransaction, 3),
                 loyalityPoints:
                   +farmingTransaction +
                   (+farmingTransaction * config.farming) / 100,
@@ -576,7 +574,7 @@ async function getUserBalance(
 
               pools.push({
                 name: 'bakery',
-                staked: bakeryTransaction,
+                staked: +Utils.toTruncFixed(bakeryTransaction, 3),
                 loyalityPoints:
                   +bakeryTransaction +
                   (+bakeryTransaction * config.bakery) / 100,
@@ -584,26 +582,26 @@ async function getUserBalance(
             } else if (k === 2) {
               pools.push({
                 name: 'tosdis-staking',
-                staked: result[k],
+                staked: +Utils.toTruncFixed(result[k], 3),
                 loyalityPoints: +result[k] + (+result[k] * config.tosdis) / 100,
               });
             } else if (k === 3) {
               pools.push({
                 name: 'sfund',
-                staked: result[k],
+                staked: +Utils.toTruncFixed(result[k], 3),
                 loyalityPoints: +result[k] + (+result[k] * config.sfund) / 100,
               });
             } else if (k === 4) {
               pools.push({
                 name: 'liquidity',
-                staked: result[k],
+                staked: +Utils.toTruncFixed(result[k], 3),
                 loyalityPoints:
                   +result[k] + (+result[k] * config.liquidity) / 100,
               });
             } else if (k === 5) {
               pools.push({
                 name: 'pancakeSwapFarming',
-                staked: result[k],
+                staked: +Utils.toTruncFixed(result[k], 3),
                 loyalityPoints:
                   +result[k] + (+result[k] * config.farmingPancakeSwap) / 100,
               });
@@ -621,7 +619,7 @@ async function getUserBalance(
         points += pools[j].loyalityPoints;
       }
 
-      userStaked.eTokens = points;
+      userStaked.eTokens = Utils.toTruncFixed(points, 3);
 
       resolve(userStaked);
     } catch (err) {
