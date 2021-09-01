@@ -16,4 +16,8 @@ claimRoute.post('/add', addNewClaim);
 const list = [ClaimCtr.list];
 claimRoute.get('/list', list);
 
+// get single pool details
+const getSingle = [Auth.isAuthenticatedUser, ClaimCtr.getSinglePool];
+claimRoute.get('/single/:id', getSingle);
+
 module.exports = claimRoute;

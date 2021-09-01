@@ -11,6 +11,8 @@ ClaimCtr.addNewClaim = async (req, res) => {
       networkSymbol,
       amount,
       name,
+      timestamp,
+      phaseNo,
     } = req.body;
     const addNewClaim = new ClaimModel({
       tokenAddress: tokenAddress,
@@ -19,6 +21,8 @@ ClaimCtr.addNewClaim = async (req, res) => {
       networkId: networkId,
       amount: amount,
       name: name,
+      timestamp,
+      phaseNo,
     });
 
     await addNewClaim.save();
@@ -48,6 +52,25 @@ ClaimCtr.list = async (req, res) => {
       message: 'SUCCESS',
       status: true,
       data: list,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'DB_ERROR',
+      status: true,
+      err: err.message ? err.message : err,
+    });
+  }
+};
+
+ClaimCtr.getSinglePool = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const fetchPool = await ClaimModel.findOne({ _id: req.params.id });
+
+    return res.status(200).json({
+      message: 'SUCCESS',
+      status: true,
+      data: fetchPool,
     });
   } catch (err) {
     return res.status(500).json({

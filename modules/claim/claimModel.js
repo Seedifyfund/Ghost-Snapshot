@@ -32,6 +32,14 @@ const claimSchema = new Schema(
       type: String,
       required: true,
     },
+    timestamp: {
+      type: Number,
+      required: true,
+    },
+    phaseNo: {
+      type: Number,
+      required: true,
+    },
   },
 
   {
