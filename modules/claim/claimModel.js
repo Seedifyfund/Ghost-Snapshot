@@ -42,4 +42,4 @@ const claimSchema = new Schema(
   }
 );
 
-module.exports = mongoose.model('pool', poolSchema);
+module.exports = mongoose.model('claim', claimSchema);
