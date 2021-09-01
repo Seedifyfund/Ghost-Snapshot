@@ -14,6 +14,6 @@ claimRoute.post('/add', addNewClaim);
 
 // login admin
 const list = [ClaimCtr.list];
-claimRoute.post('/list', list);
+claimRoute.get('/list', list);
 
 module.exports = claimRoute;
