@@ -784,4 +784,58 @@ UserCtr.getPancakeSwapInvestment = (
   });
 };
 
+// cron service
+UserCtr.getUserBalances = async (req, res) => {
+  try {
+    console.log('getUsersStakedBalance CRON called');
+
+    const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
+    const getLatestBlock = await axios.get(getLatestBlockNoUrl);
+    const latestBlock = parseInt(getLatestBlock.data.result, 16);
+
+    const getLiquidityLocked = await UserCtr.fetchLiquidityLocked(
+      process.env.LIQUIDITY_ADDRESS
+    );
+
+    const getPools = await PoolsModel.find({});
+    const getUsers = await UserModel.find({
+      isActive: true,
+    });
+    const getTimeStamp = Math.round(new Date().getTime() / 1000);
+    // console.log('get users is:', getUsers);
+    if (getUsers && getUsers.length) {
+      for (let i = 0; i < getUsers.length; i++) {
+        console.log(`${i} of ${getUsers.length}`);
+        const getBalance = await getUserBalance(
+          getUsers[i].walletAddress,
+          getPools,
+          getTimeStamp,
+          latestBlock,
+          getLiquidityLocked.totalSupply,
+          getLiquidityLocked.totalBalance
+        );
+
+        const userBal = JSON.stringify(getBalance);
+
+        getBalance.walletAddress = getUsers[i].walletAddress;
+
+        getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
+
+        const updateUser = await UserModel.updateOne(
+          { _id: getUsers[i]._id },
+          {
+            balObj: JSON.parse(userBal),
+            tier: getBalance.tier,
+            timestamp: getTimeStamp,
+          }
+        );
+      }
+
+      console.log('User staked balances fetched');
+    }
+  } catch (err) {
+    console.log('err is:', err);
+  }
+};
+
 module.exports = UserCtr;
