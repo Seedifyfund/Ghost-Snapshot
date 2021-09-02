@@ -36,10 +36,10 @@ const claimSchema = new Schema(
       type: Number,
       required: true,
     },
-    logo:{
-      type:String,
-      default:null
-    }
+    logo: {
+      type: String,
+      default: null,
+    },
     phaseNo: {
       type: Number,
       required: true,
