@@ -35,6 +35,10 @@ UserCtr.list = async (req, res) => {
       query.walletAddress = req.query.address.toLowerCase().trim();
     }
 
+    if (req.query.email) {
+      query.email = req.query.email.trim();
+    }
+
     const totalCount = await UserModel.countDocuments(query);
     const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
 
