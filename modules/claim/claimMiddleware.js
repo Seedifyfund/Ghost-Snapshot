@@ -16,6 +16,7 @@ ClaimMiddleware.validateAdd = async (req, res, next) => {
     name: Joi.string().required(),
     timestamp: Joi.number().required(),
     phaseNo: Joi.number().required(),
+    logo: Joi.string().uri().allow(null, ''),
   });
   validate.validateRequest(req, res, next, schema);
 };

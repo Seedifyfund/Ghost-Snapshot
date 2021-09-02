@@ -13,6 +13,7 @@ ClaimCtr.addNewClaim = async (req, res) => {
       name,
       timestamp,
       phaseNo,
+      logo,
     } = req.body;
     const addNewClaim = new ClaimModel({
       tokenAddress: tokenAddress,
@@ -23,6 +24,7 @@ ClaimCtr.addNewClaim = async (req, res) => {
       name: name,
       timestamp,
       phaseNo,
+      logo,
     });
 
     await addNewClaim.save();
