@@ -66,7 +66,7 @@ ClaimCtr.list = async (req, res) => {
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
-    const list = await ClaimModel.find(query);
+    const list = await ClaimModel.find(query).sort({ createdAt: -1 });
 
     return res.status(200).json({
       message: 'SUCCESS',
