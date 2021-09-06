@@ -51,6 +51,11 @@ const userSchema = new Schema(
       enum: ['approved', 'waiting', 'inreview', 'resubmit', 'incomplete'],
     },
 
+    approvedTimestamp: {
+      type: Number,
+      default: 0,
+    },
+
     tier: {
       type: String,
       default: 'tier0',

@@ -43,25 +43,6 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           const userAddress =
             getRecords.records[i].identities.crypto_address_eth.value;
 
-          // const getSfund = await getSfundBalance(
-          //   '0x477bc8d23c634c154061869478bce96be6045d12',
-          //   userAddress,
-          //   latestBlock
-          // );
-
-          // const getLiquidity = await getLiquidityBalance(
-          //   userAddress,
-          //   latestBlock
-          // );
-
-          // const getFarming = await findData(getFarmingArray, userAddress);
-
-          // const getBakery = await findData(getBakeryArray, userAddress);
-
-          // const getTosdis = await findData(getTosdisArray, userAddress);
-
-          // const getSlp = await findData(getSlpArray, userAddress);
-
           const balObj = {
             sfund: 0,
             liquidity: 0,
@@ -72,6 +53,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           };
 
           const total = 0;
+          let approvedDate = 0;
           // getSlp;
 
           const email = getRecords.records[i].identities.email.value;
@@ -81,8 +63,14 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
             walletAddress: userAddress.toLowerCase().trim(),
           });
 
+          if (getRecords.records[i].status === 'approved') {
+            const approval = Date.parse(getRecords.records[i].approvedDate);
+            approvedDate = Math.trunc(approval / 1000);
+          }
+
           if (checkUserAvalaible) {
             checkUserAvalaible.kycStatus = getRecords.records[i].status;
+            checkUserAvalaible.approvedTimestamp = approvedDate;
             // checkUserAvalaible.balObj = balObj;
             // checkUserAvalaible.totalbalance = total;
             // checkUserAvalaible.tier = syncHelper.getUserTier(0);
@@ -98,6 +86,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
               totalbalance: total,
               balObj: balObj,
               kycStatus: getRecords.records[i].status,
+              approvedTimestamp: approvedDate,
               tier: syncHelper.getUserTier(0),
             });
 
