@@ -218,7 +218,6 @@ UserCtr.addCsv = async (req, res) => {
         walletAddress: getUsers[i].walletAddress,
         email: getUsers[i].email,
         tier: getUsers[i].tier,
-        totalbalance: getUsers[i].totalbalance,
       });
     }
 
