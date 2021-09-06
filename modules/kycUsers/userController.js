@@ -209,7 +209,7 @@ UserCtr.addCsv = async (req, res) => {
     console.log('add csv called');
     const getUsers = await UserModel.find({
       isActive: true,
-      kycStatus:'approved'
+      kycStatus: 'approved',
       tier: req.query.tier.toLowerCase().trim(),
     });
     const userList = [];
