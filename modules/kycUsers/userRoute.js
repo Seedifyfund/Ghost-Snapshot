@@ -3,6 +3,8 @@ const UserCtr = require('./userController');
 
 const UserMiddleware = require('./userMiddleware');
 
+const web3Helper = require('../../helper/web3Helper');
+
 const Auth = require('../../helper/auth');
 const auth = require('../../helper/auth');
 
@@ -34,5 +36,9 @@ userRoute.get('/snapshotData', getSnapshotData);
 
 const getUserStaked = [UserCtr.getUsersStakedBalance];
 userRoute.get('/getUserStake', getUserStaked);
+
+// get sfund balance
+const getSfund = [UserCtr.getUserBalances];
+userRoute.get('/getSfund', getSfund);
 
 module.exports = userRoute;
