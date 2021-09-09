@@ -14,6 +14,7 @@ const config = require('../../config/config.json');
 const fs = require('fs');
 const { values } = require('lodash');
 const client = asyncRedis.createClient();
+const Async = require('async');
 
 const UserCtr = {};
 
@@ -804,32 +805,60 @@ UserCtr.getUserBalances = async (req, res) => {
     const getTimeStamp = Math.round(new Date().getTime() / 1000);
     // console.log('get users is:', getUsers);
     if (getUsers && getUsers.length) {
-      for (let i = 0; i < getUsers.length; i++) {
-        console.log(`${i} of ${getUsers.length}`);
+      const queue = Async.queue(async (task, completed) => {
+        console.log('Currently Busy Processing Task ' + task.address);
+
         const getBalance = await getUserBalance(
-          getUsers[i].walletAddress,
+          task.address,
           getPools,
           getTimeStamp,
           latestBlock,
           getLiquidityLocked.totalSupply,
           getLiquidityLocked.totalBalance
         );
-
         const userBal = JSON.stringify(getBalance);
-
-        getBalance.walletAddress = getUsers[i].walletAddress;
-
+        getBalance.walletAddress = task.address;
         getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
-
         const updateUser = await UserModel.updateOne(
-          { _id: getUsers[i]._id },
+          { _id: task._id },
           {
             balObj: JSON.parse(userBal),
             tier: getBalance.tier,
             timestamp: getTimeStamp,
           }
         );
+
+        // Simulating a Complex task
+        setTimeout(() => {
+          // The number of tasks to be processed
+          const remaining = queue.length();
+          console.log('remaining is:', remaining);
+          // completed(null, { remaining });
+        }, 1000);
+      }, 5);
+
+      for (let i = 0; i < getUsers.length; i++) {
+        console.log(`${i} of ${getUsers.length}`);
+        const getBalance = queue.push({
+          address: getUsers[i].walletAddress,
+          _id: getUsers[i]._id,
+        });
+        // const userBal = JSON.stringify(getBalance);
+        // getBalance.walletAddress = getUsers[i].walletAddress;
+        // getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
+        // const updateUser = await UserModel.updateOne(
+        //   { _id: getUsers[i]._id },
+        //   {
+        //     balObj: JSON.parse(userBal),
+        //     tier: getBalance.tier,
+        //     timestamp: getTimeStamp,
+        //   }
+        // );
       }
+
+      queue.drain(() => {
+        console.log('Successfully processed all items');
+      });
 
       console.log('User staked balances fetched');
     }
