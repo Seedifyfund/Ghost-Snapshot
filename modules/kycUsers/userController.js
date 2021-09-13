@@ -311,6 +311,10 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
       process.env.LIQUIDITY_ADDRESS
     );
 
+    const getApeTokenLiquidityLocked = await UserCtr.fetchLiquidityLocked(
+      process.env.LP_APE_ADDRESS
+    );
+
     res.status(200).json({
       message: 'Your request received',
     });
@@ -336,20 +340,21 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
         tier9: [],
       };
 
-      for (let i = 0; i < getUsers.length; i++) {
-        console.log(`${i} of ${getUsers.length}`);
+      const queue = Async.queue(async (task, completed) => {
+        console.log('Currently Busy Processing Task ' + task.address);
+
         const getBalance = await getUserBalance(
-          getUsers[i].walletAddress,
+          task.address,
           getPools,
           getTimeStamp,
           latestBlock,
           getLiquidityLocked.totalSupply,
-          getLiquidityLocked.totalBalance
+          getLiquidityLocked.totalBalance,
+          getApeTokenLiquidityLocked
         );
-
         const userBal = JSON.stringify(getBalance);
 
-        getBalance.walletAddress = getUsers[i].walletAddress;
+        getBalance.walletAddress = task.address;
 
         getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
 
@@ -358,7 +363,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
         console.log('user bal ', userBal);
 
         const updateUser = await UserModel.updateOne(
-          { _id: getUsers[i]._id },
+          { _id: task._id },
           {
             balObj: JSON.parse(userBal),
             tier: getBalance.tier,
@@ -368,11 +373,67 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
 
         users[getBalance.tier].push(getBalance);
         // users.push(getBalance);
+
+        // Simulating a Complex task
+        setTimeout(() => {
+          // The number of tasks to be processed
+          const remaining = queue.length();
+          console.log('remaining is:', remaining);
+          // completed(null, { remaining });
+        }, 2000);
+      }, 3);
+
+      for (let i = 0; i < getUsers.length; i++) {
+        console.log(`${i} of ${getUsers.length}`);
+        // const getBalance = await getUserBalance(
+        //   getUsers[i].walletAddress,
+        //   getPools,
+        //   getTimeStamp,
+        //   latestBlock,
+        //   getLiquidityLocked.totalSupply,
+        //   getLiquidityLocked.totalBalance
+        // );
+
+        // const userBal = JSON.stringify(getBalance);
+
+        // getBalance.walletAddress = getUsers[i].walletAddress;
+
+        // getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
+
+        // console.log('getBalance.tier', getBalance.tier);
+
+        // console.log('user bal ', userBal);
+
+        // const updateUser = await UserModel.updateOne(
+        //   { _id: getUsers[i]._id },
+        //   {
+        //     balObj: JSON.parse(userBal),
+        //     tier: getBalance.tier,
+        //     timestamp: getTimeStamp,
+        //   }
+        // );
+
+        // users[getBalance.tier].push(getBalance);
+        // // users.push(getBalance);
+
+        queue.push(
+          { address: getUsers[i].walletAddress, _id: getUsers[i]._id },
+          (error) => {
+            if (error) {
+              console.log(`An error occurred while processing task ${error}`);
+            } else {
+              console.log(`Finished processing task . `);
+            }
+          }
+        );
       }
 
-      await client.flushall();
-      genrateSpreadSheet.genrateExcel(users);
-      console.log('User staked balances fetched');
+      queue.drain(async () => {
+        console.log('Successfully processed all items');
+        await client.flushall();
+        genrateSpreadSheet.genrateExcel(users);
+        console.log('User staked balances fetched');
+      });
     }
   } catch (err) {
     console.log('err is:', err);
@@ -385,7 +446,8 @@ async function getUserBalance(
   timestamp,
   endBlock,
   totalSupply,
-  totalBalance
+  totalBalance,
+  apeLiquidity
 ) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -550,6 +612,12 @@ async function getUserBalance(
         totalBalance
       );
 
+      // ape farming
+      const apeBalance = web3Helper.getApeFarmingBalance(
+        walletAddress,
+        process.env.APE_FARM_ADDRESS
+      );
+
       await Promise.all([
         getFarmingBalance,
         bakeryBalance,
@@ -557,6 +625,7 @@ async function getUserBalance(
         getSfund,
         getLiquidity,
         getFarmingFromPanCakeSwap,
+        apeBalance,
       ]).then((result) => {
         if (result.length) {
           for (let k = 0; k < result.length; k++) {
@@ -609,6 +678,19 @@ async function getUserBalance(
                 staked: +Utils.toTruncFixed(result[k], 3),
                 loyalityPoints:
                   +result[k] + (+result[k] * config.farmingPancakeSwap) / 100,
+              });
+            } else if (k === 6) {
+              const totalSupplyCount = +result[k] / apeLiquidity.totalSupply;
+
+              const farmingTransaction =
+                +totalSupplyCount * apeLiquidity.totalBalance;
+
+              pools.push({
+                name: 'ape Farming',
+                staked: +Utils.toTruncFixed(farmingTransaction, 3),
+                loyalityPoints:
+                  +farmingTransaction +
+                  (+farmingTransaction * config.ape) / 100,
               });
             } else {
               console.log('IN ELSE');
@@ -798,6 +880,12 @@ UserCtr.getUserBalances = async (req, res) => {
       process.env.LIQUIDITY_ADDRESS
     );
 
+    const getApeTokenLiquidityLocked = await UserCtr.fetchLiquidityLocked(
+      process.env.LP_APE_ADDRESS
+    );
+
+    console.log('getApeTokenLiquidityLocked', getApeTokenLiquidityLocked);
+
     const getPools = await PoolsModel.find({});
     const getUsers = await UserModel.find({
       isActive: true,
@@ -814,7 +902,8 @@ UserCtr.getUserBalances = async (req, res) => {
           getTimeStamp,
           latestBlock,
           getLiquidityLocked.totalSupply,
-          getLiquidityLocked.totalBalance
+          getLiquidityLocked.totalBalance,
+          getApeTokenLiquidityLocked
         );
         const userBal = JSON.stringify(getBalance);
         getBalance.walletAddress = task.address;
@@ -834,15 +923,22 @@ UserCtr.getUserBalances = async (req, res) => {
           const remaining = queue.length();
           console.log('remaining is:', remaining);
           // completed(null, { remaining });
-        }, 1000);
-      }, 5);
+        }, 2000);
+      }, 3);
 
       for (let i = 0; i < getUsers.length; i++) {
         console.log(`${i} of ${getUsers.length}`);
-        const getBalance = queue.push({
-          address: getUsers[i].walletAddress,
-          _id: getUsers[i]._id,
-        });
+
+        queue.push(
+          { address: getUsers[i].walletAddress, _id: getUsers[i]._id },
+          (error) => {
+            if (error) {
+              console.log(`An error occurred while processing task `);
+            } else {
+              console.log(`Finished processing task . `);
+            }
+          }
+        );
         // const userBal = JSON.stringify(getBalance);
         // getBalance.walletAddress = getUsers[i].walletAddress;
         // getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);

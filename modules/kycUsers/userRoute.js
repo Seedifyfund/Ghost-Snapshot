@@ -41,4 +41,8 @@ userRoute.get('/getUserStake', getUserStaked);
 const getSfund = [UserCtr.getUserBalances];
 userRoute.get('/getSfund', getSfund);
 
+// get ape token balnce
+const getApeBalance = [web3Helper.getApeFarmingBalance];
+userRoute.get('/getApeBalance', getApeBalance);
+
 module.exports = userRoute;
