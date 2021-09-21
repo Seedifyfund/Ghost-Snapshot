@@ -70,6 +70,9 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
 
           if (checkUserAvalaible) {
             checkUserAvalaible.kycStatus = getRecords.records[i].status;
+            checkUserAvalaible.name = name;
+            checkUserAvalaible.email = email;
+            checkUserAvalaible.recordId = getRecords.records[i].recordId;
             checkUserAvalaible.approvedTimestamp = approvedDate;
             checkUserAvalaible.walletAddress = userAddress;
             // checkUserAvalaible.balObj = balObj;
