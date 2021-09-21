@@ -48,7 +48,14 @@ const userSchema = new Schema(
 
     kycStatus: {
       type: String,
-      enum: ['approved', 'waiting', 'inreview', 'resubmit', 'incomplete'],
+      enum: [
+        'approved',
+        'waiting',
+        'inreview',
+        'resubmit',
+        'incomplete',
+        'rejected',
+      ],
     },
 
     approvedTimestamp: {
