@@ -250,3 +250,31 @@ web3Helper.sfundBalance = async (walletAddress) => {
   });
 };
 module.exports = web3Helper;
+
+web3Helper.getTosdisStakingBalWithContract = async (
+  walletAddress,
+  contractAddress
+) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const provider =
+        process.env.NODE_ENV === 'development'
+          ? 'https://bsc-dataseed.binance.org/'
+          : 'https://bsc-dataseed.binance.org/';
+
+      const web3 = new Web3(new Web3.providers.HttpProvider(provider));
+
+      const contract = new web3.eth.Contract(TosdisStakingAbi, contractAddress);
+
+      const getStakedBalance = await contract.methods
+        .getUserInfo(walletAddress)
+        .call();
+
+      const value = Utils.convertToEther(getStakedBalance['0']);
+      resolve(value);
+    } catch (err) {
+      resolve(0);
+      console.log('error in getPanCakeSwapFarmBalance', err);
+    }
+  });
+};

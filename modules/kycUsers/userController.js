@@ -618,6 +618,25 @@ async function getUserBalance(
         process.env.APE_FARM_ADDRESS
       );
 
+      // get previous farmig pool tokens
+      const getPreviousFarmingBalance = web3Helper.getTosdisFarmingBal(
+        walletAddress,
+        process.env.PREVIOUS_FARMING_ADDRESS
+      );
+
+      // get previous bakery pool tokens
+      const getPreviousBakeryBalance = web3Helper.getTosdisFarmingBal(
+        walletAddress,
+        process.env.PREVIOUS_FARMING_BAKERY
+      );
+
+      // get previous staking from tosdis
+      const getPreviousTosdisBalance =
+        web3Helper.getTosdisStakingBalWithContract(
+          walletAddress,
+          process.env.PREVIOUS_STAKING_TOSDIS
+        );
+
       await Promise.all([
         getFarmingBalance,
         bakeryBalance,
@@ -626,6 +645,9 @@ async function getUserBalance(
         getLiquidity,
         getFarmingFromPanCakeSwap,
         apeBalance,
+        getPreviousFarmingBalance,
+        getPreviousBakeryBalance,
+        getPreviousTosdisBalance,
       ]).then((result) => {
         if (result.length) {
           for (let k = 0; k < result.length; k++) {
@@ -691,6 +713,36 @@ async function getUserBalance(
                 loyalityPoints:
                   +farmingTransaction +
                   (+farmingTransaction * config.ape) / 100,
+              });
+            } else if (k === 7) {
+              const totalSupplyCount = +result[k] / totalSupply;
+
+              const farmingTransaction = +totalSupplyCount * totalBalance;
+
+              pools.push({
+                name: 'previous-farming',
+                staked: +Utils.toTruncFixed(farmingTransaction, 3),
+                loyalityPoints:
+                  +farmingTransaction +
+                  (+farmingTransaction * config.farming) / 100,
+              });
+            } else if (k === 8) {
+              const bakeryCount = +result[k] / totalSupply;
+
+              const bakeryTransaction = +bakeryCount * totalBalance;
+
+              pools.push({
+                name: 'previous-bakery',
+                staked: +Utils.toTruncFixed(bakeryTransaction, 3),
+                loyalityPoints:
+                  +bakeryTransaction +
+                  (+bakeryTransaction * config.bakery) / 100,
+              });
+            } else if (k === 9) {
+              pools.push({
+                name: 'previous-tosdis-staking',
+                staked: +Utils.toTruncFixed(result[k], 3),
+                loyalityPoints: +result[k] + (+result[k] * config.tosdis) / 100,
               });
             } else {
               console.log('IN ELSE');
