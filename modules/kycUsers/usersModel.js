@@ -14,13 +14,15 @@ const userSchema = new Schema(
     recordId: {
       type: String,
       default: null,
+      lowercase: true,
+      unique: true,
     },
 
     walletAddress: {
       type: String,
       required: true,
       lowercase: true,
-      unique: true,
+      // unique: true,
     },
     email: {
       type: String,

@@ -58,9 +58,9 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
 
           const email = getRecords.records[i].identities.email.value;
           const name = `${getRecords.records[i].identities.given_name.value}${getRecords.records[i].identities.family_name.value} `;
-
+          const recordId = getRecords.records[i].recordId.toLowerCase().trim();
           const checkUserAvalaible = await UserModal.findOne({
-            walletAddress: userAddress.toLowerCase().trim(),
+            recordId: recordId.toLowerCase().trim(),
           });
 
           if (getRecords.records[i].status === 'approved') {
