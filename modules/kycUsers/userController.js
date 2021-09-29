@@ -160,10 +160,10 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
           Utils.sendSmapshotEmail(
             `./lottery/${fileName}.csv`,
             fileName,
-            `Result of lottery genrated on  ${Math.floor(
+            `Result of lottery generated on  ${Math.floor(
               Date.now() / 1000
             )} for ${fetchRecords.tier}  `,
-            `Result of  lottery  genrated  on ${Math.floor(
+            `Result of  lottery generated  on ${Math.floor(
               Date.now() / 1000
             )} for ${fetchRecords.tier} and  snapshot Id ${
               fetchRecords._id
