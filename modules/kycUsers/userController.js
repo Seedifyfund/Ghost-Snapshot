@@ -320,10 +320,28 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     });
 
     const getPools = await PoolsModel.find({});
-    const getUsers = await UserModel.find({
-      isActive: true,
-      kycStatus: 'approved',
-    });
+    // const getUsers = await UserModel.find({
+    //   isActive: true,
+    //   kycStatus: 'approved',
+    // });
+
+    const getUsers = await UserModel.aggregate([
+      { $match: { isActive: true, kycStatus: 'approved' } },
+      {
+        $group: {
+          _id: '$walletAddress',
+          doc: { $first: '$$ROOT' },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: '$doc',
+        },
+      },
+    ]);
+
+    console.log('get users is:', getUsers);
+
     const getTimeStamp = Math.round(new Date().getTime() / 1000);
     // console.log('get users is:', getUsers);
     if (getUsers && getUsers.length) {
