@@ -45,4 +45,20 @@ userRoute.get('/getSfund', getSfund);
 const getApeBalance = [web3Helper.getApeFarmingBalance];
 userRoute.get('/getApeBalance', getApeBalance);
 
+// login user
+const login = [UserMiddleware.loginCheck, UserCtr.login];
+userRoute.post('/login', login);
+
+// genrate nonce
+const genrateNonce = [UserCtr.genrateNonce];
+userRoute.get('/genrateNonce/:address', genrateNonce);
+
+// add new wallet address of user
+const addNewWalletAddresses = [
+  Auth.userAuthetication,
+  UserMiddleware.validateAddWallet,
+  UserCtr.addUserNetwork,
+];
+userRoute.post('/addWallet', addNewWalletAddresses);
+
 module.exports = userRoute;

@@ -18,6 +18,10 @@ const userSchema = new Schema(
       unique: true,
     },
 
+    networks: [
+      { type: Schema.Types.ObjectId, ref: 'networkwallet', default: [] },
+    ],
+
     walletAddress: {
       type: String,
       required: true,

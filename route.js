@@ -6,6 +6,7 @@ const adminRoute = require('./modules/admin/adminRoute');
 const userRoute = require('./modules/kycUsers/userRoute');
 const claimRoute = require('./modules/claim/claimRoute');
 const poolsRoute = require('./modules/pools/poolsRoute');
+const networkRoute = require('./modules/network/networkRoute');
 // Routes Path
 
 const app = express.Router();
@@ -17,6 +18,7 @@ app.use('/api/v1/admin', adminRoute);
 app.use('/api/v1/user', userRoute);
 app.use('/api/v1/pools', poolsRoute);
 app.use('/api/v1/claim', claimRoute);
+app.use('/api/v1/network', networkRoute);
 app.all('/*', (req, res) =>
   res.status(404).json({ message: 'Invalid Requests' })
 );

@@ -2,9 +2,11 @@ const UserModel = require('./usersModel');
 const Utils = require('../../helper/utils');
 const web3Helper = require('../../helper/web3Helper');
 const lotteryModel = require('../lottery/lotteryModel');
+const NetworkWalletModel = require('../networkWallet/networkWalletModel');
 const SnapshotModel = require('../snapshot/snapshotModel');
 const SyncHelper = require('../sync/syncHelper');
 const PoolsModel = require('../pools/poolsModel');
+const jwtUtil = require('../../helper/jwtUtils');
 const genrateSpreadSheet = require('../../helper/genrateSpreadsheet');
 const asyncRedis = require('async-redis');
 const axios = require('axios');
@@ -12,7 +14,7 @@ const ObjectsToCsv = require('objects-to-csv');
 const crypto = require('crypto');
 const config = require('../../config/config.json');
 const fs = require('fs');
-const { values } = require('lodash');
+const Web3 = require('web3');
 const client = asyncRedis.createClient();
 const Async = require('async');
 
@@ -1030,6 +1032,165 @@ UserCtr.getUserBalances = async (req, res) => {
     }
   } catch (err) {
     console.log('err is:', err);
+  }
+};
+
+// add user network
+UserCtr.addUserNetwork = async (req, res) => {
+  try {
+    const fetchUsers = await UserModel.find({
+      walletAddress: req.userDetails.walletAddress.toLowerCase(),
+    });
+
+    if (fetchUsers.length) {
+      let userId = [];
+      for (let i = 0; i < fetchUsers.length; i++) {
+        userId.push(fetchUsers[i]._id);
+      }
+
+      // create a entry in networkWallet model
+      const addWallets = new NetworkWalletModel({
+        walletAddress: req.body.walletAddress,
+        networkId: req.body.networkId,
+        userId: userId,
+      });
+      await addWallets.save();
+
+      for (let j = 0; j < fetchUsers.length; j++) {
+        const fetchUsersDetails = await UserModel.findById(fetchUsers[j]._id);
+
+        const network = fetchUsersDetails.networks;
+
+        network.push(addWallets._id);
+
+        fetchUsersDetails.networks = network;
+
+        await fetchUsersDetails.save();
+      }
+
+      return res.status(200).json({
+        message: 'Network Wallet added sucessfully',
+        status: true,
+      });
+    } else {
+      return res.status(200).json({
+        message: 'No User Found',
+        status: false,
+      });
+    }
+  } catch (err) {
+    Utils.echoLog('error in genrating nonce  ', err);
+    return res.status(500).json({
+      message: 'DB_ERROR',
+      status: false,
+      err: err.message ? err.message : err,
+    });
+  }
+};
+
+// Login user
+
+UserCtr.login = async (req, res) => {
+  try {
+    const { nonce, signature } = req.body;
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider('https://bsc-dataseed.binance.org/')
+    );
+
+    const signer = await web3.eth.accounts.recover(nonce, signature);
+
+    if (signer) {
+      const fetchRedisData = await client.get(nonce);
+
+      if (fetchRedisData) {
+        const parsedRedisData = JSON.parse(fetchRedisData);
+
+        const checkAddressMatched =
+          parsedRedisData.walletAddress.toLowerCase() === signer.toLowerCase();
+
+        if (checkAddressMatched) {
+          const checkAddressAvalaible = await UserModel.findOne({
+            walletAddress: signer.toLowerCase().trim(),
+          });
+
+          if (checkAddressAvalaible) {
+            // create the token and sent i tin response
+            const token = jwtUtil.getAuthToken({
+              _id: checkAddressAvalaible._id,
+              walletAddress: checkAddressAvalaible.walletAddress.toLowerCase(),
+            });
+
+            return res.status(200).json({
+              message: 'SUCCESS',
+              status: true,
+              data: {
+                token,
+              },
+            });
+          } else {
+            return res.status(400).json({
+              message: 'Kyc Not yet Verified',
+              status: false,
+            });
+          }
+        } else {
+          // invalid address
+          return res.status(400).json({
+            message: 'Inavlid Wallet Address',
+            status: false,
+          });
+        }
+      } else {
+        // redis data not avalible login again
+        return res.status(400).json({
+          message: 'LOGIN_AGAIN',
+          status: false,
+        });
+      }
+    } else {
+      // inavlid signature
+      return res.status(400).json({
+        message: 'INVALID_SIGNATURE',
+        status: false,
+      });
+    }
+  } catch (err) {
+    console.log('err in signup :', err);
+    Utils.echoLog('error in singnup  ', err);
+    return res.status(500).json({
+      message: req.t('DB_ERROR'),
+      status: true,
+      err: err.message ? err.message : err,
+    });
+  }
+};
+
+// genrate nonce
+UserCtr.genrateNonce = async (req, res) => {
+  try {
+    let nonce = crypto.randomBytes(16).toString('hex');
+
+    const data = {
+      walletAddress: req.params.address,
+      nonce: nonce,
+    };
+
+    await client.set(nonce, JSON.stringify(data), 'EX', 60 * 10);
+
+    return res.status(200).json({
+      message: 'NONCE_GENRATED',
+      status: true,
+      data: {
+        nonce: nonce,
+      },
+    });
+  } catch (err) {
+    Utils.echoLog('error in genrating nonce  ', err);
+    return res.status(500).json({
+      message: 'DB_ERROR',
+      status: false,
+      err: err.message ? err.message : err,
+    });
   }
 };
 

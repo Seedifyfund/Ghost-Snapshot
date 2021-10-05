@@ -14,4 +14,20 @@ UserMiddleware.validateCheck = async (req, res, next) => {
   validate.validateRequest(req, res, next, schema);
 };
 
+UserMiddleware.loginCheck = async (req, res, next) => {
+  const schema = Joi.object({
+    nonce: Joi.string().required(),
+    signature: Joi.string().required(),
+  });
+  validate.validateRequest(req, res, next, schema);
+};
+
+UserMiddleware.validateAddWallet = async (req, res, next) => {
+  const schema = Joi.object({
+    walletAddress: Joi.string().required(),
+    networkId: Joi.string().required(),
+  });
+  validate.validateRequest(req, res, next, schema);
+};
+
 module.exports = UserMiddleware;
