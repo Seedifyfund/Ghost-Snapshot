@@ -281,15 +281,16 @@ blockPassCtr.checkKycVerified = async (req, res) => {
     })
       .populate({
         path: 'networks',
-        select: { createdAt: 0, updatedAt: 0 },
+        select: { createdAt: 0, updatedAt: 0, userId: 0 },
         populate: {
           path: 'networkId',
           select: { _id: 1, networkName: 1, logo: 1 },
-          model: 'skills',
+          model: 'network',
         },
       })
       .sort({ createdAt: -1 });
 
+    // console.log('checkIsVerified', checkIsVerified);
     if (checkIsVerified) {
       res.status(200).json({
         message: 'Kyc Status',
@@ -302,6 +303,7 @@ blockPassCtr.checkKycVerified = async (req, res) => {
             snapshot: checkIsVerified.balObj,
             tier: checkIsVerified.tier,
             timestamp: checkIsVerified.timestamp,
+            networks: checkIsVerified.networks,
           },
         },
       });

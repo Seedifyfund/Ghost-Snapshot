@@ -34,7 +34,11 @@ userRoute.get('/snapshotData', getSnapshotData);
 
 // get user staked balance
 
-const getUserStaked = [UserCtr.getUsersStakedBalance];
+const getUserStaked = [
+  auth.isAuthenticatedUser,
+  UserMiddleware.checkProcessPending,
+  UserCtr.getUsersStakedBalance,
+];
 userRoute.get('/getUserStake', getUserStaked);
 
 // get sfund balance

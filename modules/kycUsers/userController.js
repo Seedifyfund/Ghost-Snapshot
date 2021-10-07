@@ -295,6 +295,13 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
   try {
     console.log('getUsersStakedBalance called');
 
+    const data = {
+      isSnapshotStarted: true,
+      startedAt: +new Date(),
+    };
+
+    await client.set('snapshot', JSON.stringify(data));
+
     const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
     const getLatestBlock = await axios.get(getLatestBlockNoUrl);
     const latestBlock = parseInt(getLatestBlock.data.result, 16);
@@ -341,8 +348,6 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
         },
       },
     ]);
-
-    console.log('get users is:', getUsers);
 
     const getTimeStamp = Math.round(new Date().getTime() / 1000);
     // console.log('get users is:', getUsers);
@@ -452,10 +457,12 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
         console.log('Successfully processed all items');
         await client.flushall();
         genrateSpreadSheet.genrateExcel(users);
+        await client.del('snapshot');
         console.log('User staked balances fetched');
       });
     }
   } catch (err) {
+    await client.del('snapshot');
     console.log('err is:', err);
   }
 };
