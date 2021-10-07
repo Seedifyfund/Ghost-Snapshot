@@ -9,11 +9,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/jointer-new/ledger.git"
+    "url": "git@github.com:Seedifyfund/Ghost-Snapshot.git"
   },
   "author": "",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/jointer-new/ledger#readme",
+  "homepage": "https://github.com/Seedifyfund/Ghost-Snapshot/blob/master/README.md",
   "dependencies": {
     "async": "^3.2.1",
     "async-redis": "^2.0.0",
