@@ -1194,4 +1194,35 @@ UserCtr.genrateNonce = async (req, res) => {
   }
 };
 
+// get count by groups
+UserCtr.getByGroups = async (req, res) => {
+  try {
+    // const getDataByGroup = await UserModel.aggregate([
+    //   {
+    //     $group: {
+    //       _id: { source: '$source', status: '$kycStatus' },
+    //       count: { $sum: 1 },
+    //     },
+    //   },
+    //   { $sort: { count: -1 } },
+    // ]);
+
+    const getDataByGroup = await UserModel.aggregate([
+      { $group: { _id: '$kycStatus', count: { $sum: 1 } } },
+    ]);
+
+    return res.status(200).json({
+      message: 'User Group',
+      status: true,
+      data: getDataByGroup,
+    });
+  } catch (err) {
+    Utils.echoLog('error in genrating gtroup data   ', err);
+    return res.status(500).json({
+      message: 'DB_ERROR',
+      status: false,
+      err: err.message ? err.message : err,
+    });
+  }
+};
 module.exports = UserCtr;

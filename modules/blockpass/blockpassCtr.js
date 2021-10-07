@@ -278,7 +278,17 @@ blockPassCtr.checkKycVerified = async (req, res) => {
   try {
     const checkIsVerified = await UserModal.findOne({
       walletAddress: req.params.address.toLowerCase(),
-    });
+    })
+      .populate({
+        path: 'networks',
+        select: { createdAt: 0, updatedAt: 0 },
+        populate: {
+          path: 'networkId',
+          select: { _id: 1, networkName: 1, logo: 1 },
+          model: 'skills',
+        },
+      })
+      .sort({ createdAt: -1 });
 
     if (checkIsVerified) {
       res.status(200).json({
