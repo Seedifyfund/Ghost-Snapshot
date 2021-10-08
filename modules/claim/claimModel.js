@@ -18,7 +18,7 @@ const claimSchema = new Schema(
     networkSymbol: {
       type: String,
       required: true,
-      enum: ['BNB', 'ETH', 'MATIC'],
+      enum: ['BNB', 'ETH', 'MATIC', 'SOL'],
     },
     networkId: {
       type: String,
