@@ -66,7 +66,7 @@ const addNewWalletAddresses = [
 userRoute.post('/addWallet', addNewWalletAddresses);
 
 // get it by group
-const getByGroup = [UserCtr.getByGroups];
+const getByGroup = [auth.isAuthenticatedUser, UserCtr.getByGroups];
 userRoute.get('/group', getByGroup);
 
 module.exports = userRoute;

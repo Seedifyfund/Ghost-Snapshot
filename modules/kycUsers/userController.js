@@ -1232,4 +1232,10 @@ UserCtr.getByGroups = async (req, res) => {
     });
   }
 };
+
+// edit user wallet addresses
+UserCtr.updateUserNetwork = async (req, res) => {
+  try {
+  } catch (err) {}
+};
 module.exports = UserCtr;
