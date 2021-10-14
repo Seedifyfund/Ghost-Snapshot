@@ -1127,6 +1127,8 @@ UserCtr.login = async (req, res) => {
               walletAddress: checkAddressAvalaible.walletAddress.toLowerCase(),
             });
 
+            await client.del(nonce);
+
             return res.status(200).json({
               message: 'SUCCESS',
               status: true,
@@ -1162,7 +1164,7 @@ UserCtr.login = async (req, res) => {
       });
     }
   } catch (err) {
-    console.log('err in signup :', err);
+    console.log('err in login :', err);
     Utils.echoLog('error in singnup  ', err);
     return res.status(500).json({
       message: req.t('DB_ERROR'),
@@ -1236,6 +1238,83 @@ UserCtr.getByGroups = async (req, res) => {
 // edit user wallet addresses
 UserCtr.updateUserNetwork = async (req, res) => {
   try {
-  } catch (err) {}
+    const { nonce, signature, walletId, walletAddress } = req.body;
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider('https://bsc-dataseed.binance.org/')
+    );
+
+    const signer = await web3.eth.accounts.recover(nonce, signature);
+
+    if (signer) {
+      const fetchRedisData = await client.get(nonce);
+
+      if (fetchRedisData) {
+        const parsedRedisData = JSON.parse(fetchRedisData);
+
+        const checkAddressMatched =
+          parsedRedisData.walletAddress.toLowerCase() === signer.toLowerCase();
+
+        if (checkAddressMatched) {
+          const checkAddressAvalaible = await UserModel.findOne({
+            walletAddress: signer.toLowerCase().trim(),
+          });
+
+          const findNetworkWallet = await NetworkWalletModel.findById(walletId);
+          // network id found
+          if (checkAddressAvalaible && findNetworkWallet) {
+            const userIds = findNetworkWallet.userId;
+
+            const checkUserIdAvalaible = userIds.includes(req.userDetails._id);
+
+            if (checkUserIdAvalaible) {
+              findNetworkWallet.walletAddress = walletAddress;
+
+              await findNetworkWallet.save();
+              return res.status(200).json({
+                message: 'Wallet Address updated Successfully',
+                status: true,
+              });
+            } else {
+              return res.status(400).json({
+                message: 'Invalid Request',
+                status: false,
+              });
+            }
+          } else {
+            return res.status(400).json({
+              message: 'Wallet Id Not Found',
+              status: false,
+            });
+          }
+
+          await client.del(nonce);
+        } else {
+          return res.status(400).json({
+            message: 'Kyc Not yet Verified',
+            status: false,
+          });
+        }
+      } else {
+        // invalid address
+        return res.status(400).json({
+          message: 'Inavlid Wallet Address',
+          status: false,
+        });
+      }
+    } else {
+      // redis data not avalible login again
+      return res.status(400).json({
+        message: 'LOGIN_AGAIN',
+        status: false,
+      });
+    }
+  } catch (err) {
+    Utils.echoLog('error in genrating gtroup data   ', err);
+    return res.status(500).json({
+      message: 'DB_ERROR',
+      status: false,
+      err: err.message ? err.message : err,
+    });
+  }
 };
 module.exports = UserCtr;

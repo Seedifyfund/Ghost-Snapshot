@@ -69,4 +69,12 @@ userRoute.post('/addWallet', addNewWalletAddresses);
 const getByGroup = [auth.isAuthenticatedUser, UserCtr.getByGroups];
 userRoute.get('/group', getByGroup);
 
+// update wallet address
+const updateWalletAddress = [
+  Auth.userAuthetication,
+  UserMiddleware.validateUpdateWallet,
+  UserCtr.updateUserNetwork,
+];
+userRoute.put('/updateWallet', updateWalletAddress);
+
 module.exports = userRoute;

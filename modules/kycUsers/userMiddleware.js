@@ -55,4 +55,14 @@ UserMiddleware.checkProcessPending = async (req, res, next) => {
   }
 };
 
+UserMiddleware.validateUpdateWallet = async (req, res, next) => {
+  const schema = Joi.object({
+    walletAddress: Joi.string().required(),
+    walletId: Joi.string().required(),
+    nonce: Joi.string().required(),
+    signature: Joi.string().required(),
+  });
+  validate.validateRequest(req, res, next, schema);
+};
+
 module.exports = UserMiddleware;
