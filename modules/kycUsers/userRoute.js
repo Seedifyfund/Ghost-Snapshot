@@ -61,6 +61,7 @@ userRoute.get('/genrateNonce/:address', genrateNonce);
 const addNewWalletAddresses = [
   Auth.userAuthetication,
   UserMiddleware.validateAddWallet,
+  UserMiddleware.checkWalletAlreadyAdded,
   UserCtr.addUserNetwork,
 ];
 userRoute.post('/addWallet', addNewWalletAddresses);
