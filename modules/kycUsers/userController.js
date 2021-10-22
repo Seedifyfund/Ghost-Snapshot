@@ -491,20 +491,20 @@ async function getUserBalance(
             const value = Utils.convertToEther(fetchBalance['0']);
             const endDate = fetchBalance['2'];
             // check if token expired
-            if (endDate < timestamp) {
-              pools.push({
-                name: pool[i].poolName,
-                staked: 0,
-                loyalityPoints: 0,
-              });
-            } else {
-              const points = +value + (value * pool[i].loyalityPoints) / 100;
-              pools.push({
-                name: pool[i].poolName,
-                staked: +Utils.toTruncFixed(value, 3),
-                loyalityPoints: points,
-              });
-            }
+            // if (endDate < timestamp) {
+            //   pools.push({
+            //     name: pool[i].poolName,
+            //     staked: 0,
+            //     loyalityPoints: 0,
+            //   });
+            // } else {
+            const points = +value + (value * pool[i].loyalityPoints) / 100;
+            pools.push({
+              name: pool[i].poolName,
+              staked: +Utils.toTruncFixed(value, 3),
+              loyalityPoints: points,
+            });
+            // }
           } else {
             if (pool[i].endDate > 0 && pool[i].endDate >= timestamp) {
               const getLiquidityData = await UserCtr.checkRedis(
