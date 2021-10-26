@@ -380,7 +380,6 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
         const userBal = JSON.stringify(getBalance);
 
         getBalance.walletAddress = task.address;
-
         getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
 
         console.log('getBalance.tier', getBalance.tier);
@@ -479,7 +478,7 @@ async function getUserBalance(
   return new Promise(async (resolve, reject) => {
     try {
       let pools = [];
-
+      const isInvested = false;
       if (pool.length) {
         for (let i = 0; i < pool.length; i++) {
           if (pool[i].contractType !== 'farming') {
@@ -504,6 +503,10 @@ async function getUserBalance(
               staked: +Utils.toTruncFixed(value, 3),
               loyalityPoints: points,
             });
+
+            if (+points > 0 && !isInvested) {
+              isInvested = true;
+            }
             // }
           } else {
             // if (pool[i].endDate > 0) {
@@ -511,14 +514,10 @@ async function getUserBalance(
               pool[i].lpTokenAddress
             );
 
-            console.log('getLiquidityData', getLiquidityData);
-
             const getLockedTokens = await web3Helper.getUserFarmedBalance(
               walletAddress,
               pool[i].contractAddress
             );
-
-            console.log('getLockedTokens', getLockedTokens);
 
             const totalSupplyCount =
               getLockedTokens / getLiquidityData.totalSupply;
@@ -534,6 +533,10 @@ async function getUserBalance(
               staked: +Utils.toTruncFixed(transaction, 3),
               loyalityPoints: points,
             });
+
+            if (+points > 0 && !isInvested) {
+              isInvested = true;
+            }
             // }
           }
         }
@@ -781,7 +784,7 @@ async function getUserBalance(
       }
 
       userStaked.eTokens = Utils.toTruncFixed(points, 3);
-
+      userStaked.isStaked = isInvested;
       resolve(userStaked);
     } catch (err) {
       console.log('err is:', err);
