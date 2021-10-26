@@ -478,7 +478,7 @@ async function getUserBalance(
   return new Promise(async (resolve, reject) => {
     try {
       let pools = [];
-      const isInvested = false;
+      let isInvested = false;
       if (pool.length) {
         for (let i = 0; i < pool.length; i++) {
           if (pool[i].contractType !== 'farming') {
