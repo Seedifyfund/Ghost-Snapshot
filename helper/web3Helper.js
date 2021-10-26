@@ -52,7 +52,7 @@ web3Helper.getUserStakedBalance = async (walletAddress, ContractAddress) => {
 
       resolve(getStakedBalance);
     } catch (err) {
-      console.log('error in web3 data ', err);
+      console.log('error in web3 stacked data ', err);
 
       resolve(0);
     }
@@ -93,8 +93,8 @@ web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
     try {
       const provider =
         process.env.NODE_ENV === 'development'
-          ? 'https://data-seed-prebsc-1-s1.binance.org:8545/'
-          : 'https://data-seed-prebsc-1-s1.binance.org:8545/';
+          ? 'https://bsc-dataseed.binance.org/'
+          : 'https://bsc-dataseed.binance.org/';
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
@@ -103,7 +103,8 @@ web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
       const getStakedBalance = await contract.methods
         .userDeposits(walletAddress)
         .call();
-      const value = Utils.convertToEther(getStakedBalance);
+
+      const value = Utils.convertToEther(getStakedBalance['0']);
       resolve(value);
     } catch (err) {
       console.log('error in web3 data ', err);
