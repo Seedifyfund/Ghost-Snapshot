@@ -320,6 +320,10 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
       process.env.LIQUIDITY_ADDRESS
     );
 
+    const getBakeryLiquidityLocked = await UserCtr.fetchLiquidityLocked(
+      process.env.LP_BAKERY
+    );
+
     const getApeTokenLiquidityLocked = await UserCtr.fetchLiquidityLocked(
       process.env.LP_APE_ADDRESS
     );
@@ -375,7 +379,9 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
           latestBlock,
           getLiquidityLocked.totalSupply,
           getLiquidityLocked.totalBalance,
-          getApeTokenLiquidityLocked
+          getApeTokenLiquidityLocked,
+          getBakeryLiquidityLocked,
+          getLiquidityLocked
         );
         const userBal = JSON.stringify(getBalance);
 
@@ -473,7 +479,9 @@ async function getUserBalance(
   endBlock,
   totalSupply,
   totalBalance,
-  apeLiquidity
+  apeLiquidity,
+  bakeryLiquidity,
+  panCakeLiquidity
 ) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -510,9 +518,18 @@ async function getUserBalance(
             // }
           } else {
             // if (pool[i].endDate > 0) {
-            const getLiquidityData = await UserCtr.checkRedis(
-              pool[i].lpTokenAddress
-            );
+            let getLiquidityData = {};
+
+            if (
+              pool[i].lpTokenAddress.toLowerCase() ===
+              process.env.LP_BAKERY.toLowerCase()
+            ) {
+              getLiquidityData = bakeryLiquidity;
+            } else {
+              getLiquidityData = panCakeLiquidity;
+            }
+
+            console.log('getLiquidityData', getLiquidityData);
 
             const getLockedTokens = await web3Helper.getUserFarmedBalance(
               walletAddress,
@@ -617,164 +634,164 @@ async function getUserBalance(
       //     (+getFarmingFromPanCakeSwap * config.farmingPancakeSwap) / 100,
       // });
 
-      const getFarmingBalance = web3Helper.getTosdisFarmingBal(
-        walletAddress,
-        process.env.FARMING_ADDRESS
-      );
-
-      // get bakery balance
-      const bakeryBalance = web3Helper.getTosdisFarmingBal(
-        walletAddress,
-        process.env.FARMING_BAKERY
-      );
-
-      // get tosdis balance
-      const tosdisBalance = web3Helper.getTosdisStakingBal(walletAddress);
-
-      // get sfund bal
-      // const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
-      // const getSfund = getSfundBalance(address, walletAddress, endBlock);
-
-      const getSfund = web3Helper.sfundBalance(walletAddress);
-
-      // get liquity balance
-      const getLiquidity = getLiquidityBalance(walletAddress, endBlock);
-
-      // const getFarmingFromPanCakeSwap = UserCtr.getPancakeSwapInvestment(
+      // const getFarmingBalance = web3Helper.getTosdisFarmingBal(
       //   walletAddress,
-      //   totalSupply,
-      //   totalBalance
+      //   process.env.FARMING_ADDRESS
       // );
 
-      // ape farming
-      const apeBalance = web3Helper.getApeFarmingBalance(
-        walletAddress,
-        process.env.APE_FARM_ADDRESS
-      );
-
-      // // get previous farmig pool tokens
-      // const getPreviousFarmingBalance = web3Helper.getTosdisFarmingBal(
+      // // get bakery balance
+      // const bakeryBalance = web3Helper.getTosdisFarmingBal(
       //   walletAddress,
-      //   process.env.PREVIOUS_FARMING_ADDRESS
+      //   process.env.FARMING_BAKERY
       // );
 
-      // // get previous bakery pool tokens
-      // const getPreviousBakeryBalance = web3Helper.getTosdisFarmingBal(
+      // // get tosdis balance
+      // const tosdisBalance = web3Helper.getTosdisStakingBal(walletAddress);
+
+      // // get sfund bal
+      // // const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
+      // // const getSfund = getSfundBalance(address, walletAddress, endBlock);
+
+      // const getSfund = web3Helper.sfundBalance(walletAddress);
+
+      // // get liquity balance
+      // const getLiquidity = getLiquidityBalance(walletAddress, endBlock);
+
+      // // const getFarmingFromPanCakeSwap = UserCtr.getPancakeSwapInvestment(
+      // //   walletAddress,
+      // //   totalSupply,
+      // //   totalBalance
+      // // );
+
+      // // ape farming
+      // const apeBalance = web3Helper.getApeFarmingBalance(
       //   walletAddress,
-      //   process.env.PREVIOUS_FARMING_BAKERY
+      //   process.env.APE_FARM_ADDRESS
       // );
 
-      // get previous staking from tosdis
-      // const getPreviousTosdisBalance =
-      //   web3Helper.getTosdisStakingBalWithContract(
-      //     walletAddress,
-      //     process.env.PREVIOUS_STAKING_TOSDIS
-      //   );
+      // // // get previous farmig pool tokens
+      // // const getPreviousFarmingBalance = web3Helper.getTosdisFarmingBal(
+      // //   walletAddress,
+      // //   process.env.PREVIOUS_FARMING_ADDRESS
+      // // );
 
-      await Promise.all([
-        getFarmingBalance,
-        bakeryBalance,
-        tosdisBalance,
-        getSfund,
-        getLiquidity,
-        apeBalance,
-      ]).then((result) => {
-        if (result.length) {
-          for (let k = 0; k < result.length; k++) {
-            if (k === 0) {
-              const totalSupplyCount = +result[k] / totalSupply;
+      // // // get previous bakery pool tokens
+      // // const getPreviousBakeryBalance = web3Helper.getTosdisFarmingBal(
+      // //   walletAddress,
+      // //   process.env.PREVIOUS_FARMING_BAKERY
+      // // );
 
-              const farmingTransaction = +totalSupplyCount * totalBalance;
+      // // get previous staking from tosdis
+      // // const getPreviousTosdisBalance =
+      // //   web3Helper.getTosdisStakingBalWithContract(
+      // //     walletAddress,
+      // //     process.env.PREVIOUS_STAKING_TOSDIS
+      // //   );
 
-              pools.push({
-                name: 'farming',
-                staked: +Utils.toTruncFixed(farmingTransaction, 3),
-                loyalityPoints:
-                  +farmingTransaction +
-                  (+farmingTransaction * config.farming) / 100,
-              });
-            } else if (k === 1) {
-              const bakeryCount = +result[k] / totalSupply;
+      // await Promise.all([
+      //   getFarmingBalance,
+      //   bakeryBalance,
+      //   tosdisBalance,
+      //   getSfund,
+      //   getLiquidity,
+      //   apeBalance,
+      // ]).then((result) => {
+      //   if (result.length) {
+      //     for (let k = 0; k < result.length; k++) {
+      //       if (k === 0) {
+      //         const totalSupplyCount = +result[k] / totalSupply;
 
-              const bakeryTransaction = +bakeryCount * totalBalance;
+      //         const farmingTransaction = +totalSupplyCount * totalBalance;
 
-              pools.push({
-                name: 'bakery',
-                staked: +Utils.toTruncFixed(bakeryTransaction, 3),
-                loyalityPoints:
-                  +bakeryTransaction +
-                  (+bakeryTransaction * config.bakery) / 100,
-              });
-            } else if (k === 2) {
-              pools.push({
-                name: 'tosdis-staking',
-                staked: +Utils.toTruncFixed(result[k], 3),
-                loyalityPoints: +result[k] + (+result[k] * config.tosdis) / 100,
-              });
-            } else if (k === 3) {
-              pools.push({
-                name: 'sfund',
-                staked: +Utils.toTruncFixed(result[k], 3),
-                loyalityPoints: +result[k] + (+result[k] * config.sfund) / 100,
-              });
-            } else if (k === 4) {
-              pools.push({
-                name: 'liquidity',
-                staked: +Utils.toTruncFixed(result[k], 3),
-                loyalityPoints:
-                  +result[k] + (+result[k] * config.liquidity) / 100,
-              });
-            } else if (k === 5) {
-              const totalSupplyCount = +result[k] / apeLiquidity.totalSupply;
+      //         pools.push({
+      //           name: 'farming',
+      //           staked: +Utils.toTruncFixed(farmingTransaction, 3),
+      //           loyalityPoints:
+      //             +farmingTransaction +
+      //             (+farmingTransaction * config.farming) / 100,
+      //         });
+      //       } else if (k === 1) {
+      //         const bakeryCount = +result[k] / totalSupply;
 
-              const farmingTransaction =
-                +totalSupplyCount * apeLiquidity.totalBalance;
+      //         const bakeryTransaction = +bakeryCount * totalBalance;
 
-              pools.push({
-                name: 'ape Farming',
-                staked: +Utils.toTruncFixed(farmingTransaction, 3),
-                loyalityPoints:
-                  +farmingTransaction +
-                  (+farmingTransaction * config.ape) / 100,
-              });
-            }
-            //  else if (k === 7) {
-            //   const totalSupplyCount = +result[k] / totalSupply;
+      //         pools.push({
+      //           name: 'bakery',
+      //           staked: +Utils.toTruncFixed(bakeryTransaction, 3),
+      //           loyalityPoints:
+      //             +bakeryTransaction +
+      //             (+bakeryTransaction * config.bakery) / 100,
+      //         });
+      //       } else if (k === 2) {
+      //         pools.push({
+      //           name: 'tosdis-staking',
+      //           staked: +Utils.toTruncFixed(result[k], 3),
+      //           loyalityPoints: +result[k] + (+result[k] * config.tosdis) / 100,
+      //         });
+      //       } else if (k === 3) {
+      //         pools.push({
+      //           name: 'sfund',
+      //           staked: +Utils.toTruncFixed(result[k], 3),
+      //           loyalityPoints: +result[k] + (+result[k] * config.sfund) / 100,
+      //         });
+      //       } else if (k === 4) {
+      //         pools.push({
+      //           name: 'liquidity',
+      //           staked: +Utils.toTruncFixed(result[k], 3),
+      //           loyalityPoints:
+      //             +result[k] + (+result[k] * config.liquidity) / 100,
+      //         });
+      //       } else if (k === 5) {
+      //         const totalSupplyCount = +result[k] / apeLiquidity.totalSupply;
 
-            //   const farmingTransaction = +totalSupplyCount * totalBalance;
+      //         const farmingTransaction =
+      //           +totalSupplyCount * apeLiquidity.totalBalance;
 
-            //   pools.push({
-            //     name: 'previous-farming',
-            //     staked: +Utils.toTruncFixed(farmingTransaction, 3),
-            //     loyalityPoints:
-            //       +farmingTransaction +
-            //       (+farmingTransaction * config.farming) / 100,
-            //   });
-            // } else if (k === 8) {
-            //   const bakeryCount = +result[k] / totalSupply;
+      //         pools.push({
+      //           name: 'ape Farming',
+      //           staked: +Utils.toTruncFixed(farmingTransaction, 3),
+      //           loyalityPoints:
+      //             +farmingTransaction +
+      //             (+farmingTransaction * config.ape) / 100,
+      //         });
+      //       }
+      //       //  else if (k === 7) {
+      //       //   const totalSupplyCount = +result[k] / totalSupply;
 
-            //   const bakeryTransaction = +bakeryCount * totalBalance;
+      //       //   const farmingTransaction = +totalSupplyCount * totalBalance;
 
-            //   pools.push({
-            //     name: 'previous-bakery',
-            //     staked: +Utils.toTruncFixed(bakeryTransaction, 3),
-            //     loyalityPoints:
-            //       +bakeryTransaction +
-            //       (+bakeryTransaction * config.bakery) / 100,
-            //   });
-            // } else if (k === 9) {
-            //   pools.push({
-            //     name: 'previous-tosdis-staking',
-            //     staked: +Utils.toTruncFixed(result[k], 3),
-            //     loyalityPoints: +result[k] + (+result[k] * config.tosdis) / 100,
-            //   });
-            // }
-            else {
-              console.log('IN ELSE');
-            }
-          }
-        }
-      });
+      //       //   pools.push({
+      //       //     name: 'previous-farming',
+      //       //     staked: +Utils.toTruncFixed(farmingTransaction, 3),
+      //       //     loyalityPoints:
+      //       //       +farmingTransaction +
+      //       //       (+farmingTransaction * config.farming) / 100,
+      //       //   });
+      //       // } else if (k === 8) {
+      //       //   const bakeryCount = +result[k] / totalSupply;
+
+      //       //   const bakeryTransaction = +bakeryCount * totalBalance;
+
+      //       //   pools.push({
+      //       //     name: 'previous-bakery',
+      //       //     staked: +Utils.toTruncFixed(bakeryTransaction, 3),
+      //       //     loyalityPoints:
+      //       //       +bakeryTransaction +
+      //       //       (+bakeryTransaction * config.bakery) / 100,
+      //       //   });
+      //       // } else if (k === 9) {
+      //       //   pools.push({
+      //       //     name: 'previous-tosdis-staking',
+      //       //     staked: +Utils.toTruncFixed(result[k], 3),
+      //       //     loyalityPoints: +result[k] + (+result[k] * config.tosdis) / 100,
+      //       //   });
+      //       // }
+      //       else {
+      //         console.log('IN ELSE');
+      //       }
+      //     }
+      //   }
+      // });
       let points = 0;
       const userStaked = {};
 
@@ -877,6 +894,8 @@ UserCtr.fetchLiquidityLocked = async (contractAddress) => {
 
       const totalSupply = +getTotalSupply.data.result / Math.pow(10, 18);
       const tokenBalance = +getTokenBalance.data.result / Math.pow(10, 18);
+
+      console.log('getTotalSupply', totalSupply);
 
       const data = {
         totalSupply: totalSupply,
