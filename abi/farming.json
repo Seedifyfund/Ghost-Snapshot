@@ -2,34 +2,14 @@
     {
         "inputs": [
             {
-                "internalType": "string",
-                "name": "name_",
-                "type": "string"
-            },
-            {
                 "internalType": "address",
-                "name": "tokenAddress_",
+                "name": "_tokenAddress",
                 "type": "address"
             },
             {
                 "internalType": "address",
-                "name": "rewardTokenAddress_",
+                "name": "_rewardTokenAddress",
                 "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "lockDuration_",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "stakingStart_",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "stakingEnd_",
-                "type": "uint256"
             }
         ],
         "payable": false,
@@ -133,15 +113,60 @@
         "type": "function"
     },
     {
-        "constant": false,
-        "inputs": [
+        "constant": true,
+        "inputs": [],
+        "name": "accShare",
+        "outputs": [
             {
                 "internalType": "uint256",
-                "name": "rewardAmount",
+                "name": "",
                 "type": "uint256"
             }
         ],
-        "name": "addReward",
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            }
+        ],
+        "name": "calculate",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [],
+        "name": "claimOldRewards",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [],
+        "name": "claimRewards",
         "outputs": [
             {
                 "internalType": "bool",
@@ -155,14 +180,8 @@
     },
     {
         "constant": true,
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "from",
-                "type": "address"
-            }
-        ],
-        "name": "calculate",
+        "inputs": [],
+        "name": "currentBlock",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -191,6 +210,130 @@
     },
     {
         "constant": true,
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "endAccShare",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "period",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "accShare",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "rewPerBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "startingBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "endingBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "rewards",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "endingBlock",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "rewardsToBeAdded",
+                "type": "uint256"
+            }
+        ],
+        "name": "extendPeriod",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            }
+        ],
+        "name": "fetchUserShare",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "hasStaked",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
         "inputs": [],
         "name": "isOwner",
         "outputs": [
@@ -198,6 +341,57 @@
                 "internalType": "bool",
                 "name": "",
                 "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "isPaid",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "isPaused",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "lastRewardBlock",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "payable": false,
@@ -222,21 +416,6 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "name",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
         "name": "owner",
         "outputs": [
             {
@@ -250,12 +429,93 @@
         "type": "function"
     },
     {
+        "constant": true,
+        "inputs": [],
+        "name": "period",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [],
+        "name": "renew",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "constant": false,
         "inputs": [],
         "name": "renounceOwnership",
         "outputs": [],
         "payable": false,
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_rewardAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_start",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_end",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_lockDuration",
+                "type": "uint256"
+            }
+        ],
+        "name": "resetAndsetStartEndBlock",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "rewPerBlock",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -342,22 +602,7 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "stakingEnd",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "stakingStart",
+        "name": "startingBlock",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -434,11 +679,47 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "user",
+                "name": "from",
                 "type": "address"
             }
         ],
         "name": "userDeposits",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            }
+        ],
+        "name": "viewOldRewards",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -452,7 +733,13 @@
     },
     {
         "constant": false,
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
         "name": "withdraw",
         "outputs": [
             {
@@ -463,21 +750,6 @@
         ],
         "payable": false,
         "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "withdrawStart",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
         "type": "function"
     }
 ]
