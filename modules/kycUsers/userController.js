@@ -783,6 +783,8 @@ async function getUserBalance(
         points += pools[j].loyalityPoints;
       }
 
+      console.log('user Staked is:', userStaked);
+
       userStaked.eTokens = Utils.toTruncFixed(points, 3);
       userStaked.isStaked = isInvested;
       resolve(userStaked);
@@ -897,7 +899,6 @@ UserCtr.fetchLiquidityLocked = async (contractAddress) => {
 };
 
 UserCtr.checkRedis = async (contractAddress) => {
-  console.log('Check resdis called');
   return new Promise(async (resolve, reject) => {
     try {
       const checkRedisAvalaible = await client.get(
