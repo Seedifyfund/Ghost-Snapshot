@@ -506,31 +506,35 @@ async function getUserBalance(
             });
             // }
           } else {
-            if (pool[i].endDate > 0 && pool[i].endDate >= timestamp) {
-              const getLiquidityData = await UserCtr.checkRedis(
-                pool[i].lpTokenAddress
-              );
+            // if (pool[i].endDate > 0) {
+            const getLiquidityData = await UserCtr.checkRedis(
+              pool[i].lpTokenAddress
+            );
 
-              const getLockedTokens = await web3Helper.getUserFarmedBalance(
-                walletAddress,
-                pool[i].contractAddress
-              );
+            console.log('getLiquidityData', getLiquidityData);
 
-              const totalSupplyCount =
-                getLockedTokens / getLiquidityData.totalSupply;
+            const getLockedTokens = await web3Helper.getUserFarmedBalance(
+              walletAddress,
+              pool[i].contractAddress
+            );
 
-              const transaction =
-                totalSupplyCount * getLiquidityData.totalBalance;
+            console.log('getLockedTokens', getLockedTokens);
 
-              const points =
-                +transaction + (transaction * pool[i].loyalityPoints) / 100;
+            const totalSupplyCount =
+              getLockedTokens / getLiquidityData.totalSupply;
 
-              pools.push({
-                name: pool[i].poolName,
-                staked: +Utils.toTruncFixed(transaction, 3),
-                loyalityPoints: points,
-              });
-            }
+            const transaction =
+              totalSupplyCount * getLiquidityData.totalBalance;
+
+            const points =
+              +transaction + (transaction * pool[i].loyalityPoints) / 100;
+
+            pools.push({
+              name: pool[i].poolName,
+              staked: +Utils.toTruncFixed(transaction, 3),
+              loyalityPoints: points,
+            });
+            // }
           }
         }
       }
@@ -633,11 +637,11 @@ async function getUserBalance(
       // get liquity balance
       const getLiquidity = getLiquidityBalance(walletAddress, endBlock);
 
-      const getFarmingFromPanCakeSwap = UserCtr.getPancakeSwapInvestment(
-        walletAddress,
-        totalSupply,
-        totalBalance
-      );
+      // const getFarmingFromPanCakeSwap = UserCtr.getPancakeSwapInvestment(
+      //   walletAddress,
+      //   totalSupply,
+      //   totalBalance
+      // );
 
       // ape farming
       const apeBalance = web3Helper.getApeFarmingBalance(
@@ -645,24 +649,24 @@ async function getUserBalance(
         process.env.APE_FARM_ADDRESS
       );
 
-      // get previous farmig pool tokens
-      const getPreviousFarmingBalance = web3Helper.getTosdisFarmingBal(
-        walletAddress,
-        process.env.PREVIOUS_FARMING_ADDRESS
-      );
+      // // get previous farmig pool tokens
+      // const getPreviousFarmingBalance = web3Helper.getTosdisFarmingBal(
+      //   walletAddress,
+      //   process.env.PREVIOUS_FARMING_ADDRESS
+      // );
 
-      // get previous bakery pool tokens
-      const getPreviousBakeryBalance = web3Helper.getTosdisFarmingBal(
-        walletAddress,
-        process.env.PREVIOUS_FARMING_BAKERY
-      );
+      // // get previous bakery pool tokens
+      // const getPreviousBakeryBalance = web3Helper.getTosdisFarmingBal(
+      //   walletAddress,
+      //   process.env.PREVIOUS_FARMING_BAKERY
+      // );
 
       // get previous staking from tosdis
-      const getPreviousTosdisBalance =
-        web3Helper.getTosdisStakingBalWithContract(
-          walletAddress,
-          process.env.PREVIOUS_STAKING_TOSDIS
-        );
+      // const getPreviousTosdisBalance =
+      //   web3Helper.getTosdisStakingBalWithContract(
+      //     walletAddress,
+      //     process.env.PREVIOUS_STAKING_TOSDIS
+      //   );
 
       await Promise.all([
         getFarmingBalance,
@@ -670,11 +674,7 @@ async function getUserBalance(
         tosdisBalance,
         getSfund,
         getLiquidity,
-        getFarmingFromPanCakeSwap,
         apeBalance,
-        getPreviousFarmingBalance,
-        getPreviousBakeryBalance,
-        getPreviousTosdisBalance,
       ]).then((result) => {
         if (result.length) {
           for (let k = 0; k < result.length; k++) {
@@ -722,13 +722,6 @@ async function getUserBalance(
                   +result[k] + (+result[k] * config.liquidity) / 100,
               });
             } else if (k === 5) {
-              pools.push({
-                name: 'pancakeSwapFarming',
-                staked: +Utils.toTruncFixed(result[k], 3),
-                loyalityPoints:
-                  +result[k] + (+result[k] * config.farmingPancakeSwap) / 100,
-              });
-            } else if (k === 6) {
               const totalSupplyCount = +result[k] / apeLiquidity.totalSupply;
 
               const farmingTransaction =
@@ -741,37 +734,39 @@ async function getUserBalance(
                   +farmingTransaction +
                   (+farmingTransaction * config.ape) / 100,
               });
-            } else if (k === 7) {
-              const totalSupplyCount = +result[k] / totalSupply;
+            }
+            //  else if (k === 7) {
+            //   const totalSupplyCount = +result[k] / totalSupply;
 
-              const farmingTransaction = +totalSupplyCount * totalBalance;
+            //   const farmingTransaction = +totalSupplyCount * totalBalance;
 
-              pools.push({
-                name: 'previous-farming',
-                staked: +Utils.toTruncFixed(farmingTransaction, 3),
-                loyalityPoints:
-                  +farmingTransaction +
-                  (+farmingTransaction * config.farming) / 100,
-              });
-            } else if (k === 8) {
-              const bakeryCount = +result[k] / totalSupply;
+            //   pools.push({
+            //     name: 'previous-farming',
+            //     staked: +Utils.toTruncFixed(farmingTransaction, 3),
+            //     loyalityPoints:
+            //       +farmingTransaction +
+            //       (+farmingTransaction * config.farming) / 100,
+            //   });
+            // } else if (k === 8) {
+            //   const bakeryCount = +result[k] / totalSupply;
 
-              const bakeryTransaction = +bakeryCount * totalBalance;
+            //   const bakeryTransaction = +bakeryCount * totalBalance;
 
-              pools.push({
-                name: 'previous-bakery',
-                staked: +Utils.toTruncFixed(bakeryTransaction, 3),
-                loyalityPoints:
-                  +bakeryTransaction +
-                  (+bakeryTransaction * config.bakery) / 100,
-              });
-            } else if (k === 9) {
-              pools.push({
-                name: 'previous-tosdis-staking',
-                staked: +Utils.toTruncFixed(result[k], 3),
-                loyalityPoints: +result[k] + (+result[k] * config.tosdis) / 100,
-              });
-            } else {
+            //   pools.push({
+            //     name: 'previous-bakery',
+            //     staked: +Utils.toTruncFixed(bakeryTransaction, 3),
+            //     loyalityPoints:
+            //       +bakeryTransaction +
+            //       (+bakeryTransaction * config.bakery) / 100,
+            //   });
+            // } else if (k === 9) {
+            //   pools.push({
+            //     name: 'previous-tosdis-staking',
+            //     staked: +Utils.toTruncFixed(result[k], 3),
+            //     loyalityPoints: +result[k] + (+result[k] * config.tosdis) / 100,
+            //   });
+            // }
+            else {
               console.log('IN ELSE');
             }
           }
@@ -1248,6 +1243,8 @@ UserCtr.updateUserNetwork = async (req, res) => {
     if (signer) {
       const fetchRedisData = await client.get(nonce);
 
+      console.log('redis data is:', fetchRedisData);
+
       if (fetchRedisData) {
         const parsedRedisData = JSON.parse(fetchRedisData);
 
@@ -1290,7 +1287,7 @@ UserCtr.updateUserNetwork = async (req, res) => {
           await client.del(nonce);
         } else {
           return res.status(400).json({
-            message: 'Kyc Not yet Verified',
+            message: 'Nonce and signature not matching',
             status: false,
           });
         }
