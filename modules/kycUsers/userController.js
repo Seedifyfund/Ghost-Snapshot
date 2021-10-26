@@ -411,7 +411,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
           console.log('remaining is:', remaining);
           // completed(null, { remaining });
         }, 2000);
-      }, 50);
+      }, 20);
 
       for (let i = 0; i < getUsers.length; i++) {
         console.log(`${i} of ${getUsers.length}`);
