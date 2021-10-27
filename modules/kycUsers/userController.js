@@ -981,6 +981,10 @@ UserCtr.getUserBalances = async (req, res) => {
       process.env.LP_APE_ADDRESS
     );
 
+    const getBakeryLiquidityLocked = await UserCtr.fetchLiquidityLocked(
+      process.env.LP_BAKERY
+    );
+
     console.log('getApeTokenLiquidityLocked', getApeTokenLiquidityLocked);
 
     const getPools = await PoolsModel.find({});
@@ -1000,7 +1004,9 @@ UserCtr.getUserBalances = async (req, res) => {
           latestBlock,
           getLiquidityLocked.totalSupply,
           getLiquidityLocked.totalBalance,
-          getApeTokenLiquidityLocked
+          getApeTokenLiquidityLocked,
+          getBakeryLiquidityLocked,
+          getLiquidityLocked
         );
         const userBal = JSON.stringify(getBalance);
         getBalance.walletAddress = task.address;
