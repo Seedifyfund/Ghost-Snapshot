@@ -8,6 +8,7 @@ const SyncHelper = require('../sync/syncHelper');
 const PoolsModel = require('../pools/poolsModel');
 const jwtUtil = require('../../helper/jwtUtils');
 const genrateSpreadSheet = require('../../helper/genrateSpreadsheet');
+const netwrokWallet = require('../network/');
 const asyncRedis = require('async-redis');
 const axios = require('axios');
 const ObjectsToCsv = require('objects-to-csv');
@@ -210,11 +211,28 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
 UserCtr.addCsv = async (req, res) => {
   try {
     console.log('add csv called');
-    const getUsers = await UserModel.find({
-      isActive: true,
-      kycStatus: 'approved',
-      tier: req.query.tier.toLowerCase().trim(),
-    });
+
+    const getUsers = await UserModel.aggregate([
+      {
+        $match: {
+          isActive: true,
+          kycStatus: 'approved',
+          tier: req.query.tier.toLowerCase().trim(),
+        },
+      },
+      {
+        $group: {
+          _id: '$walletAddress',
+          doc: { $first: '$$ROOT' },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: '$doc',
+        },
+      },
+    ]);
+
     const userList = [];
     for (let i = 0; i < getUsers.length; i++) {
       userList.push({
@@ -1343,4 +1361,13 @@ UserCtr.updateUserNetwork = async (req, res) => {
     });
   }
 };
+
+// UserCtr.getSecondayWalletAddresses = async (req, res) => {
+//   try {
+//     const walletId = req.body.walletId;
+
+//     const fetchWalletData=
+
+//   } catch (err) {}
+// };
 module.exports = UserCtr;
