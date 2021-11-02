@@ -8,7 +8,7 @@ const SyncHelper = require('../sync/syncHelper');
 const PoolsModel = require('../pools/poolsModel');
 const jwtUtil = require('../../helper/jwtUtils');
 const genrateSpreadSheet = require('../../helper/genrateSpreadsheet');
-// const netwrokWallet = require('../network/');
+const networkWallet = require('../network/networkModel');
 const asyncRedis = require('async-redis');
 const axios = require('axios');
 const ObjectsToCsv = require('objects-to-csv');
@@ -18,6 +18,7 @@ const fs = require('fs');
 const Web3 = require('web3');
 const client = asyncRedis.createClient();
 const Async = require('async');
+const networkModel = require('../network/networkModel');
 
 const UserCtr = {};
 
@@ -1362,12 +1363,12 @@ UserCtr.updateUserNetwork = async (req, res) => {
   }
 };
 
-// UserCtr.getSecondayWalletAddresses = async (req, res) => {
-//   try {
-//     const walletId = req.body.walletId;
-
-//     const fetchWalletData=
-
-//   } catch (err) {}
-// };
+UserCtr.getSecondayWalletAddresses = async (req, res) => {
+  try {
+    // const walletId = req.body.walletId;
+    // const fetchWalletData = await networkModel.findById(req.body.walletId);
+    // if (fetchWalletData) {
+    // }
+  } catch (err) {}
+};
 module.exports = UserCtr;

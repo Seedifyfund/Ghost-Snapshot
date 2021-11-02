@@ -1,6 +1,7 @@
 const express = require('express');
 const UserCtr = require('./userController');
-
+const multipart = require('connect-multiparty');
+const multipartMiddleware = multipart();
 const UserMiddleware = require('./userMiddleware');
 
 const web3Helper = require('../../helper/web3Helper');
