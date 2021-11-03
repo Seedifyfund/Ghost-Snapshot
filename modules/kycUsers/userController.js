@@ -556,7 +556,7 @@ async function getUserBalance(
             );
 
             const totalSupplyCount =
-              getLockedTokens / getLiquidityData.totalSupply;
+              getLockedTokens.farm / getLiquidityData.totalSupply;
 
             const transaction =
               totalSupplyCount * getLiquidityData.totalBalance;
@@ -567,7 +567,7 @@ async function getUserBalance(
             pools.push({
               name: pool[i].poolName,
               staked: +Utils.toTruncFixed(transaction, 3),
-              loyalityPoints: points,
+              loyalityPoints: points + getLockedTokens.harvest,
             });
 
             if (+points > 0 && !isInvested) {

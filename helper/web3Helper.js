@@ -104,10 +104,20 @@ web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
         .userDeposits(walletAddress)
         .call();
 
+      let harvestedValue = 0;
+
       const value = Utils.convertToEther(getStakedBalance['0']);
-      resolve(value);
+      if (value > 0) {
+        const getSfundHarvested = await contract.methods
+          .calculate(walletAddress)
+          .call();
+
+        harvestedValue = Utils.convertToEther(getSfundHarvested);
+      }
+
+      resolve({ farm: value, harvest: harvestedValue });
     } catch (err) {
-      console.log('error in web3 data ', err);
+      console.log('error in web3 farming ', err);
 
       resolve(0);
     }
