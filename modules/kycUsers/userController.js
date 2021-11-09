@@ -12,12 +12,14 @@ const networkWallet = require('../network/networkModel');
 const asyncRedis = require('async-redis');
 const axios = require('axios');
 const ObjectsToCsv = require('objects-to-csv');
+const csv = require('fast-csv');
 const crypto = require('crypto');
 const config = require('../../config/config.json');
 const fs = require('fs');
 const Web3 = require('web3');
 const client = asyncRedis.createClient();
 const Async = require('async');
+const xlsx = require('node-xlsx');
 const networkModel = require('../network/networkModel');
 
 const UserCtr = {};
@@ -1365,10 +1367,133 @@ UserCtr.updateUserNetwork = async (req, res) => {
 
 UserCtr.getSecondayWalletAddresses = async (req, res) => {
   try {
-    // const walletId = req.body.walletId;
-    // const fetchWalletData = await networkModel.findById(req.body.walletId);
-    // if (fetchWalletData) {
-    // }
-  } catch (err) {}
+    const fetchWalletData = await networkModel.findById(req.body.walletId);
+    if (fetchWalletData) {
+      const csvFiles = req.files.csv;
+      const file = csvFiles.path;
+      const csvData = [];
+      const stream = fs.createReadStream(file);
+
+      // const obj = xlsx.parse(file);
+      // const csvFile = [];
+
+      //   for (let i = 1; i < obj[0].data.length; i++) {
+      //     const transactionData = obj[0].data[i];
+      //     let transaction = {
+      //       TxHash: transactionData[0],
+      //       UnixTimeStamp: transactionData[1],
+      //       DateTime: transactionData[2],
+      //       From: transactionData[3],
+      //       To: transactionData[4],
+      //       Value: transactionData[5],
+      //       ContractAddress: transactionData[6],
+      //       TokenName: transactionData[7],
+      //       TokenSymbol: transactionData[8],
+      //     };
+
+      //     console.log('transactionData', transactionData);
+
+      //     const walletAddress = transactionData[3].toLowerCase().trim();
+      //     const fetchUserDetails = UserModel.findOne({
+      //       walletAddress: walletAddress,
+      //     });
+
+      //     if (fetchUserDetails) {
+      //       const fetchSecondartyWallet = await NetworkWalletModel.findOne({
+      //         networkId: fetchWalletData._id,
+      //         userId: { $in: fetchUserDetails._id },
+      //       });
+
+      //       if (fetchSecondartyWallet) {
+      //         transaction[`${fetchWalletData.networkName}`] =
+      //           fetchSecondartyWallet.walletAddress;
+      //       } else {
+      //         transaction[`${fetchWalletData.networkName}`] = '-';
+      //       }
+      //     } else {
+      //       transaction[`${fetchWalletData.networkName}`] = '-';
+      //     }
+      //     csvFile.push(transaction);
+      //   }
+      //   const csv = new ObjectsToCsv(transaction);
+      //   const fileName = `${+new Date()}_${fetchWalletData.networkName}`;
+      //   await csv.toDisk(`./lottery/${fileName}.csv`);
+
+      //   Utils.sendSmapshotEmail(
+      //     `./lottery/${fileName}.csv`,
+      //     fileName,
+      //     `Secondary Wallet Address of user`,
+      //     `Secondary Wallet Address of user`
+      //   );
+      // } else {
+      //   return res.status(400).json({
+      //     message: 'Invalid Wallet Id',
+      //     status: false,
+      //   });
+
+      let csvstream = csv
+        .parseStream(stream, { headers: true })
+        .on('data', async (row) => {
+          csvstream.pause();
+
+          const transaction = { ...row };
+
+          const walletAddress = row['From'].toLowerCase().trim();
+
+          const fetchUserDetails = await UserModel.findOne({
+            walletAddress: walletAddress,
+          });
+
+          if (fetchUserDetails) {
+            const fetchSecondartyWallet = await NetworkWalletModel.findOne({
+              networkId: fetchWalletData._id,
+              userId: { $in: [fetchUserDetails._id] },
+            });
+
+            if (fetchSecondartyWallet) {
+              transaction[`${fetchWalletData.networkName}`] =
+                fetchSecondartyWallet.walletAddress;
+            } else {
+              transaction[`${fetchWalletData.networkName}`] = '-';
+            }
+          } else {
+            transaction[`${fetchWalletData.networkName}`] = '-';
+          }
+
+          csvData.push(transaction);
+
+          csvstream.resume();
+        })
+        .on('end', async () => {
+          console.log('We are done!');
+          const csv = new ObjectsToCsv(csvData);
+          const fileName = `${+new Date()}_${fetchWalletData.networkName}`;
+          await csv.toDisk(`./lottery/${fileName}.csv`);
+
+          Utils.sendSmapshotEmail(
+            `./lottery/${fileName}.csv`,
+            fileName,
+            `Secondary Wallet Address of user`,
+            `Secondary Wallet Address of user`
+          );
+        })
+        .on('error', function (error) {
+          console.log(error);
+        });
+    } else {
+      return res.status(400).json({
+        message: 'Invalid Wallet Id',
+        status: false,
+      });
+    }
+  } catch (err) {
+    console.log('err os:', err);
+    Utils.echoLog('error in genrating gtroup data   ', err);
+    return res.status(500).json({
+      message: 'DB_ERROR',
+      status: false,
+      err: err.message ? err.message : err,
+    });
+  }
 };
 module.exports = UserCtr;

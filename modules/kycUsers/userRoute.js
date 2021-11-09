@@ -79,4 +79,11 @@ const updateWalletAddress = [
 ];
 userRoute.put('/updateWallet', updateWalletAddress);
 
+// get seconday wallet address from csv
+const getSecondaryWalletAddress = [
+  multipartMiddleware,
+  UserCtr.getSecondayWalletAddresses,
+];
+userRoute.post('/secondayWallet', getSecondaryWalletAddress);
+
 module.exports = userRoute;
