@@ -569,7 +569,8 @@ async function getUserBalance(
             pools.push({
               name: pool[i].poolName,
               staked: +Utils.toTruncFixed(transaction, 3),
-              loyalityPoints: points + getLockedTokens.harvest,
+              loyalityPoints: points,
+              // loyalityPoints: points + getLockedTokens.harvest,
             });
 
             if (+points > 0 && !isInvested) {
