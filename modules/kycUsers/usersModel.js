@@ -22,6 +22,12 @@ const userSchema = new Schema(
       { type: Schema.Types.ObjectId, ref: 'networkwallet', default: [] },
     ],
 
+    country: {
+      type: String,
+      default: null,
+      lowercase: true,
+    },
+
     walletAddress: {
       type: String,
       required: true,

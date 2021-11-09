@@ -58,10 +58,19 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
 
           const email = getRecords.records[i].identities.email.value;
           const name = `${getRecords.records[i].identities.given_name.value}${getRecords.records[i].identities.family_name.value} `;
+          const country = getRecords.records[i].identities?.address.value
+            ? JSON.parse(getRecords.records[i].identities?.address.value)
+            : null;
           const recordId = getRecords.records[i].recordId.toLowerCase().trim();
           const checkUserAvalaible = await UserModal.findOne({
             recordId: recordId.toLowerCase().trim(),
           });
+
+          let countryCode = null;
+
+          if (country) {
+            countryCode = country.country ? country.country : null;
+          }
 
           if (getRecords.records[i].status === 'approved') {
             const approval = Date.parse(getRecords.records[i].approvedDate);
@@ -75,10 +84,11 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
             checkUserAvalaible.recordId = getRecords.records[i].recordId;
             checkUserAvalaible.approvedTimestamp = approvedDate;
             checkUserAvalaible.walletAddress = userAddress;
+            checkUserAvalaible.country = countryCode;
             // checkUserAvalaible.balObj = balObj;
             // checkUserAvalaible.totalbalance = total;
             // checkUserAvalaible.tier = syncHelper.getUserTier(0);
-
+            checkUserAvalaible.markModified('country');
             await checkUserAvalaible.save();
             // itreateBlocks(i + 1);
           } else {
@@ -90,6 +100,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
               totalbalance: total,
               balObj: balObj,
               kycStatus: getRecords.records[i].status,
+              country: countryCode,
               approvedTimestamp: approvedDate,
               tier: syncHelper.getUserTier(0),
             });
