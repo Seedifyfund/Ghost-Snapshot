@@ -215,13 +215,19 @@ UserCtr.addCsv = async (req, res) => {
   try {
     console.log('add csv called');
 
+    let query = {
+      isActive: true,
+      kycStatus: 'approved',
+      tier: req.query.tier.toLowerCase().trim(),
+    };
+
+    if (req.query.country) {
+      query.country = { $ne: req.query.country.toLowerCase().trim() };
+    }
+
     const getUsers = await UserModel.aggregate([
       {
-        $match: {
-          isActive: true,
-          kycStatus: 'approved',
-          tier: req.query.tier.toLowerCase().trim(),
-        },
+        $match: query,
       },
       {
         $group: {
