@@ -1447,38 +1447,66 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
       let csvstream = csv
         .parseStream(stream, { headers: true })
         .on('data', async (row) => {
+          console.log('row is:', row);
           csvstream.pause();
 
           const transaction = { ...row };
 
-          const walletAddress = row['From'].toLowerCase().trim();
-
-          const fetchUserDetails = await UserModel.findOne({
-            walletAddress: walletAddress,
-          });
-
-          if (fetchUserDetails) {
-            const fetchSecondartyWallet = await NetworkWalletModel.findOne({
-              networkId: fetchWalletData._id,
-              userId: { $in: [fetchUserDetails._id] },
-            });
-
-            if (fetchSecondartyWallet) {
-              transaction[`${fetchWalletData.networkName}`] =
-                fetchSecondartyWallet.walletAddress;
-            } else {
-              transaction[`${fetchWalletData.networkName}`] = '-';
-            }
-          } else {
-            transaction[`${fetchWalletData.networkName}`] = '-';
-          }
-
           csvData.push(transaction);
+
+          // const walletAddress = row['From'].toLowerCase().trim();
+
+          // const fetchUserDetails = await UserModel.findOne({
+          //   walletAddress: walletAddress,
+          // });
+
+          // if (fetchUserDetails) {
+          //   const fetchSecondartyWallet = await NetworkWalletModel.findOne({
+          //     networkId: fetchWalletData._id,
+          //     userId: { $in: [fetchUserDetails._id] },
+          //   });
+
+          //   if (fetchSecondartyWallet) {
+          //     transaction[`${fetchWalletData.networkName}`] =
+          //       fetchSecondartyWallet.walletAddress;
+          //   } else {
+          //     transaction[`${fetchWalletData.networkName}`] = '-';
+          //   }
+          // } else {
+          //   transaction[`${fetchWalletData.networkName}`] = '-';
+          // }
+
+          // csvData.push(transaction);
 
           csvstream.resume();
         })
         .on('end', async () => {
-          console.log('We are done!');
+          console.log('WE are done');
+          for (let i = 0; i < csvData.length; i++) {
+            const row = csvData[i];
+            const walletAddress = row['From'].toLowerCase().trim();
+
+            const fetchUserDetails = await UserModel.findOne({
+              walletAddress: walletAddress,
+            });
+
+            if (fetchUserDetails) {
+              const fetchSecondartyWallet = await NetworkWalletModel.findOne({
+                networkId: fetchWalletData._id,
+                userId: { $in: [fetchUserDetails._id] },
+              });
+
+              if (fetchSecondartyWallet) {
+                csvData[i][`${fetchWalletData.networkName}`] =
+                  fetchSecondartyWallet.walletAddress;
+              } else {
+                csvData[i][`${fetchWalletData.networkName}`] = '-';
+              }
+            } else {
+              csvData[i][`${fetchWalletData.networkName}`] = '-';
+            }
+          }
+
           const csv = new ObjectsToCsv(csvData);
           const fileName = `${+new Date()}_${fetchWalletData.networkName}`;
           await csv.toDisk(`./lottery/${fileName}.csv`);
