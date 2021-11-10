@@ -359,8 +359,14 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     //   kycStatus: 'approved',
     // });
 
+    let query = { isActive: true, kycStatus: 'approved' };
+
+    if (req.query.country) {
+      query.country = { $ne: req.query.country.toLowerCase().trim() };
+    }
+
     const getUsers = await UserModel.aggregate([
-      { $match: { isActive: true, kycStatus: 'approved' } },
+      { $match: query },
       {
         $group: {
           _id: '$walletAddress',
