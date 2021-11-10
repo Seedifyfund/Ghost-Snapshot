@@ -324,7 +324,7 @@ blockPassCtr.checkKycVerified = async (req, res) => {
         status: true,
         data: {
           kycStatus: false,
-          status: 'NOTREGISTERED',
+          status: 'NOT REGISTERED',
           data: {},
         },
       });
