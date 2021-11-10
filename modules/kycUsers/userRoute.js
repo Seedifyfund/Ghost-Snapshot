@@ -86,4 +86,11 @@ const getSecondaryWalletAddress = [
 ];
 userRoute.post('/secondayWallet', getSecondaryWalletAddress);
 
+// get unique contries list
+const getUniqueCountries = [
+  Auth.isAuthenticatedUser,
+  UserCtr.listAllUniqueCountries,
+];
+userRoute.get('/getUniqueCountries', getUniqueCountries);
+
 module.exports = userRoute;

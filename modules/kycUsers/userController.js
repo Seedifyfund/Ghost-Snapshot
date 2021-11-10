@@ -1477,6 +1477,11 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
             `Secondary Wallet Address of user`,
             `Secondary Wallet Address of user`
           );
+
+          return res.status(200).json({
+            message: 'Your Request Received',
+            status: true,
+          });
         })
         .on('error', function (error) {
           console.log(error);
@@ -1488,8 +1493,33 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
       });
     }
   } catch (err) {
-    console.log('err os:', err);
     Utils.echoLog('error in genrating gtroup data   ', err);
+    return res.status(500).json({
+      message: 'DB_ERROR',
+      status: false,
+      err: err.message ? err.message : err,
+    });
+  }
+};
+
+UserCtr.listAllUniqueCountries = async (req, res) => {
+  try {
+    const getDistinctRecords = await UserModel.find().distinct('country');
+    if (getDistinctRecords) {
+      return res.status(200).json({
+        message: 'Country List',
+        status: true,
+        data: getDistinctRecords,
+      });
+    } else {
+      return res.status(200).json({
+        message: 'Country List',
+        status: true,
+        data: [],
+      });
+    }
+  } catch (err) {
+    Utils.echoLog('error in genrating country list   ', err);
     return res.status(500).json({
       message: 'DB_ERROR',
       status: false,
