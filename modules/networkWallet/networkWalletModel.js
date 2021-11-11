@@ -12,7 +12,6 @@ const networkWalletSchema = new Schema(
     walletAddress: {
       type: String,
       required: true,
-      lowercase: true,
     },
     userId: [{ type: Schema.Types.ObjectId, ref: 'user' }],
   },
