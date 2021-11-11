@@ -148,38 +148,42 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
 
 // get data from block pass
 async function getDatafromBlockPass(skip) {
-  console.log('skip is:', skip);
-  let url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants?limit=10`;
-  if (skip > 0) {
-    url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants?limit=10&skip=${skip}`;
-  }
+  try {
+    console.log('skip is:', skip);
+    let url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants?limit=10`;
+    if (skip > 0) {
+      url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants?limit=10&skip=${skip}`;
+    }
 
-  var config = {
-    method: 'get',
-    url: url,
-    headers: {
-      Authorization: `${process.env.BLOCKPASS_AUTHORIZATION}`,
-    },
-  };
-
-  const getBlockPassData = await axios(config);
-  if (getBlockPassData && getBlockPassData.status === 200) {
-    // console.log(getBlockPassData.data.data);
-    const data = getBlockPassData.data.data.records;
-    const total = getBlockPassData.data.data.total;
-    const skip = getBlockPassData.data.data.skip;
-
-    return {
-      records: data,
-      total: total,
-      skip: skip,
+    var config = {
+      method: 'get',
+      url: url,
+      headers: {
+        Authorization: `${process.env.BLOCKPASS_AUTHORIZATION}`,
+      },
     };
-  } else {
-    return {
-      records: [],
-      total: 0,
-      skip: 0,
-    };
+
+    const getBlockPassData = await axios(config);
+    if (getBlockPassData && getBlockPassData.status === 200) {
+      // console.log(getBlockPassData.data.data);
+      const data = getBlockPassData.data.data.records;
+      const total = getBlockPassData.data.data.total;
+      const skip = getBlockPassData.data.data.skip;
+
+      return {
+        records: data,
+        total: total,
+        skip: skip,
+      };
+    } else {
+      return {
+        records: [],
+        total: 0,
+        skip: 0,
+      };
+    }
+  } catch (err) {
+    console.log('Error in blockpass api ', err);
   }
 }
 
