@@ -132,14 +132,19 @@ farmCtr.getUserBalances = async (req, res) => {
             web.utils.fromWei(rew.toString())
           );
 
-          farmUsers.push({
-            walletAddress: userAddress,
-            blockNo: currentBlock,
-            rewardsFromContract: web.utils.fromWei(value),
-            stakedBalance: web.utils.fromWei(userStake[0]),
-            rewards: web.utils.fromWei(rew.toString()),
-          });
-
+          const checkAddressAlreadyPushed = farmUsers.findIndex(
+            (x) => x.walletAddress === userAddress
+          );
+          if (checkAddressAlreadyPushed === -1) {
+            farmUsers.push({
+              walletAddress: userAddress,
+              blockNo: currentBlock,
+              rewardsFromContract: web.utils.fromWei(value),
+              stakedBalance: web.utils.fromWei(userStake[0]),
+              rewards: web.utils.fromWei(rew.toString()),
+            });
+          } else {
+          }
           return [userAddress, currentBlock];
         });
 
