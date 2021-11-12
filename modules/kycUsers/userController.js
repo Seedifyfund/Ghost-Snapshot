@@ -1503,11 +1503,17 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
               if (fetchSecondartyWallet) {
                 csvData[i][`${fetchWalletData.networkName}`] =
                   fetchSecondartyWallet.walletAddress;
+                csvData[i]['Created At'] = fetchSecondartyWallet.createdAt;
+                csvData[i]['Udated At'] = fetchSecondartyWallet.updatedAt;
               } else {
                 csvData[i][`${fetchWalletData.networkName}`] = '-';
+                csvData[i]['Created At'] = '-';
+                csvData[i]['Udated At'] = '-';
               }
             } else {
               csvData[i][`${fetchWalletData.networkName}`] = '-';
+              csvData[i]['Created At'] = '-';
+              csvData[i]['Udated At'] = '-';
             }
           }
 
