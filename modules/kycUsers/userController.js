@@ -1392,6 +1392,7 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
       const file = csvFiles.path;
       const fileName = csvFiles.fileName;
       const csvData = [];
+      console.log('file is:', file);
       const stream = fs.createReadStream(file);
 
       // const obj = xlsx.parse(file);
@@ -1538,14 +1539,14 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
           }
 
           const csv = new ObjectsToCsv(csvData);
-          const file = `${fileName}_${+new Date()}_${
+          const fileData = `${fileName}_${+new Date()}_${
             fetchWalletData.networkName
           }`;
           await csv.toDisk(`./lottery/${fileName}.csv`);
 
           Utils.sendSmapshotEmail(
             `./lottery/${fileName}.csv`,
-            file,
+            fileData,
             `Secondary Wallet Address of user Created at ${+new Date()}`,
             `Secondary Wallet Address of user`,
             'csv'
