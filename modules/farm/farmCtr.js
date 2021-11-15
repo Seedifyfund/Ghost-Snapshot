@@ -33,12 +33,12 @@ farmCtr.getUserBalances = async (req, res) => {
     const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
     const getLatestBlock = await axios.get(getLatestBlockNoUrl);
     // const latestBlock = parseInt(getLatestBlock.data.result, 16);
-    const latestBlock = 12296585;
+    const latestBlock = 12372725;
 
     console.log('latestBlock', latestBlock);
     const farmUsers = [];
 
-    const initialBlockNo = 12295950;
+    const initialBlockNo = 12286325;
 
     const fetchBlocks = async (startBlock, endBlock) => {
       console.log('start block is:', startBlock);
@@ -225,30 +225,31 @@ farmCtr.getUserBalances = async (req, res) => {
             (x) => x.walletAddress === userAddress
           );
 
-          if (checkBlockAlreadyAdded === -1) {
-            farmUsers.push({
-              walletAddress: userAddress,
-              blockNo: currentBlock,
-              rewardsFromContract: web.utils.fromWei(value),
-              stakedBalance: web.utils.fromWei(userStake[0]),
-              rewards: web.utils.fromWei(rew.toString()),
-            });
-          } else {
-            const checkForDuplicate = await farmHelper.checkForDuplicate(
-              userAddress,
-              currentBlock,
-              latestBlock
-            );
+          // if (checkBlockAlreadyAdded === -1) {
+          farmUsers.push({
+            walletAddress: userAddress,
+            blockNo: currentBlock,
+            rewardsFromContract: web.utils.fromWei(value),
+            stakedBalance: web.utils.fromWei(userStake[0]),
+            rewards: web.utils.fromWei(rew.toString()),
+          });
+          // } else {
+          //   const checkForDuplicate = await farmHelper.checkForDuplicate(
+          //     userAddress,
+          //     currentBlock,
+          //     latestBlock
+          //   );
 
-            console.log('check for updates ====>', checkForDuplicate);
+          //   console.log('check for updates ====>', checkForDuplicate);
 
-            if (checkForDuplicate.status && +checkForDuplicate.value === 0) {
-              farmUsers[checkBlockAlreadyAdded].rewards =
-                checkForDuplicate.rewards;
-            } else {
-              farmUsers.splice(checkBlockAlreadyAdded, 1);
-            }
-          }
+          //   if (checkForDuplicate.status && +checkForDuplicate.value === 0) {
+          //     console.log('IN IFFFFFF ========>');
+          //     farmUsers[checkBlockAlreadyAdded].rewards =
+          //       checkForDuplicate.rewards;
+          //   } else {
+          //     farmUsers.splice(checkBlockAlreadyAdded, 1);
+          //   }
+          // }
         }
 
         if (endBlock + 1000 >= latestBlock) {
@@ -260,9 +261,9 @@ farmCtr.getUserBalances = async (req, res) => {
       } else {
         console.log('IN ELSE =================>');
         console.log('farm users', farmUsers);
-        // const csv = new ObjectsToCsv(farmUsers);
-        // const fileName = `${+new Date()}_farm`;
-        // await csv.toDisk(`./lottery/${fileName}.csv`);
+        const csv = new ObjectsToCsv(farmUsers);
+        const fileName = `${+new Date()}_farm`;
+        await csv.toDisk(`./lottery/${fileName}.csv`);
 
         // Utils.sendSmapshotEmail(
         //   `./lottery/${fileName}.csv`,

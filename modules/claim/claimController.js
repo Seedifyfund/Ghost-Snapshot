@@ -5,6 +5,7 @@ const ClaimCtr = {};
 ClaimCtr.addNewClaim = async (req, res) => {
   try {
     const {
+      contractAddress,
       tokenAddress,
       networkName,
       networkId,
@@ -34,6 +35,7 @@ ClaimCtr.addNewClaim = async (req, res) => {
     } else {
       const addNewClaim = new ClaimModel({
         tokenAddress: tokenAddress,
+        contractAddress: contractAddress,
         networkName: networkName,
         networkSymbol: networkSymbol,
         networkId: networkId,

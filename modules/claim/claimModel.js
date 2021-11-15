@@ -4,6 +4,11 @@ const { Schema } = mongoose;
 
 const claimSchema = new Schema(
   {
+    contractAddress;{
+      type: String,
+      required: true,
+      lowercase: true,
+    },
     tokenAddress: {
       type: String,
       required: true,

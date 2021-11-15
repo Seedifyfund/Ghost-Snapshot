@@ -6,6 +6,7 @@ const ClaimMiddleware = {};
 
 ClaimMiddleware.validateAdd = async (req, res, next) => {
   const schema = Joi.object({
+    contractAddress: Joi.string().required(),
     tokenAddress: Joi.string().required(),
     networkName: Joi.string()
       .valid('polygon', 'binance', 'ethereum', 'solana', 'avalanche')
