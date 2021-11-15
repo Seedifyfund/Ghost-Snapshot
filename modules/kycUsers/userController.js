@@ -1509,7 +1509,7 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
                 if (
                   fetchWalletData.networkName.toLowerCase().trim() === 'solana'
                 ) {
-                  csvData.isValid = Utils.checkAddressForSolana(
+                  csvData[i].isValid = await Utils.checkAddressForSolana(
                     fetchSecondartyWallet.walletAddress
                   );
                 }
@@ -1520,7 +1520,7 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
                 if (
                   fetchWalletData.networkName.toLowerCase().trim() === 'solana'
                 ) {
-                  csvData.isValid = false;
+                  csvData[i].isValid = false;
                 }
                 csvData[i]['Created At'] = '-';
                 csvData[i]['Updated At'] = '-';
@@ -1530,7 +1530,7 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
               if (
                 fetchWalletData.networkName.toLowerCase().trim() === 'solana'
               ) {
-                csvData.isValid = false;
+                csvData[i].isValid = false;
               }
               csvData[i]['Created At'] = '-';
               csvData[i]['Updated At'] = '-';
