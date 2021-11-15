@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const claimSchema = new Schema(
   {
-    contractAddress;{
+    contractAddress: {
       type: String,
       required: true,
       lowercase: true,
