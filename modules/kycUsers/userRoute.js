@@ -1,6 +1,7 @@
 const express = require('express');
 const UserCtr = require('./userController');
 const multipart = require('connect-multiparty');
+const Utils = require('../../helper/utils');
 const multipartMiddleware = multipart();
 const UserMiddleware = require('./userMiddleware');
 
@@ -92,5 +93,9 @@ const getUniqueCountries = [
   UserCtr.listAllUniqueCountries,
 ];
 userRoute.get('/getUniqueCountries', getUniqueCountries);
+
+// check is valid address
+const checkisValid = [Utils.checkAddressForSolana];
+userRoute.get('/checkIsValid', checkisValid);
 
 module.exports = userRoute;

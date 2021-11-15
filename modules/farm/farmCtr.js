@@ -1,6 +1,7 @@
 const tokenAbi = require('../../abi/token.json');
 const farmAbi = require('../../abi/farm.json');
 const blockModel = require('./blockModel');
+const farmHelper = require('./farmHelper');
 const axios = require('axios');
 const ObjectsToCsv = require('objects-to-csv');
 const Utils = require('../../helper/utils');
@@ -31,18 +32,19 @@ farmCtr.getUserBalances = async (req, res) => {
 
     const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
     const getLatestBlock = await axios.get(getLatestBlockNoUrl);
-    const latestBlock = parseInt(getLatestBlock.data.result, 16);
+    // const latestBlock = parseInt(getLatestBlock.data.result, 16);
+    const latestBlock = 12296585;
 
     console.log('latestBlock', latestBlock);
     const farmUsers = [];
 
-    const initialBlockNo = fetchBlock ? fetchBlock.lastBlock : 12286650;
+    const initialBlockNo = 12295950;
 
     const fetchBlocks = async (startBlock, endBlock) => {
       console.log('start block is:', startBlock);
       console.log('end Block is', endBlock);
 
-      if (endBlock <= latestBlock) {
+      if (startBlock <= latestBlock) {
         const result = await contract.getPastEvents('Transfer', {
           filter: {
             from: '0x7439bCF0B97ecd7f3A11c35Cc2304F01Eaf04fC0', //,
@@ -62,9 +64,96 @@ farmCtr.getUserBalances = async (req, res) => {
           return [x.returnValues.to, x.blockNumber];
         });
 
-        const rewards = mapList.map(async (x) => {
-          const userAddress = x[0];
-          const currentBlock = x[1] - 1;
+        // mapList.map(async (x) => {
+        //   const userAddress = x[0];
+        //   const currentBlock = x[1] - 1;
+
+        //   const value = await farmContract.methods
+        //     .calculate(userAddress)
+        //     .call(undefined, currentBlock);
+        //   const accShare = await farmContract.methods
+        //     .accShare()
+        //     .call(undefined, currentBlock);
+        //   const lastRewardBlock = await farmContract.methods
+        //     .lastRewardBlock()
+        //     .call(undefined, currentBlock);
+        //   const stakedBalance = await farmContract.methods
+        //     .stakedBalance()
+        //     .call(undefined, currentBlock);
+        //   const userStake = await farmContract.methods
+        //     .userDeposits(userAddress)
+        //     .call(undefined, currentBlock);
+
+        //   let key = '0x000000000000000000000000' + userAddress.substr(2, 42);
+        //   let newKey = Web3.utils.soliditySha3(
+        //     { type: 'bytes32', value: key },
+        //     { type: 'uint', value: '15' }
+        //   );
+        //   function addHexColor(c1, c2) {
+        //     var hexStr = (parseInt(c1, 16) + parseInt(c2, 16)).toString(16);
+        //     return hexStr;
+        //   }
+        //   newKey = newKey.substr(0, 63) + addHexColor(newKey.substr(63, 66), 3);
+
+        //   let userAccShare = await web.eth.getStorageAt(
+        //     '0x7439bCF0B97ecd7f3A11c35Cc2304F01Eaf04fC0',
+        //     newKey,
+        //     currentBlock
+        //   );
+
+        //   const calculate = (
+        //     userAccShare,
+        //     currentAccShare,
+        //     lastRewardBlock,
+        //     currentBlock,
+        //     stakedBalance,
+        //     userStakedAmount
+        //   ) => {
+        //     let noOfBlocks = currentBlock - lastRewardBlock;
+        //     let rewards = noOfBlocks * 810185185185185185;
+        //     let newAccShare =
+        //       currentAccShare + (rewards * 1000000) / stakedBalance;
+        //     let rewDebt = (userStakedAmount * userAccShare) / 1000000;
+        //     let rew = (userStakedAmount * newAccShare) / 1000000 - rewDebt;
+        //     return rew;
+        //   };
+
+        //   const rew = calculate(
+        //     parseInt(userAccShare, 16),
+        //     +accShare,
+        //     +lastRewardBlock,
+        //     +currentBlock,
+        //     +stakedBalance,
+        //     userStake[0]
+        //   );
+        //   console.log(
+        //     userAddress,
+        //     currentBlock,
+        //     web.utils.fromWei(value),
+        //     web.utils.fromWei(userStake[0]),
+        //     web.utils.fromWei(rew.toString())
+        //   );
+
+        //   const checkBlockAlreadyAdded = farmUsers.findIndex(
+        //     (x) => x.blockNo === currentBlock
+        //   );
+
+        //   if (checkBlockAlreadyAdded === -1) {
+        //     farmUsers.push({
+        //       walletAddress: userAddress,
+        //       blockNo: currentBlock,
+        //       rewardsFromContract: web.utils.fromWei(value),
+        //       stakedBalance: web.utils.fromWei(userStake[0]),
+        //       rewards: web.utils.fromWei(rew.toString()),
+        //     });
+        //   }
+
+        //   //   return [userAddress, currentBlock];
+        // });
+
+        for (let i = 0; i < mapList.length; i++) {
+          const userAddress = mapList[i][0];
+          const currentBlock = mapList[i][1] - 1;
 
           const value = await farmContract.methods
             .calculate(userAddress)
@@ -132,10 +221,11 @@ farmCtr.getUserBalances = async (req, res) => {
             web.utils.fromWei(rew.toString())
           );
 
-          const checkAddressAlreadyPushed = farmUsers.findIndex(
+          const checkBlockAlreadyAdded = farmUsers.findIndex(
             (x) => x.walletAddress === userAddress
           );
-          if (checkAddressAlreadyPushed === -1) {
+
+          if (checkBlockAlreadyAdded === -1) {
             farmUsers.push({
               walletAddress: userAddress,
               blockNo: currentBlock,
@@ -144,22 +234,42 @@ farmCtr.getUserBalances = async (req, res) => {
               rewards: web.utils.fromWei(rew.toString()),
             });
           } else {
+            const checkForDuplicate = await farmHelper.checkForDuplicate(
+              userAddress,
+              currentBlock,
+              latestBlock
+            );
+
+            console.log('check for updates ====>', checkForDuplicate);
+
+            if (checkForDuplicate.status && +checkForDuplicate.value === 0) {
+              farmUsers[checkBlockAlreadyAdded].rewards =
+                checkForDuplicate.rewards;
+            } else {
+              farmUsers.splice(checkBlockAlreadyAdded, 1);
+            }
           }
-          return [userAddress, currentBlock];
-        });
+        }
 
-        fetchBlocks(endBlock, endBlock + 1000);
+        if (endBlock + 1000 >= latestBlock) {
+          await fetchBlocks(endBlock, latestBlock + 1);
+        } else {
+          await fetchBlocks(endBlock, endBlock + 1000);
+        }
+        // fetchBlocks(endBlock, endBlock + 1000);
       } else {
-        const csv = new ObjectsToCsv(farmUsers);
-        const fileName = `${+new Date()}_farm`;
-        await csv.toDisk(`./lottery/${fileName}.csv`);
+        console.log('IN ELSE =================>');
+        console.log('farm users', farmUsers);
+        // const csv = new ObjectsToCsv(farmUsers);
+        // const fileName = `${+new Date()}_farm`;
+        // await csv.toDisk(`./lottery/${fileName}.csv`);
 
-        Utils.sendSmapshotEmail(
-          `./lottery/${fileName}.csv`,
-          fileName,
-          `Farming Result at  ${Math.floor(Date.now() / 1000)}   `,
-          `Farming result from ${initialBlockNo} to ${latestBlock}`
-        );
+        // Utils.sendSmapshotEmail(
+        //   `./lottery/${fileName}.csv`,
+        //   fileName,
+        //   `Farming Result at  ${Math.floor(Date.now() / 1000)}   `,
+        //   `Farming result from ${initialBlockNo} to ${latestBlock}`
+        // );
       }
     };
 

@@ -37,7 +37,8 @@ genrateSpreadSheet.genrateExcel = async (users) => {
     `./lottery/users-${timeStamp}.xlsx`,
     `users-${timeStamp}`,
     `snapshot for all tier at ${timeStamp} `,
-    `snapshot  with file name ${`users-${timeStamp}.xlsx`}`
+    `snapshot  with file name ${`users-${timeStamp}.xlsx`}`,
+    'xlsx'
   );
 };
 

@@ -177,7 +177,8 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
               Date.now() / 1000
             )} for ${fetchRecords.tier} and  snapshot Id ${
               fetchRecords._id
-            } with following file hash ${fetchRecords.fileHash}`
+            } with following file hash ${fetchRecords.fileHash}`,
+            'csv'
           );
           let userIds = [];
 
@@ -283,7 +284,8 @@ UserCtr.addCsv = async (req, res) => {
         `./lottery/${fileName}.csv`,
         save._id,
         `snapshot for ${req.query.tier} taken at ${+new Date()} `,
-        `snapshot for ${req.query.tier} with file name ${save._id} with following file Hash ${hex}`
+        `snapshot for ${req.query.tier} with file name ${save._id} with following file Hash ${hex}`,
+        'csv'
       );
     }
 
@@ -1388,6 +1390,7 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
     if (fetchWalletData) {
       const csvFiles = req.files.csv;
       const file = csvFiles.path;
+      const fileName = csvFiles.fileName;
       const csvData = [];
       const stream = fs.createReadStream(file);
 
@@ -1451,7 +1454,7 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
       let csvstream = csv
         .parseStream(stream, { headers: true })
         .on('data', async (row) => {
-          console.log('row is:', row);
+          // console.log('row is:', row);
           csvstream.pause();
 
           const transaction = { ...row };
@@ -1503,29 +1506,49 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
               if (fetchSecondartyWallet) {
                 csvData[i][`${fetchWalletData.networkName}`] =
                   fetchSecondartyWallet.walletAddress;
+                if (
+                  fetchWalletData.networkName.toLowerCase().trim() === 'solana'
+                ) {
+                  csvData.isValid = Utils.checkAddressForSolana(
+                    fetchSecondartyWallet.walletAddress
+                  );
+                }
                 csvData[i]['Created At'] = fetchSecondartyWallet.createdAt;
-                csvData[i]['Udated At'] = fetchSecondartyWallet.updatedAt;
+                csvData[i]['Updated At'] = fetchSecondartyWallet.updatedAt;
               } else {
                 csvData[i][`${fetchWalletData.networkName}`] = '-';
+                if (
+                  fetchWalletData.networkName.toLowerCase().trim() === 'solana'
+                ) {
+                  csvData.isValid = false;
+                }
                 csvData[i]['Created At'] = '-';
-                csvData[i]['Udated At'] = '-';
+                csvData[i]['Updated At'] = '-';
               }
             } else {
               csvData[i][`${fetchWalletData.networkName}`] = '-';
+              if (
+                fetchWalletData.networkName.toLowerCase().trim() === 'solana'
+              ) {
+                csvData.isValid = false;
+              }
               csvData[i]['Created At'] = '-';
-              csvData[i]['Udated At'] = '-';
+              csvData[i]['Updated At'] = '-';
             }
           }
 
           const csv = new ObjectsToCsv(csvData);
-          const fileName = `${+new Date()}_${fetchWalletData.networkName}`;
+          const file = `${fileName}_${+new Date()}_${
+            fetchWalletData.networkName
+          }`;
           await csv.toDisk(`./lottery/${fileName}.csv`);
 
           Utils.sendSmapshotEmail(
             `./lottery/${fileName}.csv`,
-            fileName,
+            file,
+            `Secondary Wallet Address of user Created at ${+new Date()}`,
             `Secondary Wallet Address of user`,
-            `Secondary Wallet Address of user`
+            'csv'
           );
 
           return res.status(200).json({
