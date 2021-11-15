@@ -1390,7 +1390,7 @@ UserCtr.getSecondayWalletAddresses = async (req, res) => {
     if (fetchWalletData) {
       const csvFiles = req.files.csv;
       const file = csvFiles.path;
-      const fileName = csvFiles.fileName;
+      const fileName = csvFiles.name;
       const csvData = [];
       console.log('file is:', csvFiles);
       const stream = fs.createReadStream(file);
