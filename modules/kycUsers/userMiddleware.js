@@ -108,4 +108,15 @@ UserMiddleware.validateUpdateWallet = async (req, res, next) => {
   validate.validateRequest(req, res, next, schema);
 };
 
+UserMiddleware.checkWalletAddress = async (req, res, next) => {
+  try {
+  } catch (err) {
+    return res.status(500).json({
+      message: 'DB_ERROR',
+      status: false,
+      err: err.message ? err.message : err,
+    });
+  }
+};
+
 module.exports = UserMiddleware;

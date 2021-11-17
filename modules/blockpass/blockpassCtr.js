@@ -67,9 +67,10 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           });
 
           let countryCode = null;
-
+          let state = null;
           if (country) {
             countryCode = country.country ? country.country : null;
+            state = country.state ? country.state : null;
           }
 
           if (getRecords.records[i].status === 'approved') {
@@ -78,18 +79,33 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           }
 
           if (checkUserAvalaible) {
-            checkUserAvalaible.kycStatus = getRecords.records[i].status;
-            checkUserAvalaible.name = name;
-            checkUserAvalaible.email = email;
-            checkUserAvalaible.recordId = getRecords.records[i].recordId;
-            checkUserAvalaible.approvedTimestamp = approvedDate;
-            checkUserAvalaible.walletAddress = userAddress;
-            checkUserAvalaible.country = countryCode;
+            // checkUserAvalaible.kycStatus = getRecords.records[i].status;
+            // checkUserAvalaible.name = name;
+            // checkUserAvalaible.email = email;
+            // checkUserAvalaible.recordId = getRecords.records[i].recordId;
+            // checkUserAvalaible.approvedTimestamp = approvedDate;
+            // checkUserAvalaible.walletAddress = userAddress;
+            // checkUserAvalaible.country = countryCode;
+
+            const updateUser = await UserModal.updateOne(
+              { _id: checkUserAvalaible._id },
+              {
+                kycStatus: getRecords.records[i].status,
+                name: name,
+                email: email,
+                recordId: getRecords.records[i].recordId,
+                approvedTimestamp: approvedDate,
+                walletAddress: userAddress,
+                country: countryCode,
+                state: state,
+              }
+            );
+
             // checkUserAvalaible.balObj = balObj;
             // checkUserAvalaible.totalbalance = total;
             // checkUserAvalaible.tier = syncHelper.getUserTier(0);
-            checkUserAvalaible.markModified('country');
-            await checkUserAvalaible.save();
+            // checkUserAvalaible.markModified('country');
+            // await checkUserAvalaible.save();
             // itreateBlocks(i + 1);
           } else {
             const addNewUser = new UserModal({

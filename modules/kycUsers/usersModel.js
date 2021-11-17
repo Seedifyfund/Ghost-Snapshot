@@ -27,6 +27,11 @@ const userSchema = new Schema(
       default: null,
       lowercase: true,
     },
+    state: {
+      type: String,
+      default: null,
+      lowercase: true,
+    },
 
     walletAddress: {
       type: String,
