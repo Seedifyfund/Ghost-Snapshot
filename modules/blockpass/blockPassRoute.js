@@ -11,4 +11,8 @@ blockPassRoute.get('/approved', getApprovedUsers);
 const checkIsVerified = [BlockPassCtr.checkKycVerified];
 blockPassRoute.get('/check/:address', checkIsVerified);
 
+// block pass webhooks
+const webhook = [BlockPassCtr.getWebhooks];
+blockPassRoute.post('/webhook', webhook);
+
 module.exports = blockPassRoute;

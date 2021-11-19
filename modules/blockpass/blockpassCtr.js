@@ -359,4 +359,10 @@ blockPassCtr.checkKycVerified = async (req, res) => {
   }
 };
 
+blockPassCtr.getWebhooks = async (req, res) => {
+  try {
+    console.log('req.body is:', req.body);
+  } catch (err) {}
+};
+
 module.exports = blockPassCtr;
