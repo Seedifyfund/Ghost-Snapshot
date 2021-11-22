@@ -537,7 +537,7 @@ async function getUserBalance(
             const value = Utils.convertToEther(fetchBalance['0']);
             const endDate = fetchBalance['2'];
             // check if time  expired
-            if (endDate >= timestamp) {
+            if (endDate < timestamp) {
               pools.push({
                 name: pool[i].poolName,
                 staked: 0,

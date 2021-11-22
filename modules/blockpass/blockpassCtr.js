@@ -361,8 +361,101 @@ blockPassCtr.checkKycVerified = async (req, res) => {
 
 blockPassCtr.getWebhooks = async (req, res) => {
   try {
-    console.log('req.body is:', req.body);
-  } catch (err) {}
+    Utils.echoLog('Webhook received for user', JSON.stringify(req.body));
+    const userDetails = req.body;
+    res.status(200).json({
+      status: true,
+    });
+
+    const url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/recordId/${userDetails.recordId}`;
+
+    var config = {
+      method: 'get',
+      url: url,
+      headers: {
+        Authorization: `${process.env.BLOCKPASS_AUTHORIZATION}`,
+      },
+    };
+
+    const getBlockPassData = await axios(config);
+    if (getBlockPassData && getBlockPassData.status === 200) {
+      const getRecords = getBlockPassData.data.data;
+
+      const userAddress = getRecords.identities.crypto_address_eth.value;
+
+      const balObj = {
+        sfund: 0,
+        liquidity: 0,
+        farming: 0,
+        bakery: 0,
+        tosdis: 0,
+        // slp: getSlp,
+      };
+
+      const total = 0;
+      let approvedDate = 0;
+      // getSlp;
+
+      const email = getRecords.identities.email.value;
+      const name = `${getRecords.identities.given_name.value}${getRecords.identities.family_name.value} `;
+      const country = getRecords.identities?.address.value
+        ? JSON.parse(getRecords.identities?.address.value)
+        : null;
+      const recordId = getRecords.recordId.toLowerCase().trim();
+      const checkUserAvalaible = await UserModal.findOne({
+        recordId: recordId.toLowerCase().trim(),
+      });
+
+      let countryCode = null;
+      let state = null;
+      if (country) {
+        countryCode = country.country ? country.country : null;
+        state = country.state ? country.state : null;
+      }
+
+      if (getRecords.status === 'approved') {
+        const approval = Date.parse(getRecords.approvedDate);
+        approvedDate = Math.trunc(approval / 1000);
+      }
+
+      if (checkUserAvalaible) {
+        console.log('User avalaible ====>');
+        const updateUser = await UserModal.updateOne(
+          { _id: checkUserAvalaible._id },
+          {
+            kycStatus: getRecords.status,
+            name: name,
+            email: email,
+            recordId: getRecords.recordId,
+            approvedTimestamp: approvedDate,
+            walletAddress: userAddress,
+            country: countryCode,
+            state: state,
+          },
+          { upsert: true }
+        );
+      } else {
+        const addNewUser = new UserModal({
+          recordId: getRecords.recordId,
+          walletAddress: userAddress,
+          email: email,
+          name: name,
+          totalbalance: total,
+          balObj: balObj,
+          kycStatus: getRecords.status,
+          country: countryCode,
+          approvedTimestamp: approvedDate,
+          tier: syncHelper.getUserTier(0),
+        });
+
+        await addNewUser.save();
+        // itreateBlocks(i + 1);
+      }
+    }
+  } catch (err) {
+    Utils.echoLog(`Error in webhooks ${err}`);
+    console.log('error in webhook', err);
+  }
 };
 
 module.exports = blockPassCtr;
