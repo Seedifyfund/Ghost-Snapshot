@@ -47,6 +47,8 @@ app.all('/*', (req, res, next) => {
     res.header('Access-Control-Allow-Origin', origin);
   }
   // res.header('Access-Control-Allow-Origin', 'https://snapshot.seedify.fund');
+
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Request-Headers', '*');
   res.header(
     'Access-Control-Allow-Headers',
