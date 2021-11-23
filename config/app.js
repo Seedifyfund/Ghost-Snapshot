@@ -3,9 +3,10 @@ global._ = require('lodash');
 require('../modules/cron/cron');
 require('./database.js');
 require('./winston');
+const cors = require('cors');
 
 const bodyParser = require('body-parser');
-const cors = require('cors');
+
 const mongoose = require('mongoose');
 
 const app = express();
@@ -22,7 +23,34 @@ app.set('port', process.env.PORT);
 app.use(bodyParser.json({ limit: '1gb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '1gb' }));
 app.use('/result', express.static('./result'));
-app.use(cors());
+
+var whitelist = [
+  'https://launchpad.seedify.fund',
+  'https://snapshot.seedify.fund',
+]; //white list consumers
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  credentials: true, //Credentials are cookies, authorization headers or TLS client certificates.
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'device-remember-token',
+    'Access-Control-Allow-Origin',
+    'Origin',
+    'Accept',
+  ],
+};
+
+app.use(cors(corsOptions));
 app.use(require('../route.js'));
 
 app.all('/*', (req, res, next) => {
@@ -30,7 +58,7 @@ app.all('/*', (req, res, next) => {
   res.header('Access-Control-Request-Headers', '*');
   res.header(
     'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Headers, x-auth-token, x-l10n-locale, Cache-Control, timeout'
+    'Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Headers, x-auth-token, Cache-Control, timeout'
   );
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
