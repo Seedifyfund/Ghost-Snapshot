@@ -28,13 +28,10 @@ var corsOptions = {
   origin: ['snapshot.seedify.fund', 'launchpad.seedify.fund'],
 };
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.all('/*', (req, res, next) => {
   let origin = req.get('host');
-  console.log('origin is:', origin);
-
-  console.log(corsOptions.origin.indexOf(origin));
 
   if (corsOptions.origin.indexOf(origin) === -1) {
     return res.status(400).json({
