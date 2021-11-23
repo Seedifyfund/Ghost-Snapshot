@@ -24,37 +24,24 @@ app.use(bodyParser.json({ limit: '1gb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '1gb' }));
 app.use('/result', express.static('./result'));
 
-var whitelist = [
-  'https://launchpad.seedify.fund',
-  'https://snapshot.seedify.fund',
-]; //white list consumers
 var corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(null, false);
-    }
-  },
-  methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  credentials: true, //Credentials are cookies, authorization headers or TLS client certificates.
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'device-remember-token',
-    'Access-Control-Allow-Origin',
-    'Origin',
-    'Accept',
-  ],
+  origin: ['snapshot.seedify.fund', 'launchpad.seedify.fund'],
 };
 
 app.use(cors(corsOptions));
-app.use(require('../route.js'));
 
 app.all('/*', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  let origin = req.get('host');
+  console.log('origin is:', origin);
+
+  console.log(corsOptions.origin.indexOf(origin));
+
+  if (corsOptions.origin.indexOf(origin) === -1) {
+    return res.status(400).json({
+      message: 'Unauthrozed',
+    });
+  }
+  res.header('Access-Control-Allow-Origin', 'https://snapshot.seedify.fund');
   res.header('Access-Control-Request-Headers', '*');
   res.header(
     'Access-Control-Allow-Headers',
@@ -64,5 +51,6 @@ app.all('/*', (req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   next();
 });
+app.use(require('../route.js'));
 
 module.exports = app;
