@@ -25,7 +25,11 @@ app.use(bodyParser.urlencoded({ extended: false, limit: '1gb' }));
 app.use('/result', express.static('./result'));
 
 var corsOptions = {
-  origin: ['snapshot.seedify.fund', 'launchpad.seedify.fund'],
+  origin: [
+    'snapshot.seedify.fund',
+    'launchpad.seedify.fund',
+    'snapshotapi.seedify.fund',
+  ],
 };
 
 app.use(cors());
