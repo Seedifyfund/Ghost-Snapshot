@@ -33,6 +33,8 @@ app.use(cors());
 app.all('/*', (req, res, next) => {
   let origin = req.get('host');
 
+  console.log('origin is:', origin);
+
   if (corsOptions.origin.indexOf(origin) === -1) {
     return res.status(400).json({
       message: 'Unauthrozed',
