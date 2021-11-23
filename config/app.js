@@ -37,11 +37,11 @@ app.use(cors());
 app.all('/*', (req, res, next) => {
   let origin = req.get('host');
 
-  if (corsOptions.origin.indexOf(origin) === -1) {
-    return res.status(400).json({
-      message: 'Unauthrozed',
-    });
-  }
+  // if (corsOptions.origin.indexOf(origin) === -1) {
+  //   return res.status(400).json({
+  //     message: 'Unauthrozed',
+  //   });
+  // }
 
   if (corsOptions.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
