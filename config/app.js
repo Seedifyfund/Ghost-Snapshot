@@ -44,9 +44,9 @@ app.all('/*', (req, res, next) => {
   // }
 
   if (corsOptions.origin.indexOf(origin) >= 0) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Origin', origin);
   }
-  res.header('Access-Control-Allow-Origin', 'https://snapshot.seedify.fund');
+  // res.header('Access-Control-Allow-Origin', 'https://snapshot.seedify.fund');
   res.header('Access-Control-Request-Headers', '*');
   res.header(
     'Access-Control-Allow-Headers',
