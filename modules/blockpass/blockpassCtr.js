@@ -307,9 +307,12 @@ async function findData(data, userAddress) {
 
 blockPassCtr.checkKycVerified = async (req, res) => {
   try {
-    const checkIsVerified = await UserModal.findOne({
-      walletAddress: req.params.address.toLowerCase(),
-    })
+    const checkIsVerified = await UserModal.findOne(
+      {
+        walletAddress: req.params.address.toLowerCase(),
+      },
+      { name: 0, recordId: 0, country: 0, state: 0, email: 0 }
+    )
       .populate({
         path: 'networks',
         select: { createdAt: 0, updatedAt: 0, userId: 0 },
