@@ -37,15 +37,17 @@ app.use(cors());
 app.all('/*', (req, res, next) => {
   let origin = req.get('host');
 
+  console.log('req.headers', req.headers['origin']);
+
   // if (corsOptions.origin.indexOf(origin) === -1) {
   //   return res.status(400).json({
   //     message: 'Unauthrozed',
   //   });
   // }
 
-  if (corsOptions.origin.indexOf(origin) >= 0) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
+  // if (corsOptions.origin.indexOf(origin) >= 0) {
+  //   res.header('Access-Control-Allow-Origin', origin);
+  // }
   // res.header('Access-Control-Allow-Origin', 'https://snapshot.seedify.fund');
 
   res.header('Access-Control-Allow-Origin', '*');
