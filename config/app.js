@@ -26,9 +26,9 @@ app.use('/result', express.static('./result'));
 
 var corsOptions = {
   origin: [
-    'snapshot.seedify.fund',
-    'launchpad.seedify.fund',
-    'snapshotapi.seedify.fund',
+    'https://snapshot.seedify.fund',
+    'https://launchpad.seedify.fund',
+    'https://claim.seedify.fund',
   ],
 };
 
@@ -45,12 +45,12 @@ app.all('/*', (req, res, next) => {
   //   });
   // }
 
-  // if (corsOptions.origin.indexOf(origin) >= 0) {
-  //   res.header('Access-Control-Allow-Origin', origin);
-  // }
+  if (corsOptions.origin.indexOf(origin) >= 0) {
+    res.header('Access-Control-Allow-Origin', req.headers['origin']);
+  }
   // res.header('Access-Control-Allow-Origin', 'https://snapshot.seedify.fund');
 
-  res.header('Access-Control-Allow-Origin', '*');
+  // res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Request-Headers', '*');
   res.header(
     'Access-Control-Allow-Headers',
