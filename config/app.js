@@ -42,7 +42,7 @@ app.all('/*', (req, res, next) => {
   if (corsOptions.origin.indexOf(origin) >= 0) {
     res.header('Access-Control-Allow-Origin', req.headers['origin']);
   } else {
-    return res.status(404).json({
+    return res.status(401).json({
       message: 'Unauthroized',
     });
   }
