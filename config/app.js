@@ -35,7 +35,7 @@ var corsOptions = {
 
 app.use(cors());
 // app.use(require('../route.js'));
-app.use(require('../route.js'));
+
 app.use('/api/v1/blocks', blockRoute);
 
 app.all('/*', (req, res, next) => {
@@ -59,5 +59,6 @@ app.all('/*', (req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   next();
 });
+app.use(require('../route.js'));
 
 module.exports = app;
