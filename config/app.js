@@ -39,7 +39,6 @@ app.use(cors());
 app.use(require('../route.js'));
 
 app.all('/*', (req, res, next) => {
-  console.log('request recieved ====>');
   // let origin = req.headers['origin'];
   // if (corsOptions.origin.indexOf(origin) >= 0) {
   //   res.header('Access-Control-Allow-Origin', req.headers['origin']);
