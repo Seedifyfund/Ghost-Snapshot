@@ -55,8 +55,6 @@ UserCtr.list = async (req, res) => {
 
     const list = await UserModel.find(query, {
       balObj: 0,
-      createdAt: 0,
-      updatedAt: 0,
     })
       .skip((+page - 1 || 0) * +process.env.LIMIT)
       .limit(+process.env.LIMIT);
