@@ -8,7 +8,7 @@ const claimRoute = require('./modules/claim/claimRoute');
 const poolsRoute = require('./modules/pools/poolsRoute');
 const networkRoute = require('./modules/network/networkRoute');
 const farmRoute = require('./modules/farm/farmRoute');
-const blockWebhookRoute = require('../modules/blockpass/blockPassWebookRoute');
+const blockWebhookRoute = require('./modules/blockpass/blockPassWebookRoute');
 // Routes Path
 
 const app = express.Router();
