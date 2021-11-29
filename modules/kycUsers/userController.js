@@ -324,8 +324,7 @@ UserCtr.getGenratedSnapshotData = async (req, res) => {
 
 UserCtr.getUsersStakedBalance = async (req, res) => {
   try {
-    console.log('getUsersStakedBalance called');
-
+    const igoName = req.query.name ? req.query.name : 'IGO';
     const data = {
       isSnapshotStarted: true,
       startedAt: +new Date(),
@@ -357,6 +356,11 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
 
     const getApeTokenLiquidityLocked = await UserCtr.fetchLiquidityLocked(
       process.env.LP_APE_ADDRESS
+    );
+
+    Utils.sendFromalEmail(
+      `Snapshot fired for ${igoName} at ${new Date(data.startedAt)}`,
+      `Snapshot fired for ${igoName}`
     );
 
     res.status(200).json({
