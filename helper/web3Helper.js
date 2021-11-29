@@ -119,7 +119,7 @@ web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
     } catch (err) {
       console.log('error in web3 farming ', err);
 
-      resolve(farm: 0, harvest: 0);
+      resolve({ farm: 0, harvest: 0 });
     }
   });
 };
