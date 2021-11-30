@@ -502,7 +502,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
       queue.drain(async () => {
         console.log('Successfully processed all items');
         await client.flushall();
-        genrateSpreadSheet.genrateExcel(users);
+        genrateSpreadSheet.genrateExcel(users, igoName);
         await client.del('snapshot');
         console.log('User staked balances fetched');
       });
