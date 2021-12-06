@@ -107,19 +107,19 @@ web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
       let harvestedValue = 0;
 
       const value = Utils.convertToEther(getStakedBalance['0']);
-      if (value > 0) {
-        const getSfundHarvested = await contract.methods
-          .calculate(walletAddress)
-          .call();
+      // if (value > 0) {
+      //   const getSfundHarvested = await contract.methods
+      //     .calculate(walletAddress)
+      //     .call();
 
-        harvestedValue = Utils.convertToEther(getSfundHarvested);
-      }
+      //   harvestedValue = Utils.convertToEther(getSfundHarvested);
+      // }
 
       resolve({ farm: value, harvest: harvestedValue });
     } catch (err) {
       console.log('error in web3 farming ', err);
 
-      resolve(0);
+      resolve({ farm: 0, harvest: 0 });
     }
   });
 };

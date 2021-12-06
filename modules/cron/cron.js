@@ -11,6 +11,6 @@ cron.schedule('0 */12 * * *', (req, res) => {
   BlockPassCtr.getApprovedUserList(req, res);
 });
 
-cron.schedule('0 */5 * * *', (req, res) => {
-  UserCtr.getUserBalances(req, res);
-});
+// cron.schedule('0 */13 * * *', (req, res) => {
+//   UserCtr.getUserBalances(req, res);
+// });

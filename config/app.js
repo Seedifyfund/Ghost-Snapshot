@@ -3,10 +3,9 @@ global._ = require('lodash');
 require('../modules/cron/cron');
 require('./database.js');
 require('./winston');
+const blockWebhookRoute = require('../modules/blockpass/blockPassWebookRoute');
 const cors = require('cors');
-
 const bodyParser = require('body-parser');
-
 const mongoose = require('mongoose');
 
 const app = express();
@@ -29,27 +28,25 @@ var corsOptions = {
     'snapshot.seedify.fund',
     'launchpad.seedify.fund',
     'snapshotapi.seedify.fund',
-    'http://localhost:3000/',
+    'http://localhost:3000',
   ],
 };
 
 app.use(cors());
-
+// app.use(require('../route.js'));
+app.use('/api/v1/blocks', blockWebhookRoute);
 app.all('/*', (req, res, next) => {
-  let origin = req.get('host');
-
-  // if (corsOptions.origin.indexOf(origin) === -1) {
-  //   return res.status(400).json({
-  //     message: 'Unauthrozed',
-  //   });
-  // }
-
+  let origin = req.headers['origin'];
   if (corsOptions.origin.indexOf(origin) >= 0) {
-    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Origin', req.headers['origin']);
+  } else {
+    return res.status(401).json({
+      message: 'Unauthroized',
+    });
   }
   // res.header('Access-Control-Allow-Origin', 'https://snapshot.seedify.fund');
 
-  res.header('Access-Control-Allow-Origin', '*');
+  // res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Request-Headers', '*');
   res.header(
     'Access-Control-Allow-Headers',

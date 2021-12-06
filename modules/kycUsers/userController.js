@@ -55,8 +55,6 @@ UserCtr.list = async (req, res) => {
 
     const list = await UserModel.find(query, {
       balObj: 0,
-      createdAt: 0,
-      updatedAt: 0,
     })
       .skip((+page - 1 || 0) * +process.env.LIMIT)
       .limit(+process.env.LIMIT);
@@ -326,8 +324,7 @@ UserCtr.getGenratedSnapshotData = async (req, res) => {
 
 UserCtr.getUsersStakedBalance = async (req, res) => {
   try {
-    console.log('getUsersStakedBalance called');
-
+    const igoName = req.query.name ? req.query.name : 'IGO';
     const data = {
       isSnapshotStarted: true,
       startedAt: +new Date(),
@@ -359,6 +356,11 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
 
     const getApeTokenLiquidityLocked = await UserCtr.fetchLiquidityLocked(
       process.env.LP_APE_ADDRESS
+    );
+
+    Utils.sendFromalEmail(
+      `Snapshot fired for ${igoName} at ${new Date(data.startedAt)}`,
+      `Snapshot fired for ${igoName}`
     );
 
     res.status(200).json({
@@ -500,7 +502,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
       queue.drain(async () => {
         console.log('Successfully processed all items');
         await client.flushall();
-        genrateSpreadSheet.genrateExcel(users);
+        genrateSpreadSheet.genrateExcel(users, igoName);
         await client.del('snapshot');
         console.log('User staked balances fetched');
       });

@@ -3,7 +3,7 @@ const Utils = require('./utils');
 
 const genrateSpreadSheet = {};
 
-genrateSpreadSheet.genrateExcel = async (users) => {
+genrateSpreadSheet.genrateExcel = async (users, igoName) => {
   const wb = new xl.Workbook();
   Object.keys(users).map((key, index) => {
     const ws = wb.addWorksheet(key);
@@ -31,13 +31,13 @@ genrateSpreadSheet.genrateExcel = async (users) => {
     });
   });
   const timeStamp = +new Date();
-  wb.write(`./lottery/users-${timeStamp}.xlsx`);
+  wb.write(`./lottery/users-${igoName}-${timeStamp}.xlsx`);
 
   Utils.sendSmapshotEmail(
-    `./lottery/users-${timeStamp}.xlsx`,
-    `users-${timeStamp}`,
-    `snapshot for all tier at ${timeStamp} `,
-    `snapshot  with file name ${`users-${timeStamp}.xlsx`}`,
+    `./lottery/users-${igoName}-${timeStamp}.xlsx`,
+    `users-${igoName}-${timeStamp}`,
+    `snapshot for all tier for ${igoName}  `,
+    `snapshot  with file name ${`users-${igoName}-${timeStamp}.xlsx`}`,
     'xlsx'
   );
 };
