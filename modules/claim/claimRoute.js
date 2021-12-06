@@ -10,7 +10,14 @@ const addNewClaim = [
   ClaimMiddleware.validateAdd,
   ClaimCtr.addNewClaim,
 ];
+
+const addClaimDump = [
+  Auth.isAuthenticatedUser,
+  ClaimMiddleware.validateAdd,
+  ClaimCtr.addClaimDump
+]
 claimRoute.post('/add', addNewClaim);
+claimRoute.post('/add-claim-dump', ClaimCtr.addClaimDump);
 
 // login admin
 const list = [ClaimCtr.list];
