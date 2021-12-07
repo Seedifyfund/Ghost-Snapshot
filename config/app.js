@@ -29,6 +29,7 @@ var corsOptions = {
     'https://snapshot.seedify.fund',
     'https://launchpad.seedify.fund',
     'https://claim.seedify.fund',
+    "http://localhost:3000"
   ],
 };
 
