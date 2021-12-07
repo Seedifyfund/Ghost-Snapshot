@@ -125,6 +125,11 @@ ClaimCtr.addClaimDump = async (req, res) => {
     networkSymbol: networkSymbol.toUpperCase(),
   });
   if (claimDump) {
+    if(req.files.length != 0){
+      fs.unlink(files[0].path, () => {
+        console.log("remove from temp : >> ");
+      });
+    }
     return res.status(200).json({
       message: "Please complete the pending Claim first",
       status: false,

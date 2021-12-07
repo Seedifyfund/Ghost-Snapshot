@@ -18,7 +18,6 @@ function exitHandler(options) {
 }
 process.on('SIGINT', exitHandler.bind(null, { cleanup: true }));
 // app.use(multer({}))
-app.use(multer({dest:__dirname +'/tmp'}).any());
 
 app.set('port', process.env.PORT);
 app.use(bodyParser.json({ limit: '1gb' }));
@@ -38,13 +37,13 @@ app.use(cors());
 app.use('/api/v1/blocks', blockWebhookRoute);
 app.all('/*', (req, res, next) => {
   let origin = req.headers['origin'];
-  if (corsOptions.origin.indexOf(origin) >= 0) {
-    res.header('Access-Control-Allow-Origin', req.headers['origin']);
-  } else {
-    return res.status(401).json({
-      message: 'Unauthroized',
-    });
-  }
+  // if (corsOptions.origin.indexOf(origin) >= 0) {
+  //   res.header('Access-Control-Allow-Origin', req.headers['origin']);
+  // } else {
+  //   return res.status(401).json({
+  //     message: 'Unauthroized',
+  //   });
+  // }
   // res.header('Access-Control-Allow-Origin', 'https://snapshot.seedify.fund');
 
   // res.header('Access-Control-Allow-Origin', '*');
@@ -57,6 +56,7 @@ app.all('/*', (req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   next();
 });
+app.use(multer({dest:__dirname +'/tmp'}).any());
 app.use(require('../route.js'));
 
 module.exports = app;
