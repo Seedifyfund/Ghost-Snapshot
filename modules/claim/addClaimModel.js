@@ -53,7 +53,11 @@ const addClaimSchema = new Schema(
       type: Array,
       default: [],
     },
-    loops: {
+    iteration: {
+      type: Number,
+      default: 0,
+    },
+    totalIterationCount : {
       type: Number,
       default: 0,
     },
