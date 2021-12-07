@@ -118,9 +118,6 @@ ClaimCtr.addClaimDump = async (req, res) => {
     timestamp,
     phaseNo,
     logo,
-    transactionHash,
-    _id,
-    currentIteration,
   } = req.body;
   const claimDump = await AddClaimModel.findOne({
     phaseNo: phaseNo,
@@ -152,38 +149,112 @@ ClaimCtr.addClaimDump = async (req, res) => {
       phaseNo,
       logo,
       data: jsonArray,
-      loops: 1,
+      iteration: 0,
+      totalIterationCount : iterationCount
     });
     await addClaim.save();
-    res.status(200).json({
+     return res.status(200).json({
       message: "SUCCESS",
       status: true,
       data: {
         claimData: data,
-        iterationCount: iterationCount,
-        _id: addClaim._id,
+        totalIterationCount: iterationCount,
+        // _id: addClaim._id,
       },
     });
   } else {
-    const claimDump = await AddClaimModel.findOne({
-      _id: _id,
-    });
-    claimDump.transactionHash.push(transactionHash);
-    claimDump.loops = claimDump.loops + 1;
-    claimDump.save();
-
-    const respData = {
-      claimData : claimDump.data.slice(
-        600 * (currentIteration - 1),
-        currentIteration * 600
-      ),
-      _id: _id,
-    };
     return res.status(200).json({
-      message: "SUCCESS",
-      status: true,
-      data: respData,
+      message: "Please upload csv",
+      status: false,
     });
   }
 };
+
+ClaimCtr.getClaimDumpList = async (req, res)=>{
+  try {
+    let query = {};
+    if (req.query.network) {
+      query.networkSymbol = req.query.network.toUpperCase();
+    }
+    let page = req.query.page ? req.query.page : 1
+    const list = await AddClaimModel.find(query)
+    .skip((+page - 1 || 0) * +process.env.LIMIT)
+    .limit(+process.env.LIMIT)
+    .sort({ createdAt: -1 });
+
+    const totalCount = await AddClaimModel.countDocuments(query);
+    const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
+
+    return res.status(200).json({
+      message: "SUCCESS",
+      status: true,
+      data: list,
+      pagination: {
+        pageNo: page,
+        totalRecords: totalCount,
+        totalPages: pageCount,
+        limit: +process.env.LIMIT,
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "DB_ERROR",
+      status: true,
+      err: err.message ? err.message : err,
+    });
+  }
+}
+ClaimCtr.getClaimDump = async (req, res) => {
+try {
+  const dump = await AddClaimModel.findOne({ _id: req.params.dumpId });
+  return res.status(200).json({
+    message: "SUCCESS",
+    status: true,
+    data: dump,
+  });
+} catch (err) {
+  return res.status(500).json({
+    message: "DB_ERROR",
+    status: true,
+    err: err.message ? err.message : err,
+  });
+}
+
+}
+ClaimCtr.updateDump = async (req, res) => {
+  const {
+    transactionHash,
+    dumpId,
+    currentIteration,
+  } = req.body
+  try{
+    const dump = await AddClaimModel.findOne({ _id: dumpId });
+    if(dump.transactionHash.includes(transactionHash)){
+      return res.status(200).json({
+        message : "Transaction hash is already updated",
+        status : true
+      })
+    }
+    dump.transactionHash.push(transactionHash)
+    const claimData = dump.data.slice(600*currentIteration, 600*(currentIteration + 1))
+    dump.iteration = dump.iteration + 1
+    dump.save();
+    const resData = {
+      claimData : claimData,
+      id : dump._id
+    }
+    return res.status(200).json({
+      message: "SUCCESS",
+      status: true,
+      data : resData
+    });
+  } catch (err) {
+  return res.status(500).json({
+    message: "DB_ERROR",
+    status: true,
+    err: err.message ? err.message : err,
+  });
+}
+}
+
 module.exports = ClaimCtr;
