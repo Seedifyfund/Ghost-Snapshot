@@ -26,10 +26,10 @@ app.use('/result', express.static('./result'));
 
 var corsOptions = {
   origin: [
-    'https://snapshot.seedify.fund',
-    'https://launchpad.seedify.fund',
-    'https://claim.seedify.fund',
-    "http://localhost:3000"
+    'https://snapshot.seedify.info',
+    'https://launchpad.seedify.info',
+    'https://claim.seedify.info',
+    "http://localhost:3000",
   ],
 };
 
