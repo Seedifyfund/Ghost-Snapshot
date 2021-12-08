@@ -161,11 +161,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
      return res.status(200).json({
       message: "SUCCESS",
       status: true,
-      data: {
-        claimData: data,
-        totalIterationCount: iterationCount,
-        // _id: addClaim._id,
-      },
+      data: addClaim
     });
   } else {
     return res.status(200).json({
@@ -230,7 +226,7 @@ ClaimCtr.updateDump = async (req, res) => {
   const {
     transactionHash,
     dumpId,
-    currentIteration,
+    numberOfRecords,
   } = req.body
   try{
     const dump = await AddClaimModel.findOne({ _id: dumpId });
@@ -241,17 +237,20 @@ ClaimCtr.updateDump = async (req, res) => {
       })
     }
     dump.transactionHash.push(transactionHash)
-    const claimData = dump.data.slice(600*currentIteration, 600*(currentIteration + 1))
     dump.iteration = dump.iteration + 1
+    let iteration = dump.iteration
+    const claimData = dump.data.splice(0, numberOfRecords)
+    dump.uploadData = dump.uploadData.concat(claimData)
     dump.save();
     const resData = {
-      claimData : claimData,
-      id : dump._id
+      // claimData : claimData,
+      id : dump._id,
+      iteration : iteration
     }
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
-      data : resData
+      data : dump
     });
   } catch (err) {
   return res.status(500).json({

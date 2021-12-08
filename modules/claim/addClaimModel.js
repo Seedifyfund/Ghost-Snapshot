@@ -53,6 +53,10 @@ const addClaimSchema = new Schema(
       type: Array,
       default: [],
     },
+    uploadData: {
+      type: Array,
+      default: [],
+    },
     iteration: {
       type: Number,
       default: 0,

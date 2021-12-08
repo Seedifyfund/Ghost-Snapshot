@@ -16,6 +16,15 @@ const addClaimDump = [
   ClaimMiddleware.validateAdd,
   ClaimCtr.addClaimDump
 ]
+const updateDump = [
+  Auth.isAuthenticatedUser,
+  ClaimMiddleware.validateDumpUdate, 
+  ClaimCtr.updateDump
+]
+const getClaimDump = [
+  Auth.isAuthenticatedUser,
+  ClaimCtr.getClaimDump
+]
 claimRoute.post('/add', addNewClaim);
 claimRoute.post('/add-dump', ClaimCtr.addClaimDump);
 claimRoute.post('/update-dump', [ClaimMiddleware.validateDumpUdate, ClaimCtr.updateDump]);
