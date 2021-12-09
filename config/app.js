@@ -7,7 +7,7 @@ const blockWebhookRoute = require('../modules/blockpass/blockPassWebookRoute');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const multer = require("multer");
+const multer = require('multer');
 const app = express();
 
 /* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
@@ -26,11 +26,9 @@ app.use('/result', express.static('./result'));
 
 var corsOptions = {
   origin: [
-    'https://snapshot.seedify.info',
-    'https://launchpad.seedify.info',
-    'https://claim.seedify.info',
-    'http://localhost:3000',
-    'https://admin.seedify.info',
+    'snapshot.seedify.fund',
+    'launchpad.seedify.fund',
+    'snapshotapi.seedify.fund',
   ],
 };
 
@@ -58,7 +56,7 @@ app.all('/*', (req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   next();
 });
-app.use(multer({dest:__dirname +'/tmp'}).any());
+app.use(multer({ dest: __dirname + '/tmp' }).any());
 app.use(require('../route.js'));
 
 module.exports = app;
