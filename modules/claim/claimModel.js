@@ -45,6 +45,10 @@ const claimSchema = new Schema(
       type: String,
       default: null,
     },
+    dumpId: {
+      type: String,
+      default: null,
+    },
     phaseNo: {
       type: Number,
       required: true,

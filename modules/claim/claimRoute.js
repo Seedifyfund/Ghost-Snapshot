@@ -26,14 +26,14 @@ const getClaimDump = [
   ClaimCtr.getClaimDump
 ]
 claimRoute.post('/add', addNewClaim);
-claimRoute.post('/add-dump', ClaimCtr.addClaimDump);
-claimRoute.post('/update-dump', [ClaimMiddleware.validateDumpUdate, ClaimCtr.updateDump]);
+claimRoute.post('/add-dump', addClaimDump);
+claimRoute.post('/update-dump', updateDump);
 
 // login admin 
 const list = [ClaimCtr.list];
 claimRoute.get('/list', list);
 claimRoute.get('/dump-list', ClaimCtr.getClaimDumpList);
-claimRoute.get('/get-dump/:dumpId', ClaimCtr.getClaimDump);
+claimRoute.get('/get-dump/:dumpId', getClaimDump);
 
 // get single pool details
 const getSingle = [Auth.isAuthenticatedUser, ClaimCtr.getSinglePool];
