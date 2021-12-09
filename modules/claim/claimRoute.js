@@ -14,22 +14,19 @@ const addNewClaim = [
 const addClaimDump = [
   Auth.isAuthenticatedUser,
   ClaimMiddleware.validateAdd,
-  ClaimCtr.addClaimDump
-]
+  ClaimCtr.addClaimDump,
+];
 const updateDump = [
   Auth.isAuthenticatedUser,
-  ClaimMiddleware.validateDumpUdate, 
-  ClaimCtr.updateDump
-]
-const getClaimDump = [
-  Auth.isAuthenticatedUser,
-  ClaimCtr.getClaimDump
-]
+  ClaimMiddleware.validateDumpUdate,
+  ClaimCtr.updateDump,
+];
+const getClaimDump = [Auth.isAuthenticatedUser, ClaimCtr.getClaimDump];
 claimRoute.post('/add', addNewClaim);
 claimRoute.post('/add-dump', addClaimDump);
 claimRoute.post('/update-dump', updateDump);
 
-// login admin 
+// login admin
 const list = [ClaimCtr.list];
 claimRoute.get('/list', list);
 claimRoute.get('/dump-list', ClaimCtr.getClaimDumpList);
