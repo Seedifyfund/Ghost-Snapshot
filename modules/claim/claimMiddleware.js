@@ -23,12 +23,13 @@ ClaimMiddleware.validateAdd = async (req, res, next) => {
   });
   validate.validateRequest(req, res, next, schema);
 };
-ClaimMiddleware.validateDumpUdate = async (req, res, next)=>{
+
+ClaimMiddleware.validateDumpUdate = async (req, res, next) => {
   const schema = Joi.object({
     transactionHash: Joi.string().required(),
-    dumpId: Joi.string().required()
-  })
-  validate.validateRequest(req, res, next, schema)
-}
+    dumpId: Joi.string().required(),
+  });
+  validate.validateRequest(req, res, next, schema);
+};
 
 module.exports = ClaimMiddleware;
