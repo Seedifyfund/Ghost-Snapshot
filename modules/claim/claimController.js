@@ -238,19 +238,36 @@ ClaimCtr.updateDump = async (req, res) => {
     }
     dump.transactionHash.push(transactionHash)
     dump.iteration = dump.iteration + 1
-    let iteration = dump.iteration
     const claimData = dump.data.splice(0, numberOfRecords)
     dump.uploadData = dump.uploadData.concat(claimData)
     dump.save();
-    const resData = {
-      // claimData : claimData,
-      id : dump._id,
-      iteration : iteration
+    if(dump.data.length == 0){
+      const checkClaimAlreadyAdded = await ClaimModel.findOne({
+        phaseNo: dump.phaseNo,
+        tokenAddress: dump.tokenAddress.toLowerCase(),
+        networkSymbol: dump.networkSymbol.toUpperCase(),
+      });
+      if(!checkClaimAlreadyAdded){
+        const addNewClaim = new ClaimModel({
+          tokenAddress: dump.tokenAddress,
+          contractAddress: dump.contractAddress,
+          networkName: dump.networkName,
+          networkSymbol: dump.networkSymbol,
+          networkId: dump.networkId,
+          amount: dump.amount,
+          name: dump.name,
+          timestamp : dump.timestamp,
+          phaseNo : dump.phaseNo ,
+          logo : dump.logo,
+          dumpId : dump._id
+        });
+        await addNewClaim.save();
+      }
     }
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
-      data : dump
+      data : dump,
     });
   } catch (err) {
   return res.status(500).json({
