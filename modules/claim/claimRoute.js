@@ -10,27 +10,32 @@ const addNewClaim = [
   ClaimMiddleware.validateAdd,
   ClaimCtr.addNewClaim,
 ];
+claimRoute.post('/add', addNewClaim);
 
+// add all records in claim dump
 const addClaimDump = [
   Auth.isAuthenticatedUser,
   ClaimMiddleware.validateAdd,
   ClaimCtr.addClaimDump,
 ];
+claimRoute.post('/add-dump', addClaimDump);
+
+// update dump record for each iteration and enter record in main claim model
 const updateDump = [
   Auth.isAuthenticatedUser,
   ClaimMiddleware.validateDumpUdate,
   ClaimCtr.updateDump,
 ];
-const getClaimDump = [Auth.isAuthenticatedUser, ClaimCtr.getClaimDump];
-claimRoute.post('/add', addNewClaim);
-claimRoute.post('/add-dump', addClaimDump);
+
 claimRoute.post('/update-dump', updateDump);
+// get single dump details
+const getClaimDump = [Auth.isAuthenticatedUser, ClaimCtr.getClaimDump];
+claimRoute.get('/get-dump/:dumpId', getClaimDump);
 
 // login admin
 const list = [ClaimCtr.list];
 claimRoute.get('/list', list);
 claimRoute.get('/dump-list', ClaimCtr.getClaimDumpList);
-claimRoute.get('/get-dump/:dumpId', getClaimDump);
 
 // get single pool details
 const getSingle = [Auth.isAuthenticatedUser, ClaimCtr.getSinglePool];

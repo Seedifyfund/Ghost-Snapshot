@@ -46,8 +46,8 @@ const claimSchema = new Schema(
       default: null,
     },
     dumpId: {
-      type: String,
-      default: null,
+      type: mongoose.Schema.ObjectId,
+      ref: "addClaim"
     },
     phaseNo: {
       type: Number,
