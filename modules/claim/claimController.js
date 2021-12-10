@@ -74,9 +74,12 @@ ClaimCtr.list = async (req, res) => {
     const list = await ClaimModel.find(query).sort({ createdAt: -1 }).populate("dumpId", 'uploadData').lean();
     if(req.query.walletAddress){
       list.forEach((claim)=>{
-        const wallet = claim.dumpId.uploadData.find((wallet)=> req.query.walletAddress == wallet.walletAddress)
-        claim.isInvested = wallet ? true : false
-        claim.dumpId = claim.dumpId._id
+        if(claim.dumpId && claim.dumpId.uploadData.length){
+          const wallet = claim.dumpId.uploadData.find((wallet)=> req.query.walletAddress == wallet.walletAddress)
+          claim.isInvested = wallet ? true : false
+          claim.dumpId = claim.dumpId._id
+        }
+
       })
     }     
     return res.status(200).json({
