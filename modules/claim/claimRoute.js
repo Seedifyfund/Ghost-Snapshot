@@ -12,6 +12,12 @@ const addNewClaim = [
 ];
 claimRoute.post('/add', addNewClaim);
 
+const editClaim = [
+  Auth.isAuthenticatedUser,
+  ClaimCtr.editClaim,
+];
+claimRoute.post('/edit', editClaim);
+
 // add all records in claim dump
 const addClaimDump = [
   Auth.isAuthenticatedUser,
