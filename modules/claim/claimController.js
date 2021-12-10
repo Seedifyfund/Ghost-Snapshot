@@ -117,7 +117,8 @@ ClaimCtr.getSinglePool = async (req, res) => {
 ClaimCtr.editClaim = async (req, res) =>{
   try{
     const claim = await ClaimModel.findOne({_id : req.body.claimId});
-    claim.logo = req.body.logo
+    claim.logo = req.body.logo ? req.body.logo : claim.logo
+    claim.name = req.body.name ? req.body.name : claim.name
     claim.save();
     return  res.status(200).json({
       status : "SUCCESS",
