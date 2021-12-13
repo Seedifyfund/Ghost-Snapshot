@@ -2,7 +2,8 @@ const express = require('express');
 const ClaimCtr = require('./claimController');
 const ClaimMiddleware = require('./claimMiddleware');
 const Auth = require('../../helper/auth');
-
+const multipart = require('connect-multiparty');
+const multipartMiddleware = multipart();
 const claimRoute = express.Router();
 // get roles
 const addNewClaim = [
@@ -21,6 +22,7 @@ claimRoute.post('/edit', editClaim);
 // add all records in claim dump
 const addClaimDump = [
   Auth.isAuthenticatedUser,
+  multipartMiddleware,
   ClaimMiddleware.validateAdd,
   ClaimCtr.addClaimDump,
 ];
