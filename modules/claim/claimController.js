@@ -134,7 +134,7 @@ ClaimCtr.editClaim = async (req, res) =>{
 }
 
 ClaimCtr.addClaimDump = async (req, res) => {
-  const files = req.files;
+  const files = req.files.csv;
   const {
     contractAddress,
     tokenAddress,
@@ -153,9 +153,9 @@ ClaimCtr.addClaimDump = async (req, res) => {
     networkSymbol: networkSymbol.toUpperCase(),
   });
   if (claimDump) {
-    if(req.files.length != 0){
-      fs.unlink(files[0].path, () => {
-        console.log("remove from temp : >> ");
+    if(files){
+      fs.unlink(files.path, () => {
+        console.log("remove csv from temp : >> ");
       });
     }
     return res.status(200).json({
@@ -163,13 +163,12 @@ ClaimCtr.addClaimDump = async (req, res) => {
       status: false,
     });
   }
-  if (req.files.length != 0) {
-    const jsonArray = await csv().fromFile(files[0].path);
-    fs.unlink(files[0].path, () => {
-      console.log("remove from temp : >> ");
+  if (files) {
+    const jsonArray = await csv().fromFile(files.path);
+    fs.unlink(files.path, () => {
+      console.log("remove csv from temp : >> ");
     });
     const iterationCount = Math.ceil(jsonArray.length / 600);
-    const data = iterationCount > 1 ? jsonArray.slice(0, 600) : jsonArray;
     const addClaim = new AddClaimModel({
       tokenAddress: tokenAddress,
       contractAddress: contractAddress,
