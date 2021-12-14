@@ -24,26 +24,26 @@ app.use(bodyParser.json({ limit: '1gb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '1gb' }));
 app.use('/result', express.static('./result'));
 
-var corsOptions = {
-  origin: [
-    'https://snapshot.seedify.fund',
-    'https://launchpad.seedify.fund',
-    'https://claim.seedify.fund',
-  ],
-};
+// var corsOptions = {
+//   origin: [
+//     'https://snapshot.seedify.fund',
+//     'https://launchpad.seedify.fund',
+//     'https://claim.seedify.fund',
+//   ],
+// };
 
 app.use(cors());
 // app.use(require('../route.js'));
 app.use('/api/v1/blocks', blockWebhookRoute);
 app.all('/*', (req, res, next) => {
-  let origin = req.headers['origin'];
-  if (corsOptions.origin.indexOf(origin) >= 0) {
-    res.header('Access-Control-Allow-Origin', req.headers['origin']);
-  } else {
-    return res.status(401).json({
-      message: 'Unauthroized',
-    });
-  }
+  // let origin = req.headers['origin'];
+  // if (corsOptions.origin.indexOf(origin) >= 0) {
+  //   res.header('Access-Control-Allow-Origin', req.headers['origin']);
+  // } else {
+  //   return res.status(401).json({
+  //     message: 'Unauthroized',
+  //   });
+  // }
   // res.header('Access-Control-Allow-Origin', 'https://snapshot.seedify.fund');
 
   // res.header('Access-Control-Allow-Origin', '*');
