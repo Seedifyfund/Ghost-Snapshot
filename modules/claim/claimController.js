@@ -339,7 +339,7 @@ ClaimCtr.checkTransactionStatus = async () => {
             console.log('txn :>> ', txn)
             if(txn && txn.status == true){
               dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
-              dump.uploadData.push(pendingData.data)
+              dump.uploadData = dump.uploadData.concat(pendingData.data)
               if(dump.data.length == 0 && dump.pendingData.length == 0){
                 const checkClaimAlreadyAdded = await ClaimModel.findOne({
                   phaseNo: dump.phaseNo,
@@ -363,11 +363,11 @@ ClaimCtr.checkTransactionStatus = async () => {
                   await addNewClaim.save();
                 }
               }
-              await findOneAndUpdate({_id : dump._id}, {pendingData : dump.pendingData, uploadData : dump.uploadData})
+              await AddClaimModel.findOneAndUpdate({_id : dump._id}, {$set : {pendingData : dump.pendingData, uploadData : dump.uploadData}})
             }else if (txn && txn.status == false){
               dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
               dump.data.push(pendingData.data)
-              await findOneAndUpdate({_id : dump._id}, {pendingData : dump.pendingData, data : dump.data});
+              await AddClaimModel.findOneAndUpdate({_id : dump._id}, {$set : {pendingData : dump.pendingData, data : dump.data}});
             }
           })
         }
