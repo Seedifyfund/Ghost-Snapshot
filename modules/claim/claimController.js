@@ -336,7 +336,7 @@ ClaimCtr.checkTransactionStatus = async () => {
           dump.pendingData.forEach( async (pendingData)=>{
             const txn = await web3Helper.getTransactionStatus(pendingData.transactionHash)
             console.log('txn :>> ', txn)
-            if(txn.status == 'confirmed'){
+            if(txn && txn.status == 'confirmed'){
               dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
               dump.uploadData.push(pendingData.data)
               if(dump.data.length == 0 && dump.pendingData.length == 0){

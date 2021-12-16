@@ -306,10 +306,10 @@ web3Helper.getTransactionStatus = async (transactionHash)=>{
           status : trxnReciept.status == true ? 'confirmed' : 'pending'
         });
       }else{
-
-      }resolve(trxnReciept)
+        resolve(null)
+      }
     } catch (err) {
-      reject();
+      reject(null);
       console.log('error in getPanCakeSwapFarmBalance', err);
     }
   })
