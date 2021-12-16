@@ -69,28 +69,46 @@ ClaimCtr.addNewClaim = async (req, res) => {
 ClaimCtr.list = async (req, res) => {
   try {
     let query = { };
+    let page = req.query.page ? req.query.page : 1
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
     if(req.query.isDisabledBit){
       query.isDisabledBit = { $ne : true }
     }
-    console.log('req.query :>> ', query);
-    const list = await ClaimModel.find(query).sort({ createdAt: -1 }).populate("dumpId", 'uploadData').lean();
+    let list
     if(req.query.walletAddress){
+      list = await ClaimModel.find(query).sort({ createdAt: -1 }).populate("dumpId", 'uploadData')
+      .skip((+page - 1 || 0) * +process.env.LIMIT)
+      .limit(+process.env.LIMIT)
+      .sort({ createdAt: -1 })
+      .lean();
       list.forEach((claim)=>{
         if(claim.dumpId && claim.dumpId.uploadData.length){
           const wallet = claim.dumpId.uploadData.find((wallet)=> req.query.walletAddress == wallet.walletAddress)
           claim.isInvested = wallet ? true : false
           claim.dumpId = claim.dumpId._id
         }
-
       })
-    }     
+    }else{
+       list = await ClaimModel.find(query).sort({ createdAt: -1 })
+      .skip((+page - 1 || 0) * +process.env.LIMIT)
+      .limit(+process.env.LIMIT)
+      .sort({ createdAt: -1 })
+      .lean();
+    }
+    const totalCount = await ClaimModel.countDocuments(query);
+    const pageCount = Math.ceil(totalCount / +process.env.LIMIT); 
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
       data: list,
+      pagination: {
+        pageNo: page,
+        totalRecords: totalCount,
+        totalPages: pageCount,
+        limit: +process.env.LIMIT,
+      }
     });
   } catch (err) {
     return res.status(500).json({
