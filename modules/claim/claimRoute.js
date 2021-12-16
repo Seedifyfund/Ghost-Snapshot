@@ -40,6 +40,9 @@ claimRoute.post('/update-dump', updateDump);
 const getClaimDump = [Auth.isAuthenticatedUser, ClaimCtr.getClaimDump];
 claimRoute.get('/get-dump/:dumpId', getClaimDump);
 
+const editDump = [Auth.isAuthenticatedUser, ClaimCtr.editDump]
+claimRoute.post('/edit-dump', editDump);
+
 // login admin
 const list = [ClaimCtr.list];
 claimRoute.get('/list', list);

@@ -68,7 +68,7 @@ ClaimCtr.addNewClaim = async (req, res) => {
 
 ClaimCtr.list = async (req, res) => {
   try {
-    let query = {};
+    let query = { isDisabledBit : { $ne : true } };
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
@@ -305,6 +305,25 @@ ClaimCtr.updateDump = async (req, res) => {
     err: err.message ? err.message : err,
   });
 }
+}
+
+ClaimCtr.editDump = async (req, res) =>{
+  try{
+    const dump = await AddClaimModel.findOne({_id : req.body.dumpId});
+    dump.isDisabledBit = req.body.isDisabledBit
+    const claim = await ClaimModel.findOneAndUpdate({dumpId : dump._id}, { isDisabledBit : req.body.isDisabledBit })
+    dump.save();
+    return  res.status(200).json({
+      status : "SUCCESS",
+      data : dump
+    })
+  }catch(err){
+    return res.status(500).json({
+      message: "Something Went Wrong ",
+      status: true,
+      err: err.message ? err.message : err,
+    });
+  }
 }
 //cron service
 ClaimCtr.checkTransactionStatus = async () => {

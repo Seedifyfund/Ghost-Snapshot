@@ -72,7 +72,11 @@ const addClaimSchema = new Schema(
     transactionHash : {
         type : Array,
         default : []
-    }
+    },
+    isDisabledBit : {
+      type : Boolean,
+      default : false
+  }
   },
 
   {
