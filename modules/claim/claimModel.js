@@ -45,6 +45,10 @@ const claimSchema = new Schema(
       type: String,
       default: null,
     },
+    isDisabledBit : {
+      type : Boolean,
+      default : false
+  },
     dumpId: {
       type: mongoose.Schema.ObjectId,
       ref: "addClaim"
