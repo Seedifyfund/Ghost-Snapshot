@@ -362,12 +362,11 @@ ClaimCtr.checkTransactionStatus = async () => {
                   await addNewClaim.save();
                 }
               }
-              dump.save()
             }else if (txn && txn.status == false){
               dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
               dump.data.push(pendingData.data)
-              dump.save()
             }
+            dump.save()
           })
         }
       })
