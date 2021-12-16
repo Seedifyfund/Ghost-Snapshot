@@ -139,11 +139,7 @@ ClaimCtr.getSinglePool = async (req, res) => {
 };
 ClaimCtr.editClaim = async (req, res) =>{
   try{
-    const claim = await ClaimModel.findOneAndUpdate({_id : req.body.claimId}, {$set : req.body});
-    // claim.logo = req.body.logo ? req.body.logo : claim.logo
-    // claim.name = req.body.name ? req.body.name : claim.name
-    // claim.name = req.body.isDisabledBit ? req.body.name : claim.name
-    // claim.save();
+    const claim = await ClaimModel.findOneAndUpdate({_id : req.body.claimId}, {$set : req.body}, {new: true});
     return  res.status(200).json({
       status : "SUCCESS",
       data : claim
