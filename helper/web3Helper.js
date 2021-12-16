@@ -289,21 +289,27 @@ web3Helper.getTosdisStakingBalWithContract = async (
   });
 };
 
-web3Helper.getTransactionStatus = async (transactionHash)=>{
+web3Helper.getTransactionStatus = async (transactionHash, networkName)=>{
   return new Promise(async (resolve, reject)=>{
     try {
-      const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://data-seed-prebsc-1-s1.binance.org:8545/'
-          // : 'https://bsc-dataseed.binance.org/';
-          : 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+      // const provider =
+      //   process.env.NODE_ENV === 'development'
+      //     ? 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+      //     // : 'https://bsc-dataseed.binance.org/';
+      //     : 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+
+      //     // "binance", "ethereum", "solana", "avalanche"
+
+          const provider = networkName == "polygon" ? 'https://rpc-mumbai.maticvigil.com/' :
+                           networkName == "binance" ? 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+                                                    : 'https://data-seed-prebsc-1-s1.binance.org:8545/';
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
       const trxnReciept = await web3.eth.getTransactionReceipt(transactionHash);
       console.log(`trxnReciept.status :>>  ${trxnReciept != null ? trxnReciept.status : 'null'}`);
 
       if(trxnReciept){
         resolve({
-          status :  trxnReciept.status == true ? 'confirmed' : 'pending'
+          status :  trxnReciept.status
         });
       }else{
         resolve(null)
