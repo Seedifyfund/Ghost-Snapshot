@@ -3,6 +3,7 @@ const AddClaimModel = require("./addClaimModel");
 const csv = require("csvtojson");
 const fs = require("fs");
 const web3Helper = require("../../helper/web3Helper");
+const { findOneAndUpdate } = require("./claimModel");
 
 const ClaimCtr = {};
 
@@ -362,11 +363,12 @@ ClaimCtr.checkTransactionStatus = async () => {
                   await addNewClaim.save();
                 }
               }
+              await findOneAndUpdate({_id : dump._id}, {pendingData : dump.pendingData, uploadData : dump.uploadData})
             }else if (txn && txn.status == false){
               dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
               dump.data.push(pendingData.data)
+              await findOneAndUpdate({_id : dump._id}, {pendingData : dump.pendingData, data : dump.data});
             }
-            dump.save()
           })
         }
       })
