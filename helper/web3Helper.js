@@ -260,7 +260,6 @@ web3Helper.sfundBalance = async (walletAddress) => {
     }
   });
 };
-module.exports = web3Helper;
 
 web3Helper.getTosdisStakingBalWithContract = async (
   walletAddress,
@@ -289,3 +288,30 @@ web3Helper.getTosdisStakingBalWithContract = async (
     }
   });
 };
+
+web3Helper.getTransactionStatus = async (transactionHash)=>{
+  return new Promise(async (resolve, reject)=>{
+    try {
+      const provider =
+        process.env.NODE_ENV === 'development'
+          ? 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+          // : 'https://bsc-dataseed.binance.org/';
+          : 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+      const web3 = new Web3(new Web3.providers.HttpProvider(provider));
+      const trxnReciept = await web3.eth.getTransactionReceipt(transactionHash);
+      console.log('trxnReciept.status :>> ' + trxnReciept.status);
+
+      if(trxnReciept){
+        resolve({
+          status : trxnReciept.status == true ? 'confirmed' : 'pending'
+        });
+      }else{
+
+      }resolve(trxnReciept)
+    } catch (err) {
+      reject();
+      console.log('error in getPanCakeSwapFarmBalance', err);
+    }
+  })
+}
+module.exports = web3Helper;

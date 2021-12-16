@@ -2,6 +2,7 @@ const ClaimModel = require("./claimModel");
 const AddClaimModel = require("./addClaimModel");
 const csv = require("csvtojson");
 const fs = require("fs");
+const web3Helper = require("../../helper/web3Helper");
 
 const ClaimCtr = {};
 
@@ -266,31 +267,32 @@ ClaimCtr.updateDump = async (req, res) => {
     dump.transactionHash.push(transactionHash)
     dump.iteration = dump.iteration + 1
     const claimData = dump.data.splice(0, numberOfRecords)
-    dump.uploadData = dump.uploadData.concat(claimData)
+    dump.pendingData.push({data : claimData, transactionHash : transactionHash})
+    // dump.uploadData = dump.uploadData.concat(claimData)
     dump.save();
-    if(dump.data.length == 0){
-      const checkClaimAlreadyAdded = await ClaimModel.findOne({
-        phaseNo: dump.phaseNo,
-        tokenAddress: dump.tokenAddress.toLowerCase(),
-        networkSymbol: dump.networkSymbol.toUpperCase(),
-      });
-      if(!checkClaimAlreadyAdded){
-        const addNewClaim = new ClaimModel({
-          tokenAddress: dump.tokenAddress,
-          contractAddress: dump.contractAddress,
-          networkName: dump.networkName,
-          networkSymbol: dump.networkSymbol,
-          networkId: dump.networkId,
-          amount: dump.amount,
-          name: dump.name,
-          timestamp : dump.timestamp,
-          phaseNo : dump.phaseNo ,
-          logo : dump.logo,
-          dumpId : dump._id
-        });
-        await addNewClaim.save();
-      }
-    }
+    // if(dump.data.length == 0){
+    //   const checkClaimAlreadyAdded = await ClaimModel.findOne({
+    //     phaseNo: dump.phaseNo,
+    //     tokenAddress: dump.tokenAddress.toLowerCase(),
+    //     networkSymbol: dump.networkSymbol.toUpperCase(),
+    //   });
+    //   if(!checkClaimAlreadyAdded){
+    //     const addNewClaim = new ClaimModel({
+    //       tokenAddress: dump.tokenAddress,
+    //       contractAddress: dump.contractAddress,
+    //       networkName: dump.networkName,
+    //       networkSymbol: dump.networkSymbol,
+    //       networkId: dump.networkId,
+    //       amount: dump.amount,
+    //       name: dump.name,
+    //       timestamp : dump.timestamp,
+    //       phaseNo : dump.phaseNo ,
+    //       logo : dump.logo,
+    //       dumpId : dump._id
+    //     });
+    //     await addNewClaim.save();
+    //   }
+    // }
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
@@ -303,6 +305,52 @@ ClaimCtr.updateDump = async (req, res) => {
     err: err.message ? err.message : err,
   });
 }
+}
+//cron service
+ClaimCtr.checkTransactionStatus = async () => {
+  try{
+    console.log('checkTransactionStatus cron called :>> ');
+    const dumpList = await AddClaimModel.find({ pendingData : {$ne : []} })
+    console.log('dumpList.length :>> ', dumpList.length);
+      dumpList.forEach((dump)=>{
+        if(dump.pendingData.length !=0){
+          dump.pendingData.forEach( async (pendingData)=>{
+            const txn = await web3Helper.getTransactionStatus(pendingData.transactionHash)
+            console.log('txn :>> ', txn)
+            if(txn.status == 'confirmed'){
+              dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
+              dump.uploadData.push(pendingData.data)
+              if(dump.data.length == 0 && dump.pendingData.length == 0){
+                const checkClaimAlreadyAdded = await ClaimModel.findOne({
+                  phaseNo: dump.phaseNo,
+                  tokenAddress: dump.tokenAddress.toLowerCase(),
+                  networkSymbol: dump.networkSymbol.toUpperCase(),
+                });
+                if(!checkClaimAlreadyAdded){
+                  const addNewClaim = new ClaimModel({
+                    tokenAddress: dump.tokenAddress,
+                    contractAddress: dump.contractAddress,
+                    networkName: dump.networkName,
+                    networkSymbol: dump.networkSymbol,
+                    networkId: dump.networkId,
+                    amount: dump.amount,
+                    name: dump.name,
+                    timestamp : dump.timestamp,
+                    phaseNo : dump.phaseNo ,
+                    logo : dump.logo,
+                    dumpId : dump._id
+                  });
+                  await addNewClaim.save();
+                }
+              }
+              dump.save()
+            }
+          })
+        }
+      })
+  }catch(error){
+    console.log("error >>", error.message)
+  }
 }
 
 module.exports = ClaimCtr;
