@@ -334,9 +334,9 @@ ClaimCtr.checkTransactionStatus = async () => {
       dumpList.forEach((dump)=>{
         if(dump.pendingData.length !=0){
           dump.pendingData.forEach( async (pendingData)=>{
-            const txn = await web3Helper.getTransactionStatus(pendingData.transactionHash)
+            const txn = await web3Helper.getTransactionStatus(pendingData.transactionHash, dump.networkName)
             console.log('txn :>> ', txn)
-            if(txn && txn.status == 'confirmed'){
+            if(txn && txn.status == true){
               dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
               dump.uploadData.push(pendingData.data)
               if(dump.data.length == 0 && dump.pendingData.length == 0){
@@ -362,6 +362,10 @@ ClaimCtr.checkTransactionStatus = async () => {
                   await addNewClaim.save();
                 }
               }
+              dump.save()
+            }else if (txn && txn.status == false){
+              dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
+              dump.data.push(pendingData.data)
               dump.save()
             }
           })
