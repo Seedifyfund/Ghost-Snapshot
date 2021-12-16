@@ -57,6 +57,10 @@ const addClaimSchema = new Schema(
       type: Array,
       default: [],
     },
+    pendingData: {
+      type: Array,
+      default: [],
+    },
     iteration: {
       type: Number,
       default: 0,
