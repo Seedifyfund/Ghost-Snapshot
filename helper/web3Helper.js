@@ -299,18 +299,18 @@ web3Helper.getTransactionStatus = async (transactionHash)=>{
           : 'https://data-seed-prebsc-1-s1.binance.org:8545/'
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
       const trxnReciept = await web3.eth.getTransactionReceipt(transactionHash);
-      console.log('trxnReciept.status :>> ' + trxnReciept.status);
+      console.log(`trxnReciept.status :>>  ${trxnReciept != null ? trxnReciept.status : 'null'}`);
 
       if(trxnReciept){
         resolve({
-          status : trxnReciept.status == true ? 'confirmed' : 'pending'
+          status :  trxnReciept.status == true ? 'confirmed' : 'pending'
         });
       }else{
         resolve(null)
       }
     } catch (err) {
       reject(null);
-      console.log('error in getPanCakeSwapFarmBalance', err);
+      console.log('error in getTransactionStatus', err);
     }
   })
 }
