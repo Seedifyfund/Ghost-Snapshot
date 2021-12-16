@@ -69,10 +69,14 @@ ClaimCtr.addNewClaim = async (req, res) => {
 
 ClaimCtr.list = async (req, res) => {
   try {
-    let query = { isDisabledBit : { $ne : true } };
+    let query = { };
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
+    if(req.query.isDisabledBit){
+      query.isDisabledBit = { $ne : true }
+    }
+    console.log('req.query :>> ', query);
     const list = await ClaimModel.find(query).sort({ createdAt: -1 }).populate("dumpId", 'uploadData').lean();
     if(req.query.walletAddress){
       list.forEach((claim)=>{
@@ -118,13 +122,14 @@ ClaimCtr.getSinglePool = async (req, res) => {
 };
 ClaimCtr.editClaim = async (req, res) =>{
   try{
-    const claim = await ClaimModel.findOne({_id : req.body.claimId});
-    claim.logo = req.body.logo ? req.body.logo : claim.logo
-    claim.name = req.body.name ? req.body.name : claim.name
-    claim.save();
+    const claim = await ClaimModel.findOneAndUpdate({_id : req.body.claimId}, {$set : req.body});
+    // claim.logo = req.body.logo ? req.body.logo : claim.logo
+    // claim.name = req.body.name ? req.body.name : claim.name
+    // claim.name = req.body.isDisabledBit ? req.body.name : claim.name
+    // claim.save();
     return  res.status(200).json({
       status : "SUCCESS",
-      data : claim
+      // data : claim
     })
   }catch(err){
     return res.status(500).json({
