@@ -366,7 +366,7 @@ ClaimCtr.checkTransactionStatus = async () => {
               await AddClaimModel.findOneAndUpdate({_id : dump._id}, {$set : {pendingData : dump.pendingData, uploadData : dump.uploadData}})
             }else if (txn && txn.status == false){
               dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
-              dump.data.push(pendingData.data)
+              dump.data = dump.data.concat(pendingData.data)
               await AddClaimModel.findOneAndUpdate({_id : dump._id}, {$set : {pendingData : dump.pendingData, data : dump.data}});
             }
           })
