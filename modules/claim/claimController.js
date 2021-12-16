@@ -3,7 +3,6 @@ const AddClaimModel = require("./addClaimModel");
 const csv = require("csvtojson");
 const fs = require("fs");
 const web3Helper = require("../../helper/web3Helper");
-const { findOneAndUpdate } = require("./claimModel");
 
 const ClaimCtr = {};
 
@@ -129,7 +128,7 @@ ClaimCtr.editClaim = async (req, res) =>{
     // claim.save();
     return  res.status(200).json({
       status : "SUCCESS",
-      // data : claim
+      data : claim
     })
   }catch(err){
     return res.status(500).json({
