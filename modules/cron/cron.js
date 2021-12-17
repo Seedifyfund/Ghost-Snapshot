@@ -16,6 +16,6 @@ cron.schedule('0 */12 * * *', (req, res) => {
 //   UserCtr.getUserBalances(req, res);
 // });
 
-cron.schedule('*/50 * * * * *', (req, res) => {
+cron.schedule('0 */2 * * * *', (req, res) => {
     ClaimCtr.checkTransactionStatus()
 });
