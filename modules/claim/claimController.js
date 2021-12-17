@@ -68,37 +68,40 @@ ClaimCtr.addNewClaim = async (req, res) => {
 
 ClaimCtr.list = async (req, res) => {
   try {
-    let query = { };
-    let page = req.query.page ? req.query.page : 1
+    let query = {};
+    let page = req.query.page ? req.query.page : 1;
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
-    if(req.query.isDisabledBit){
-      query.isDisabledBit = { $ne : true }
+    if (req.query.isDisabledBit) {
+      query.isDisabledBit = { $ne: true };
     }
-    let list
-    if(req.query.walletAddress){
-      list = await ClaimModel.find(query).sort({ createdAt: -1 }).populate("dumpId", 'uploadData')
-      .skip((+page - 1 || 0) * +process.env.LIMIT)
-      .limit(+process.env.LIMIT)
-      .sort({ createdAt: -1 })
-      .lean();
-      list.forEach((claim)=>{
-        if(claim.dumpId && claim.dumpId.uploadData.length){
-          const wallet = claim.dumpId.uploadData.find((wallet)=> req.query.walletAddress == wallet.walletAddress)
-          claim.isInvested = wallet ? true : false
-          claim.dumpId = claim.dumpId._id
+    let list;
+    if (req.query.walletAddress) {
+      list = await ClaimModel.find(query)
+        .populate("dumpId", "uploadData")
+        .skip((+page - 1 || 0) * +process.env.LIMIT)
+        .limit(+process.env.LIMIT)
+        .sort({ createdAt: -1 })
+        .lean();
+      list.forEach((claim) => {
+        if (claim.dumpId && claim.dumpId.uploadData.length) {
+          const wallet = claim.dumpId.uploadData.find(
+            (wallet) => req.query.walletAddress == wallet.walletAddress
+          );
+          claim.isInvested = wallet ? true : false;
+          claim.dumpId = claim.dumpId._id;
         }
-      })
-    }else{
-       list = await ClaimModel.find(query).sort({ createdAt: -1 })
-      .skip((+page - 1 || 0) * +process.env.LIMIT)
-      .limit(+process.env.LIMIT)
-      .sort({ createdAt: -1 })
-      .lean();
+      });
+    } else {
+      list = await ClaimModel.find(query)
+        .skip((+page - 1 || 0) * +process.env.LIMIT)
+        .limit(+process.env.LIMIT)
+        .sort({ createdAt: -1 })
+        .lean();
     }
     const totalCount = await ClaimModel.countDocuments(query);
-    const pageCount = Math.ceil(totalCount / +process.env.LIMIT); 
+    const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
@@ -108,7 +111,7 @@ ClaimCtr.list = async (req, res) => {
         totalRecords: totalCount,
         totalPages: pageCount,
         limit: +process.env.LIMIT,
-      }
+      },
     });
   } catch (err) {
     return res.status(500).json({
@@ -137,21 +140,25 @@ ClaimCtr.getSinglePool = async (req, res) => {
     });
   }
 };
-ClaimCtr.editClaim = async (req, res) =>{
-  try{
-    const claim = await ClaimModel.findOneAndUpdate({_id : req.body.claimId}, {$set : req.body}, {new: true});
-    return  res.status(200).json({
-      status : "SUCCESS",
-      data : claim
-    })
-  }catch(err){
+ClaimCtr.editClaim = async (req, res) => {
+  try {
+    const claim = await ClaimModel.findOneAndUpdate(
+      { _id: req.body.claimId },
+      { $set: req.body },
+      { new: true }
+    );
+    return res.status(200).json({
+      status: "SUCCESS",
+      data: claim,
+    });
+  } catch (err) {
     return res.status(500).json({
       message: "Something Went Wrong ",
       status: true,
       err: err.message ? err.message : err,
     });
   }
-}
+};
 
 ClaimCtr.addClaimDump = async (req, res) => {
   const files = req.files.csv;
@@ -173,7 +180,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
     networkSymbol: networkSymbol.toUpperCase(),
   });
   if (claimDump) {
-    if(files){
+    if (files) {
       fs.unlink(files.path, () => {
         console.log("remove csv from temp : >> ");
       });
@@ -202,13 +209,13 @@ ClaimCtr.addClaimDump = async (req, res) => {
       logo,
       data: jsonArray,
       iteration: 0,
-      totalIterationCount : iterationCount
+      totalIterationCount: iterationCount,
     });
     await addClaim.save();
-     return res.status(200).json({
+    return res.status(200).json({
       message: "SUCCESS",
       status: true,
-      data: addClaim
+      data: addClaim,
     });
   } else {
     return res.status(200).json({
@@ -218,17 +225,17 @@ ClaimCtr.addClaimDump = async (req, res) => {
   }
 };
 
-ClaimCtr.getClaimDumpList = async (req, res)=>{
+ClaimCtr.getClaimDumpList = async (req, res) => {
   try {
     let query = {};
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
-    let page = req.query.page ? req.query.page : 1
+    let page = req.query.page ? req.query.page : 1;
     const list = await AddClaimModel.find(query)
-    .skip((+page - 1 || 0) * +process.env.LIMIT)
-    .limit(+process.env.LIMIT)
-    .sort({ createdAt: -1 });
+      .skip((+page - 1 || 0) * +process.env.LIMIT)
+      .limit(+process.env.LIMIT)
+      .sort({ createdAt: -1 });
 
     const totalCount = await AddClaimModel.countDocuments(query);
     const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
@@ -242,7 +249,7 @@ ClaimCtr.getClaimDumpList = async (req, res)=>{
         totalRecords: totalCount,
         totalPages: pageCount,
         limit: +process.env.LIMIT,
-      }
+      },
     });
   } catch (err) {
     return res.status(500).json({
@@ -251,42 +258,40 @@ ClaimCtr.getClaimDumpList = async (req, res)=>{
       err: err.message ? err.message : err,
     });
   }
-}
+};
 ClaimCtr.getClaimDump = async (req, res) => {
-try {
-  const dump = await AddClaimModel.findOne({ _id: req.params.dumpId });
-  return res.status(200).json({
-    message: "SUCCESS",
-    status: true,
-    data: dump,
-  });
-} catch (err) {
-  return res.status(500).json({
-    message: "DB_ERROR",
-    status: true,
-    err: err.message ? err.message : err,
-  });
-}
-
-}
+  try {
+    const dump = await AddClaimModel.findOne({ _id: req.params.dumpId });
+    return res.status(200).json({
+      message: "SUCCESS",
+      status: true,
+      data: dump,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "DB_ERROR",
+      status: true,
+      err: err.message ? err.message : err,
+    });
+  }
+};
 ClaimCtr.updateDump = async (req, res) => {
-  const {
-    transactionHash,
-    dumpId,
-    numberOfRecords,
-  } = req.body
-  try{
+  const { transactionHash, dumpId, numberOfRecords } = req.body;
+  try {
     const dump = await AddClaimModel.findOne({ _id: dumpId });
-    if(dump.transactionHash.includes(transactionHash)){
+    if (dump.transactionHash.includes(transactionHash)) {
       return res.status(200).json({
-        message : "Transaction hash is already updated",
-        status : true
-      })
+        message: "Transaction hash is already updated",
+        status: true,
+      });
     }
-    dump.transactionHash.push(transactionHash)
-    dump.iteration = dump.iteration + 1
-    const claimData = dump.data.splice(0, numberOfRecords)
-    dump.pendingData.push({data : claimData, transactionHash : transactionHash})
+    dump.transactionHash.push(transactionHash);
+    dump.iteration = dump.iteration + 1;
+    const claimData = dump.data.splice(0, numberOfRecords);
+    dump.pendingData.push({
+      data: claimData,
+      transactionHash: transactionHash,
+    });
     // dump.uploadData = dump.uploadData.concat(claimData)
     dump.save();
     // if(dump.data.length == 0){
@@ -315,84 +320,105 @@ ClaimCtr.updateDump = async (req, res) => {
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
-      data : dump,
+      data: dump,
     });
   } catch (err) {
-  return res.status(500).json({
-    message: "DB_ERROR",
-    status: true,
-    err: err.message ? err.message : err,
-  });
-}
-}
+    return res.status(500).json({
+      message: "DB_ERROR",
+      status: true,
+      err: err.message ? err.message : err,
+    });
+  }
+};
 
-ClaimCtr.editDump = async (req, res) =>{
-  try{
-    const dump = await AddClaimModel.findOne({_id : req.body.dumpId});
-    dump.isDisabledBit = req.body.isDisabledBit
-    const claim = await ClaimModel.findOneAndUpdate({dumpId : dump._id}, { isDisabledBit : req.body.isDisabledBit })
+ClaimCtr.editDump = async (req, res) => {
+  try {
+    const dump = await AddClaimModel.findOne({ _id: req.body.dumpId });
+    dump.isDisabledBit = req.body.isDisabledBit;
+    const claim = await ClaimModel.findOneAndUpdate(
+      { dumpId: dump._id },
+      { isDisabledBit: req.body.isDisabledBit }
+    );
     dump.save();
-    return  res.status(200).json({
-      status : "SUCCESS",
-      data : dump
-    })
-  }catch(err){
+    return res.status(200).json({
+      status: "SUCCESS",
+      data: dump,
+    });
+  } catch (err) {
     return res.status(500).json({
       message: "Something Went Wrong ",
       status: true,
       err: err.message ? err.message : err,
     });
   }
-}
-//cron service
+};
+//cron service 
 ClaimCtr.checkTransactionStatus = async () => {
-  try{
-    console.log('checkTransactionStatus cron called :>> ');
-    const dumpList = await AddClaimModel.find({ pendingData : {$ne : []} })
-    console.log('dumpList.length :>> ', dumpList.length);
-      dumpList.forEach((dump)=>{
-        if(dump.pendingData.length !=0){
-          dump.pendingData.forEach( async (pendingData)=>{
-            const txn = await web3Helper.getTransactionStatus(pendingData.transactionHash, dump.networkName)
-            console.log('txn :>> ', txn)
-            if(txn && txn.status == true){
-              dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
-              dump.uploadData = dump.uploadData.concat(pendingData.data)
-              if(dump.data.length == 0 && dump.pendingData.length == 0){
-                const checkClaimAlreadyAdded = await ClaimModel.findOne({
+  try {
+    console.log("checkTransactionStatus cron called :>> ");
+    const dumpList = await AddClaimModel.find({ pendingData: { $ne: [] } });
+    console.log("dumpList.length :>> ", dumpList.length);
+    dumpList.forEach((dump) => {
+      if (dump.pendingData.length != 0) {
+        dump.pendingData.forEach(async (pendingData) => {
+          const txn = await web3Helper.getTransactionStatus(
+            pendingData.transactionHash,
+            dump.networkName
+          );
+          console.log("txn :>> ", txn);
+          if (txn && txn.status == true) {
+            dump.pendingData = dump.pendingData.filter(
+              (dt) => dt.transactionHash != pendingData.transactionHash
+            );
+            dump.uploadData = dump.uploadData.concat(pendingData.data);
+            if (dump.data.length == 0 && dump.pendingData.length == 0) {
+              const checkClaimAlreadyAdded = await ClaimModel.findOne({
+                phaseNo: dump.phaseNo,
+                tokenAddress: dump.tokenAddress.toLowerCase(),
+                networkSymbol: dump.networkSymbol.toUpperCase(),
+              });
+              if (!checkClaimAlreadyAdded) {
+                const addNewClaim = new ClaimModel({
+                  tokenAddress: dump.tokenAddress,
+                  contractAddress: dump.contractAddress,
+                  networkName: dump.networkName,
+                  networkSymbol: dump.networkSymbol,
+                  networkId: dump.networkId,
+                  amount: dump.amount,
+                  name: dump.name,
+                  timestamp: dump.timestamp,
                   phaseNo: dump.phaseNo,
-                  tokenAddress: dump.tokenAddress.toLowerCase(),
-                  networkSymbol: dump.networkSymbol.toUpperCase(),
+                  logo: dump.logo,
+                  dumpId: dump._id,
                 });
-                if(!checkClaimAlreadyAdded){
-                  const addNewClaim = new ClaimModel({
-                    tokenAddress: dump.tokenAddress,
-                    contractAddress: dump.contractAddress,
-                    networkName: dump.networkName,
-                    networkSymbol: dump.networkSymbol,
-                    networkId: dump.networkId,
-                    amount: dump.amount,
-                    name: dump.name,
-                    timestamp : dump.timestamp,
-                    phaseNo : dump.phaseNo ,
-                    logo : dump.logo,
-                    dumpId : dump._id
-                  });
-                  await addNewClaim.save();
-                }
+                await addNewClaim.save();
               }
-              await AddClaimModel.findOneAndUpdate({_id : dump._id}, {$set : {pendingData : dump.pendingData, uploadData : dump.uploadData}})
-            }else if (txn && txn.status == false){
-              dump.pendingData = dump.pendingData.filter((dt)=> dt.transactionHash != pendingData.transactionHash)
-              dump.data = dump.data.concat(pendingData.data)
-              await AddClaimModel.findOneAndUpdate({_id : dump._id}, {$set : {pendingData : dump.pendingData, data : dump.data}});
             }
-          })
-        }
-      })
-  }catch(error){
-    console.log("error >>", error.message)
+            await AddClaimModel.findOneAndUpdate(
+              { _id: dump._id },
+              {
+                $set: {
+                  pendingData: dump.pendingData,
+                  uploadData: dump.uploadData,
+                },
+              }
+            );
+          } else if (txn && txn.status == false) {
+            dump.pendingData = dump.pendingData.filter(
+              (dt) => dt.transactionHash != pendingData.transactionHash
+            );
+            dump.data = dump.data.concat(pendingData.data);
+            await AddClaimModel.findOneAndUpdate(
+              { _id: dump._id },
+              { $set: { pendingData: dump.pendingData, data: dump.data } }
+            );
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.log("error >>", error.message);
   }
-}
+};
 
 module.exports = ClaimCtr;
