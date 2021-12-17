@@ -3,7 +3,7 @@ const AddClaimModel = require("./addClaimModel");
 const csv = require("csvtojson");
 const fs = require("fs");
 const web3Helper = require("../../helper/web3Helper");
-
+const momentTz = require("moment-timezone");
 const ClaimCtr = {};
 
 ClaimCtr.addNewClaim = async (req, res) => {
@@ -352,7 +352,7 @@ ClaimCtr.editDump = async (req, res) => {
     });
   }
 };
-//cron service 
+//cron service
 ClaimCtr.checkTransactionStatus = async () => {
   try {
     console.log("checkTransactionStatus cron called :>> ");
@@ -418,6 +418,22 @@ ClaimCtr.checkTransactionStatus = async () => {
     });
   } catch (error) {
     console.log("error >>", error.message);
+  }
+};
+// cron service for deleting dump records
+ClaimCtr.deleteDumprecords = async () => {
+  try {
+    const currentDate = momentTz.utc().subtract(24, "hours").format();
+    console.log("deleteDumprecords cron :>> ");
+    const dumpList1 = await AddClaimModel.find({
+      transactionHash: [],
+      updatedAt: { $lte: currentDate },
+    });
+    dumpList1.forEach(async (dump) => {
+      await AddClaimModel.findOneAndDelete({ _id: dump._id });
+    });
+  } catch (error) {
+    console.log("error in deleteDumprecord >>", error.message);
   }
 };
 
