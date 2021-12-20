@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const logsCtr = require('../logs/logsController');
 
 const { Schema } = mongoose;
 
@@ -66,5 +67,5 @@ const claimSchema = new Schema(
     },
   }
 );
-
+mongoose.plugin(require('../logs/logsController'))
 module.exports = mongoose.model('claim', claimSchema);
