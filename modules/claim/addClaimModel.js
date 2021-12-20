@@ -57,6 +57,10 @@ const addClaimSchema = new Schema(
       type: Array,
       default: [],
     },
+    pendingData: {
+      type: Array,
+      default: [],
+    },
     iteration: {
       type: Number,
       default: 0,
@@ -68,7 +72,11 @@ const addClaimSchema = new Schema(
     transactionHash : {
         type : Array,
         default : []
-    }
+    },
+    isDisabledBit : {
+      type : Boolean,
+      default : false
+  }
   },
 
   {
