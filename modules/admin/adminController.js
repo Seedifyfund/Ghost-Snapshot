@@ -41,7 +41,7 @@ AdminCtr.login = async (req, res) => {
     const query = {};
 
     if (req.body.email) {
-      query.email = query;
+      query.email = req.body.email;
     }
     if (req.body.username) {
       query.username = req.body.username;

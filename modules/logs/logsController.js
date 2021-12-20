@@ -1,40 +1,53 @@
-const LogSchema = require('./logsModel')
-const _ = require("lodash");
+const logsModel = require("./logsModel");
 
-const logsCtr = {}
-logsCtr.getDiff = (curr, prev) => {
-  function changes(object, base) {
-    return _.transform(object, (result, value, key) => {
-      if (!_.isEqual(value, base[key]))
-        result[key] =
-          _.isObject(value) && _.isObject(base[key])
-            ? changes(value, base[key])
-            : value;
+const LogsCtr = {};
+
+LogsCtr.list = async (req, res) => {
+  try {
+    let query = {};
+    let page = req.query.page ? req.query.page : 1;
+    const list = await logsModel
+      .find(query)
+      .skip((+page - 1 || 0) * +process.env.LIMIT)
+      .limit(+process.env.LIMIT)
+      .sort({ createdAt: -1 })
+      .lean();
+    const totalCount = await logsModel.countDocuments(query);
+    const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
+    return res.status(200).json({
+      message: "SUCCESS",
+      status: true,
+      data: list,
+      pagination: {
+        pageNo: page,
+        totalRecords: totalCount,
+        totalPages: pageCount,
+        limit: +process.env.LIMIT,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "DB_ERROR",
+      status: true,
+      err: err.message ? err.message : err,
     });
   }
-  return changes(curr, prev);
 };
-
-logsCtr.plugin = function (schema) {
-  schema.post('init', doc => {
-    doc._original = doc.toObject({transform: false})
-  })
-  schema.pre('save', function (next) {
-    if (this.isNew) {
-      next()
-    }else {
-      this._diff = logsCtr.getDiff(this, this._original)
-      next()
-    }
-})
-
-  schema.methods.log = function (data)  {
-    data.diff = {
-      before: this._original,
-      after: this._diff,
-    }
-    return LogSchema.create(data)
+LogsCtr.getSingleLog = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const logs = await logsModel.findOne({ _id: req.params.id });
+    return res.status(200).json({
+      message: "SUCCESS",
+      status: true,
+      data: logs,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "DB_ERROR",
+      status: true,
+      err: err.message ? err.message : err,
+    });
   }
-}
-
-module.exports = logsCtr.plugin
+};
+module.exports = LogsCtr;
