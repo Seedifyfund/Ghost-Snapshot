@@ -147,6 +147,16 @@ ClaimCtr.editClaim = async (req, res) => {
       { $set: req.body },
       { new: true }
     );
+    if (claim && typeof claim.log === "function") {
+      console.log("req.userData._id :>> " + req.userData._id);
+      const data = {
+        action: "update-claim",
+        category: "claim/edit",
+        createdBy: req.userData._id,
+        message: "Updated user name",
+      };
+      claim.log(data);
+    }
     return res.status(200).json({
       status: "SUCCESS",
       data: claim,
