@@ -8,6 +8,7 @@ const claimRoute = require('./modules/claim/claimRoute');
 const poolsRoute = require('./modules/pools/poolsRoute');
 const networkRoute = require('./modules/network/networkRoute');
 const farmRoute = require('./modules/farm/farmRoute');
+const logsRoute = require('./modules/logs/logsRout');
 
 // Routes Path
 
@@ -22,6 +23,8 @@ app.use('/api/v1/pools', poolsRoute);
 app.use('/api/v1/claim', claimRoute);
 app.use('/api/v1/network', networkRoute);
 app.use('/api/v1/farm', farmRoute);
+app.use('/api/v1/logs', logsRoute);
+
 app.all('/*', (req, res) =>
   res.status(404).json({ message: 'Invalid Requests' })
 );
