@@ -1,16 +1,16 @@
-const Web3 = require('web3');
-const lotteryAbi = require('../abi/lautry.json');
-const StakingContract = require('../abi/staking.json');
-const FarmingContract = require('../abi/farming.json');
-const PanCakeSwapAbi = require('../abi/pancakeswap.json');
-const TosdisStakingAbi = require('../abi/tosdisStaking.json');
-const TosdisFarmingAbi = require('../abi/tosdisFarming.json');
-const ApeFarmingAbi = require('../abi/apeFarming.json');
-const sfundAbi = require('../abi/sfund.json');
-const Utils = require('../helper/utils');
+const Web3 = require("web3");
+const lotteryAbi = require("../abi/lautry.json");
+const StakingContract = require("../abi/staking.json");
+const FarmingContract = require("../abi/farming.json");
+const PanCakeSwapAbi = require("../abi/pancakeswap.json");
+const TosdisStakingAbi = require("../abi/tosdisStaking.json");
+const TosdisFarmingAbi = require("../abi/tosdisFarming.json");
+const ApeFarmingAbi = require("../abi/apeFarming.json");
+const sfundAbi = require("../abi/sfund.json");
+const Utils = require("../helper/utils");
 
 provider =
-  process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === "development"
     ? `https://bsc-dataseed.binance.org/`
     : `https://bsc-dataseed.binance.org/`;
 
@@ -30,7 +30,7 @@ web3Helper.getRandomNumber = async (requestNo, noOfAddress, Outof) => {
 
     return getRandomNumbers;
   } catch (err) {
-    console.log('error in contract ', err);
+    console.log("error in contract ", err);
   }
 };
 
@@ -38,9 +38,9 @@ web3Helper.getUserStakedBalance = async (walletAddress, ContractAddress) => {
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://bsc-dataseed.binance.org/'
-          : 'https://bsc-dataseed.binance.org/';
+        process.env.NODE_ENV === "development"
+          ? "https://bsc-dataseed.binance.org/"
+          : "https://bsc-dataseed.binance.org/";
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
@@ -52,7 +52,7 @@ web3Helper.getUserStakedBalance = async (walletAddress, ContractAddress) => {
 
       resolve(getStakedBalance);
     } catch (err) {
-      console.log('error in web3 stacked data ', err);
+      console.log("error in web3 stacked data ", err);
 
       resolve(0);
     }
@@ -63,9 +63,9 @@ web3Helper.getFarmingContractEndDate = async (contractAddress) => {
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://data-seed-prebsc-1-s1.binance.org:8545/'
-          : 'https://data-seed-prebsc-2-s1.binance.org:8545/';
+        process.env.NODE_ENV === "development"
+          ? "https://data-seed-prebsc-1-s1.binance.org:8545/"
+          : "https://data-seed-prebsc-2-s1.binance.org:8545/";
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
@@ -81,7 +81,7 @@ web3Helper.getFarmingContractEndDate = async (contractAddress) => {
         withdrawDate: withdrawDate,
       });
     } catch (err) {
-      console.log('Error in getting end date', err);
+      console.log("Error in getting end date", err);
 
       resolve({ endDate: 0, startDate: 0, withdrawDate: 0 });
     }
@@ -92,9 +92,9 @@ web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://bsc-dataseed.binance.org/'
-          : 'https://bsc-dataseed.binance.org/';
+        process.env.NODE_ENV === "development"
+          ? "https://bsc-dataseed.binance.org/"
+          : "https://bsc-dataseed.binance.org/";
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
@@ -106,7 +106,7 @@ web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
 
       let harvestedValue = 0;
 
-      const value = Utils.convertToEther(getStakedBalance['0']);
+      const value = Utils.convertToEther(getStakedBalance["0"]);
       // if (value > 0) {
       //   const getSfundHarvested = await contract.methods
       //     .calculate(walletAddress)
@@ -117,7 +117,7 @@ web3Helper.getUserFarmedBalance = async (walletAddress, ContractAddress) => {
 
       resolve({ farm: value, harvest: harvestedValue });
     } catch (err) {
-      console.log('error in web3 farming ', err);
+      console.log("error in web3 farming ", err);
 
       resolve({ farm: 0, harvest: 0 });
     }
@@ -129,26 +129,26 @@ web3Helper.getPanCakeSwapFarmBalance = async (walletAddress) => {
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://bsc-dataseed.binance.org/'
-          : 'https://bsc-dataseed.binance.org/';
+        process.env.NODE_ENV === "development"
+          ? "https://bsc-dataseed.binance.org/"
+          : "https://bsc-dataseed.binance.org/";
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
       const contract = new web3.eth.Contract(
         PanCakeSwapAbi,
-        '0x73feaa1eE314F8c655E354234017bE2193C9E24E'
+        "0x73feaa1eE314F8c655E354234017bE2193C9E24E"
       );
 
       const getStakedBalance = await contract.methods
         .userInfo(450, walletAddress)
         .call();
       // console.log('getStakedBalance', getStakedBalance['amount']);
-      const value = Utils.convertToEther(getStakedBalance['amount']);
+      const value = Utils.convertToEther(getStakedBalance["amount"]);
       resolve(value);
     } catch (err) {
       resolve(0);
-      console.log('error in getPanCakeSwapFarmBalance', err);
+      console.log("error in getPanCakeSwapFarmBalance", err);
     }
   });
 };
@@ -158,9 +158,9 @@ web3Helper.getTosdisStakingBal = async (walletAddress) => {
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://bsc-dataseed.binance.org/'
-          : 'https://bsc-dataseed.binance.org/';
+        process.env.NODE_ENV === "development"
+          ? "https://bsc-dataseed.binance.org/"
+          : "https://bsc-dataseed.binance.org/";
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
@@ -173,11 +173,11 @@ web3Helper.getTosdisStakingBal = async (walletAddress) => {
         .getUserInfo(walletAddress)
         .call();
 
-      const value = Utils.convertToEther(getStakedBalance['0']);
+      const value = Utils.convertToEther(getStakedBalance["0"]);
       resolve(value);
     } catch (err) {
       resolve(0);
-      console.log('error in getPanCakeSwapFarmBalance', err);
+      console.log("error in getPanCakeSwapFarmBalance", err);
     }
   });
 };
@@ -188,9 +188,9 @@ web3Helper.getTosdisFarmingBal = async (walletAddress, contractAddress) => {
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://bsc-dataseed.binance.org/'
-          : 'https://bsc-dataseed.binance.org/';
+        process.env.NODE_ENV === "development"
+          ? "https://bsc-dataseed.binance.org/"
+          : "https://bsc-dataseed.binance.org/";
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
@@ -200,10 +200,10 @@ web3Helper.getTosdisFarmingBal = async (walletAddress, contractAddress) => {
         .getUserInfo(walletAddress)
         .call();
 
-      const value = Utils.convertToEther(getStakedBalance['0']);
+      const value = Utils.convertToEther(getStakedBalance["0"]);
       resolve(value);
     } catch (err) {
-      console.log('error in farming', err);
+      console.log("error in farming", err);
       resolve(0);
     }
   });
@@ -214,21 +214,21 @@ web3Helper.getApeFarmingBalance = async (walletAddress, contractAddress) => {
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://bsc-dataseed.binance.org/'
-          : 'https://bsc-dataseed.binance.org/';
+        process.env.NODE_ENV === "development"
+          ? "https://bsc-dataseed.binance.org/"
+          : "https://bsc-dataseed.binance.org/";
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
       const contract = new web3.eth.Contract(ApeFarmingAbi, contractAddress);
 
       const getStakedBalance = await contract.methods
-        .userInfo('123', walletAddress)
+        .userInfo("123", walletAddress)
         .call();
-      const value = Utils.convertToEther(getStakedBalance['0']);
+      const value = Utils.convertToEther(getStakedBalance["0"]);
       resolve(value);
     } catch (err) {
-      console.log('error in ape farming', err);
+      console.log("error in ape farming", err);
       resolve(0);
     }
   });
@@ -240,9 +240,9 @@ web3Helper.sfundBalance = async (walletAddress) => {
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://bsc-dataseed.binance.org/'
-          : 'https://bsc-dataseed.binance.org/';
+        process.env.NODE_ENV === "development"
+          ? "https://bsc-dataseed.binance.org/"
+          : "https://bsc-dataseed.binance.org/";
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
@@ -255,12 +255,11 @@ web3Helper.sfundBalance = async (walletAddress) => {
       const value = Utils.convertToEther(getStakedBalance);
       resolve(value);
     } catch (err) {
-      console.log('error in farming', err);
+      console.log("error in farming", err);
       resolve(0);
     }
   });
 };
-module.exports = web3Helper;
 
 web3Helper.getTosdisStakingBalWithContract = async (
   walletAddress,
@@ -269,9 +268,9 @@ web3Helper.getTosdisStakingBalWithContract = async (
   return new Promise(async (resolve, reject) => {
     try {
       const provider =
-        process.env.NODE_ENV === 'development'
-          ? 'https://bsc-dataseed.binance.org/'
-          : 'https://bsc-dataseed.binance.org/';
+        process.env.NODE_ENV === "development"
+          ? "https://bsc-dataseed.binance.org/"
+          : "https://bsc-dataseed.binance.org/";
 
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
 
@@ -281,11 +280,53 @@ web3Helper.getTosdisStakingBalWithContract = async (
         .getUserInfo(walletAddress)
         .call();
 
-      const value = Utils.convertToEther(getStakedBalance['0']);
+      const value = Utils.convertToEther(getStakedBalance["0"]);
       resolve(value);
     } catch (err) {
       resolve(0);
-      console.log('error in getPanCakeSwapFarmBalance', err);
+      console.log("error in getPanCakeSwapFarmBalance", err);
     }
   });
 };
+
+web3Helper.getTransactionStatus = async (transactionHash, networkName) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const testNetProvider =
+        networkName == "polygon"
+          ? "https://rpc-mumbai.maticvigil.com/"
+          : networkName == "binance"
+          ? "https://data-seed-prebsc-1-s1.binance.org:8545/"
+          : "https://data-seed-prebsc-1-s1.binance.org:8545/";
+      const mainNetProvider =
+        networkName == "polygon"
+          ? "https://polygon-rpc.com/"
+          : networkName == "binance"
+          ? "https://bsc-dataseed.binance.org/"
+          : "https://bsc-dataseed.binance.org/";
+      const provider =
+        process.env.NODE_ENV === "development"
+          ? testNetProvider
+          : mainNetProvider;
+      const web3 = new Web3(new Web3.providers.HttpProvider(provider));
+      const trxnReciept = await web3.eth.getTransactionReceipt(transactionHash);
+      console.log(
+        `trxnReciept.status :>>  ${
+          trxnReciept != null ? trxnReciept.status : "null"
+        }`
+      );
+
+      if (trxnReciept) {
+        resolve({
+          status: trxnReciept.status,
+        });
+      } else {
+        resolve(null);
+      }
+    } catch (err) {
+      reject(null);
+      console.log("error in getTransactionStatus", err);
+    }
+  });
+};
+module.exports = web3Helper;
