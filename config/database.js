@@ -1,16 +1,15 @@
 const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
+const url = `mongodb+srv://Sadmin:fxxHWM7pbI7tL9Bn@snapshot.o35fi.mongodb.net/seedify?retryWrites=true&w=majority`;
+
 mongoose
-  .connect(
-    `mongodb://${process.env.DATABASEURL}:${process.env.DATABSEPORT}/${process.env.DATABASE}`,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
-      useCreateIndex: true,
-    }
-  )
+  .connect(`${url}`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+  })
   .then((res) => {
     // mongoose.pluralize(null);
     // mongoose.set('debug',true);
