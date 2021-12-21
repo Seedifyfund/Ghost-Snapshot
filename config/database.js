@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
-const url = `mongodb+srv://Snapshot:l1fP5GoDBXGi0HSV@snapshot.o35fi.mongodb.net/seedify?retryWrites=true&w=majority`;
+const url = `mongodb+srv://Sadmin:fxxHWM7pbI7tL9Bn@snapshot.o35fi.mongodb.net/seedify?retryWrites=true&w=majority`;
 
 mongoose
   .connect(`${url}`, {
