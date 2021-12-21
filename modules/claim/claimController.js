@@ -80,7 +80,7 @@ ClaimCtr.list = async (req, res) => {
     let list;
     if (req.query.walletAddress) {
       list = await ClaimModel.find(query)
-        .populate("dumpId", "uploadData", "transactionHash")
+        .populate("dumpId", "uploadData, transactionHash")
         .skip((+page - 1 || 0) * +process.env.LIMIT)
         .limit(+process.env.LIMIT)
         .sort({ createdAt: -1 })
