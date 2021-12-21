@@ -88,7 +88,7 @@ ClaimCtr.list = async (req, res) => {
       list.forEach((claim) => {
         if (claim.dumpId && claim.dumpId.uploadData.length) {
           const wallet = claim.dumpId.uploadData.find(
-            (wallet) => req.query.walletAddress == wallet.walletAddress
+            (wallet) => req.query.walletAddress.toLowerCase() == wallet.walletAddress
           );
           claim.isInvested = wallet ? true : false;
           claim.dumpId = {
