@@ -142,12 +142,13 @@ ClaimCtr.getSinglePool = async (req, res) => {
 };
 ClaimCtr.editClaim = async (req, res) => {
   try {
+    const claimBeforeUpdt = await ClaimModel.findOne({_id: req.body.claimId })
     const claim = await ClaimModel.findOneAndUpdate(
       { _id: req.body.claimId },
       { $set: req.body },
       { new: true }
     );
-    if (claim && typeof claim.log === "function") {
+    if (claimBeforeUpdt && typeof claimBeforeUpdt.log === "function") {
       console.log("req.userData._id :>> " + req.userData._id);
       const data = {
         action: "update-claim",
@@ -155,7 +156,7 @@ ClaimCtr.editClaim = async (req, res) => {
         createdBy: req.userData._id,
         message: `${req.userData.username ? req.userData.username : req.userData.email} Updated claim`,
       };
-      claim.log(data);
+      claimBeforeUpdt.log(data);
     }
     return res.status(200).json({
       status: "SUCCESS",
