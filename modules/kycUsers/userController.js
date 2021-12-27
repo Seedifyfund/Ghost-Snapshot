@@ -197,7 +197,16 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
             snapshotId: req.body.snapshotId,
             noOfRecordsAdded: num,
           });
-
+          if (addNewLottery && typeof addNewLottery.log === "function") {
+            console.log("req.userData._id :>> " + req.userData._id);
+            const data = {
+              action: "genrateLotteryNumbers",
+              category: "user/genrateRandom",
+              createdBy: req.userData._id,
+              message: `${req.userData.username ? req.userData.username : req.userData.email} created new lottery`,
+            };
+            addNewLottery.log(data);
+          }
           await addNewLottery.save();
 
           fetchRecords.snapshotId = req.body.requestNo;
@@ -267,16 +276,24 @@ UserCtr.addCsv = async (req, res) => {
     const hex = hashSum.digest('hex');
 
     // add this record to snapshot model
-
     const addNewSnapshotRecord = new SnapshotModel({
       users: userList,
       tier: req.query.tier.toLowerCase().trim(),
       totalUsers: userList.length,
       fileHash: hex,
     });
-
+    if (addNewSnapshotRecord && typeof addNewSnapshotRecord.log === "function") {
+      console.log("req.userData._id :>> " + req.userData._id);
+      const data = {
+        action: "generate CSV After snapshot",
+        category: "user/genrateCsv",
+        createdBy: req.userData._id,
+        message: `${req.userData.username ? req.userData.username : req.userData.email} created new snapshot`,
+      };
+      addNewSnapshotRecord.log(data);
+    }
     const save = await addNewSnapshotRecord.save();
-
+    
     if (req.query.sendEmail === 'true') {
       Utils.sendSmapshotEmail(
         `./lottery/${fileName}.csv`,
