@@ -363,6 +363,19 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     // );
     // const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
 
+    const users = await UserModel.find({}, {walletAddress : 1, kycStatus : 1}).lean().sort({createdAt : -1})
+    const walletAddresses = users.map(({_id, ...rest})=> ({...rest}))
+    const csv = new ObjectsToCsv(walletAddresses);
+    const fileName = `${+new Date()}_${igoName}`;
+    await csv.toDisk(`./csv/${fileName}.csv`);
+    Utils.sendSmapshotEmail(
+      `./csv/${fileName}.csv`,
+      fileName,
+      `Snapshot fired for ${igoName} at ${new Date(data.startedAt)}`,
+      `Snapshot fired for ${igoName}`,
+      'csv'
+    );
+
     const getLiquidityLocked = await UserCtr.fetchLiquidityLocked(
       process.env.LIQUIDITY_ADDRESS
     );
@@ -373,11 +386,6 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
 
     const getApeTokenLiquidityLocked = await UserCtr.fetchLiquidityLocked(
       process.env.LP_APE_ADDRESS
-    );
-
-    Utils.sendFromalEmail(
-      `Snapshot fired for ${igoName} at ${new Date(data.startedAt)}`,
-      `Snapshot fired for ${igoName}`
     );
 
     res.status(200).json({

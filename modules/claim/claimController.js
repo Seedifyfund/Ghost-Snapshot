@@ -4,6 +4,7 @@ const csv = require("csvtojson");
 const fs = require("fs");
 const web3Helper = require("../../helper/web3Helper");
 const momentTz = require("moment-timezone");
+const utils = require("../../helper/utils");
 const ClaimCtr = {};
 
 ClaimCtr.addNewClaim = async (req, res) => {
@@ -79,7 +80,7 @@ ClaimCtr.list = async (req, res) => {
     let list;
     if (req.query.walletAddress) {
       list = await ClaimModel.find(query)
-        .populate("dumpId", "uploadData")
+        .populate("dumpId", "uploadData transactionHash")
         .skip((+page - 1 || 0) * +process.env.LIMIT)
         .limit(+process.env.LIMIT)
         .sort({ createdAt: -1 })
@@ -87,14 +88,18 @@ ClaimCtr.list = async (req, res) => {
       list.forEach((claim) => {
         if (claim.dumpId && claim.dumpId.uploadData.length) {
           const wallet = claim.dumpId.uploadData.find(
-            (wallet) => req.query.walletAddress == wallet.walletAddress
+            (wallet) => req.query.walletAddress.toLowerCase() == wallet.walletAddress.toLowerCase()
           );
           claim.isInvested = wallet ? true : false;
-          claim.dumpId = claim.dumpId._id;
+          claim.dumpId = {
+            _id : claim.dumpId._id,
+            transactionHash : claim.dumpId.transactionHash
+          };
         }
       });
     } else {
       list = await ClaimModel.find(query)
+        .populate("dumpId", "transactionHash")
         .skip((+page - 1 || 0) * +process.env.LIMIT)
         .limit(+process.env.LIMIT)
         .sort({ createdAt: -1 })
@@ -386,9 +391,8 @@ ClaimCtr.editDump = async (req, res) => {
 //cron service
 ClaimCtr.checkTransactionStatus = async () => {
   try {
-    console.log("checkTransactionStatus cron called :>> ");
+    // console.log("checkTransactionStatus cron called :>> ");
     const dumpList = await AddClaimModel.find({ pendingData: { $ne: [] } });
-    console.log("dumpList.length :>> ", dumpList.length);
     dumpList.forEach((dump) => {
       if (dump.pendingData.length != 0) {
         dump.pendingData.forEach(async (pendingData) => {
@@ -448,14 +452,14 @@ ClaimCtr.checkTransactionStatus = async () => {
       }
     });
   } catch (error) {
-    console.log("error >>", error.message);
+    utils.echoLog('error in checkTransactionStatus cron  ', err);
   }
 };
 // cron service for deleting dump records
 ClaimCtr.deleteDumprecords = async () => {
   try {
     const currentDate = momentTz.utc().subtract(24, "hours").format();
-    console.log("deleteDumprecords cron :>> ");
+    console.log("deleteDumprecords cron called :>> ");
     const dumpList1 = await AddClaimModel.find({
       transactionHash: [],
       updatedAt: { $lte: currentDate },
@@ -464,7 +468,7 @@ ClaimCtr.deleteDumprecords = async () => {
       await AddClaimModel.findOneAndDelete({ _id: dump._id });
     });
   } catch (error) {
-    console.log("error in deleteDumprecord >>", error.message);
+    utils.echoLog('error in deleteDumprecord >>  ', err);
   }
 };
 
