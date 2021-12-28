@@ -8,6 +8,7 @@ LogsCtr.list = async (req, res) => {
     let page = req.query.page ? req.query.page : 1;
     const list = await logsModel
       .find(query)
+      .populate("createdBy", "username email")
       .skip((+page - 1 || 0) * +process.env.LIMIT)
       .limit(+process.env.LIMIT)
       .sort({ createdAt: -1 })
