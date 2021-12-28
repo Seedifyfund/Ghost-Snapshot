@@ -233,7 +233,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
         action: "create-dump",
         category: "claim/add-dump",
         createdBy: req.userData._id,
-        message: `${req.userData.username ? req.userData.username : req.userData.email} created new dump record`,
+        message: `Claim record created for ${addClaim.name} IGO`,
       };
       addClaim.log(data);
     }
