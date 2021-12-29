@@ -66,5 +66,5 @@ const claimSchema = new Schema(
     },
   }
 );
-
+mongoose.plugin(require('../logs/logsHelper'))
 module.exports = mongoose.model('claim', claimSchema);

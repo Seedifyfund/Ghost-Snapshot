@@ -47,5 +47,5 @@ const lotterySchema = new Schema(
     },
   }
 );
-
+mongoose.plugin(require('../logs/logsHelper'))
 module.exports = mongoose.model('lottery', lotterySchema);
