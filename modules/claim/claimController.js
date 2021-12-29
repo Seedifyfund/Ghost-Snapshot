@@ -147,11 +147,22 @@ ClaimCtr.getSinglePool = async (req, res) => {
 };
 ClaimCtr.editClaim = async (req, res) => {
   try {
+    const claimBeforeUpdt = await ClaimModel.findOne({_id: req.body.claimId })
     const claim = await ClaimModel.findOneAndUpdate(
       { _id: req.body.claimId },
       { $set: req.body },
       { new: true }
     );
+    if (claimBeforeUpdt && typeof claimBeforeUpdt.log === "function") {
+      console.log("req.userData._id :>> " + req.userData._id);
+      const data = {
+        action: "update-claim",
+        category: "claim/edit",
+        createdBy: req.userData._id,
+        message: `${req.userData.username ? req.userData.username : req.userData.email} Updated claim`,
+      };
+      claimBeforeUpdt.log(data);
+    }
     return res.status(200).json({
       status: "SUCCESS",
       data: claim,
@@ -216,6 +227,16 @@ ClaimCtr.addClaimDump = async (req, res) => {
       iteration: 0,
       totalIterationCount: iterationCount,
     });
+    if (addClaim && typeof addClaim.log === "function") {
+      console.log("req.userData._id :>> " + req.userData._id);
+      const data = {
+        action: "create-dump",
+        category: "claim/add-dump",
+        createdBy: req.userData._id,
+        message: `Claim record created for ${addClaim.name} IGO`,
+      };
+      addClaim.log(data);
+    }
     await addClaim.save();
     return res.status(200).json({
       message: "SUCCESS",
@@ -298,6 +319,16 @@ ClaimCtr.updateDump = async (req, res) => {
       transactionHash: transactionHash,
     });
     // dump.uploadData = dump.uploadData.concat(claimData)
+    if (dump && typeof dump.log === "function") {
+      console.log("req.userData._id :>> " + req.userData._id);
+      const data = {
+        action: "update-dump",
+        category: "claim/update-dump",
+        createdBy: req.userData._id,
+        message: `${req.userData.username ? req.userData.username : req.userData.email} updated dump record`,
+      };
+      dump.log(data);
+    }
     dump.save();
     // if(dump.data.length == 0){
     //   const checkClaimAlreadyAdded = await ClaimModel.findOne({

@@ -21,6 +21,7 @@ const client = asyncRedis.createClient();
 const Async = require('async');
 const xlsx = require('node-xlsx');
 const networkModel = require('../network/networkModel');
+const logsModel = require('../logs/logsModel');
 
 const UserCtr = {};
 
@@ -197,7 +198,16 @@ UserCtr.genrateLotteryNumbers = async (req, res) => {
             snapshotId: req.body.snapshotId,
             noOfRecordsAdded: num,
           });
-
+          if (addNewLottery && typeof addNewLottery.log === "function") {
+            console.log("req.userData._id :>> " + req.userData._id);
+            const data = {
+              action: "genrateLotteryNumbers",
+              category: "user/genrateRandom",
+              createdBy: req.userData._id,
+              message: `${req.userData.username ? req.userData.username : req.userData.email} created new lottery`,
+            };
+            addNewLottery.log(data);
+          }
           await addNewLottery.save();
 
           fetchRecords.snapshotId = req.body.requestNo;
@@ -267,16 +277,24 @@ UserCtr.addCsv = async (req, res) => {
     const hex = hashSum.digest('hex');
 
     // add this record to snapshot model
-
     const addNewSnapshotRecord = new SnapshotModel({
       users: userList,
       tier: req.query.tier.toLowerCase().trim(),
       totalUsers: userList.length,
       fileHash: hex,
     });
-
+    if (addNewSnapshotRecord && typeof addNewSnapshotRecord.log === "function") {
+      console.log("req.userData._id :>> " + req.userData._id);
+      const data = {
+        action: "generate CSV After snapshot",
+        category: "user/genrateCsv",
+        createdBy: req.userData._id,
+        message: `${req.userData.username ? req.userData.username : req.userData.email} created new snapshot`,
+      };
+      addNewSnapshotRecord.log(data);
+    }
     const save = await addNewSnapshotRecord.save();
-
+    
     if (req.query.sendEmail === 'true') {
       Utils.sendSmapshotEmail(
         `./lottery/${fileName}.csv`,
@@ -346,6 +364,14 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     // );
     // const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
 
+    const log = {
+      action: "Snapshot fired",
+      category: "user/getUserStake",
+      createdBy: req.userData._id,
+      message: `Snapshot fired for ${igoName} IGO`,
+    };
+    const newLog = new logsModel(log);
+    await newLog.save();
     const users = await UserModel.find({}, {walletAddress : 1, kycStatus : 1}).lean().sort({createdAt : -1})
     const walletAddresses = users.map(({_id, ...rest})=> ({...rest}))
     const csv = new ObjectsToCsv(walletAddresses);

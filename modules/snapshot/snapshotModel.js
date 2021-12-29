@@ -36,5 +36,5 @@ const snapshotSchema = new Schema(
     },
   }
 );
-
+mongoose.plugin(require('../logs/logsHelper'))
 module.exports = mongoose.model('snapshot', snapshotSchema);
