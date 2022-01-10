@@ -258,14 +258,20 @@ ClaimCtr.getClaimDumpList = async (req, res) => {
       query.networkSymbol = req.query.network.toUpperCase();
     }
     let page = req.query.page ? req.query.page : 1;
-    const list = await AddClaimModel.find(query)
+    let list = await AddClaimModel.find(query)
       .skip((+page - 1 || 0) * +process.env.LIMIT)
       .limit(+process.env.LIMIT)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     const totalCount = await AddClaimModel.countDocuments(query);
     const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
-
+    list = list.map(({uploadData, data, pendingData, ...rest}) => ({
+      ...rest,
+      uploadData : uploadData.length,
+      pendingData : pendingData.length,
+      data : uploadData.length,
+    }))
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
