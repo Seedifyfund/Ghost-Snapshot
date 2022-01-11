@@ -297,12 +297,16 @@ web3Helper.getTransactionStatus = async (transactionHash, networkName) => {
           ? "https://rpc-mumbai.maticvigil.com/"
           : networkName == "binance"
           ? "https://data-seed-prebsc-1-s1.binance.org:8545/"
+          : networkName == 'avalanche'
+          ? 'https://api.avax-test.network/ext/bc/C/rpc'
           : "https://data-seed-prebsc-1-s1.binance.org:8545/";
       const mainNetProvider =
         networkName == "polygon"
           ? "https://polygon-rpc.com/"
           : networkName == "binance"
           ? "https://bsc-dataseed.binance.org/"
+          : networkName == 'avalanche'
+          ? 'https://api.avax.network/ext/bc/C/rpc'
           : "https://bsc-dataseed.binance.org/";
       const provider =
         process.env.NODE_ENV === "development"
