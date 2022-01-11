@@ -42,6 +42,7 @@ claimRoute.get('/get-dump/:dumpId', getClaimDump);
 
 const editDump = [Auth.isAuthenticatedUser, ClaimCtr.editDump]
 claimRoute.post('/edit-dump', editDump);
+claimRoute.post('/trigger-vesting', ClaimCtr.triggerVestings);
 
 // login admin
 const list = [ClaimCtr.list];

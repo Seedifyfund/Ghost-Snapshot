@@ -65,18 +65,39 @@ const addClaimSchema = new Schema(
       type: Number,
       default: 0,
     },
-    totalIterationCount : {
+    vestings: [
+      {
+        name: { type: String, default: "" },
+        vestingPercent: { type: Number, default: 0 },
+        timestamp: { type: Number, default: 0 },
+        phaseNo: { type: Number, default: 0 },
+        status: {
+          type: String,
+          enum: ["upcoming", "pending", "uploaded"],
+          default: "upcoming",
+        },
+      },
+    ],
+    currentVestingId : {
+      type: String,
+      default: null,
+    },
+    prevIgoDate : {
+      type: Date,
+      default: null,
+    },
+    totalIterationCount: {
       type: Number,
       default: 0,
     },
-    transactionHash : {
-        type : Array,
-        default : []
+    transactionHash: {
+      type: Array,
+      default: [],
     },
-    isDisabledBit : {
-      type : Boolean,
-      default : false
-  }
+    isDisabledBit: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   {
@@ -86,5 +107,5 @@ const addClaimSchema = new Schema(
     },
   }
 );
-mongoose.plugin(require('../logs/logsHelper'))
+mongoose.plugin(require("../logs/logsHelper"));
 module.exports = mongoose.model("addClaim", addClaimSchema);
