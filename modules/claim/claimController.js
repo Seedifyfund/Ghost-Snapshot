@@ -270,7 +270,7 @@ ClaimCtr.getClaimDumpList = async (req, res) => {
       ...rest,
       uploadData : uploadData.length,
       pendingData : pendingData.length,
-      data : uploadData.length,
+      data : data.length,
     }))
     return res.status(200).json({
       message: "SUCCESS",
