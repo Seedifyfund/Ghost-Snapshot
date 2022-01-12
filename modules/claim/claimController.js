@@ -425,6 +425,8 @@ ClaimCtr.triggerVestings = async (req, res) => {
     dump.vestings.forEach((vesting) => {
       if (vesting._id == req.body.vestingId) {
         vesting.status = "pending";
+        vesting.phaseNo = req.body.phaseNo;
+        vesting.timestamp = req.body.timestamp;
       }
     });
     dump.prevIgoDate = new Date()
