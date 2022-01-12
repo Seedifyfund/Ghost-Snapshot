@@ -1,6 +1,6 @@
-const Joi = require('joi');
-const validate = require('../../helper/validateRequest');
-const Utils = require('../../helper/utils');
+const Joi = require("joi");
+const validate = require("../../helper/validateRequest");
+const Utils = require("../../helper/utils");
 
 const ClaimMiddleware = {};
 
@@ -9,17 +9,18 @@ ClaimMiddleware.validateAdd = async (req, res, next) => {
     contractAddress: Joi.string().required(),
     tokenAddress: Joi.string().required(),
     networkName: Joi.string()
-      .valid('polygon', 'binance', 'ethereum', 'solana', 'avalanche')
+      .valid("polygon", "binance", "ethereum", "solana", "avalanche")
       .required(),
+    vestingType: Joi.string().valid("monthly", "linear").required(),
     networkSymbol: Joi.string()
-      .allow('BNB', 'ETH', 'MATIC', 'SOL', 'AVAX')
+      .allow("BNB", "ETH", "MATIC", "SOL", "AVAX")
       .required(),
     networkId: Joi.string().required(),
     amount: Joi.number().required(),
     name: Joi.string().required(),
     timestamp: Joi.number().required(),
     phaseNo: Joi.number().required(),
-    logo: Joi.string().uri().allow(null, ''),
+    logo: Joi.string().uri().allow(null, ""),
   });
   validate.validateRequest(req, res, next, schema);
 };

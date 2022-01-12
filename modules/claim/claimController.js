@@ -77,6 +77,9 @@ ClaimCtr.list = async (req, res) => {
     if (req.query.isDisabledBit) {
       query.isDisabledBit = { $ne: true };
     }
+    if (req.query.vestingType) {
+      query.vestingType = { $in: req.query.vestingType };
+    }
     let list;
     if (req.query.walletAddress) {
       list = await ClaimModel.find(query)
@@ -189,6 +192,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
     timestamp,
     phaseNo,
     logo,
+    vestingType
   } = req.body;
   const claimDump = await AddClaimModel.findOne({
     phaseNo: phaseNo,
@@ -223,6 +227,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
       timestamp: timestamp,
       phaseNo,
       logo,
+      vestingType,
       data: jsonArray,
       iteration: 0,
       totalIterationCount: iterationCount,
@@ -430,6 +435,7 @@ ClaimCtr.checkTransactionStatus = async () => {
                   timestamp: dump.timestamp,
                   phaseNo: dump.phaseNo,
                   logo: dump.logo,
+                  vestingType : dump.vestingType,
                   dumpId: dump._id,
                 });
                 await addNewClaim.save();
