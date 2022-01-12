@@ -65,6 +65,11 @@ const addClaimSchema = new Schema(
       type: Number,
       default: 0,
     },
+    vestingType: {
+      type: String,
+      required: true,
+      enum: ["monthly", "linear"],
+    },
     totalIterationCount : {
       type: Number,
       default: 0,

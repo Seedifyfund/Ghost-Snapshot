@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 
@@ -17,13 +17,13 @@ const claimSchema = new Schema(
     networkName: {
       type: String,
       required: true,
-      enum: ['polygon', 'binance', 'ethereum', 'solana', 'avalanche'],
+      enum: ["polygon", "binance", "ethereum", "solana", "avalanche"],
       lowercase: true,
     },
     networkSymbol: {
       type: String,
       required: true,
-      enum: ['BNB', 'ETH', 'MATIC', 'SOL', 'AVAX'],
+      enum: ["BNB", "ETH", "MATIC", "SOL", "AVAX"],
     },
     networkId: {
       type: String,
@@ -45,13 +45,18 @@ const claimSchema = new Schema(
       type: String,
       default: null,
     },
-    isDisabledBit : {
-      type : Boolean,
-      default : false
-  },
+    vestingType: {
+      type: String,
+      required: true,
+      enum: ["monthly", "linear"],
+    },
+    isDisabledBit: {
+      type: Boolean,
+      default: false,
+    },
     dumpId: {
       type: mongoose.Schema.ObjectId,
-      ref: "addClaim"
+      ref: "addClaim",
     },
     phaseNo: {
       type: Number,
@@ -66,5 +71,5 @@ const claimSchema = new Schema(
     },
   }
 );
-mongoose.plugin(require('../logs/logsHelper'))
-module.exports = mongoose.model('claim', claimSchema);
+mongoose.plugin(require("../logs/logsHelper"));
+module.exports = mongoose.model("claim", claimSchema);
