@@ -41,6 +41,14 @@ const addClaimSchema = new Schema(
       type: Number,
       required: true,
     },
+    endTime: {
+      type: Number,
+      default: null,
+    },
+    startAmount: {
+      type: Number,
+      default: null,
+    },
     logo: {
       type: String,
       default: null,
