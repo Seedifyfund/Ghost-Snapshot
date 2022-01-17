@@ -262,7 +262,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
 
 ClaimCtr.getClaimDumpList = async (req, res) => {
   try {
-    let query = {};
+    let query = {$or : [{pendingData: { $ne: [] }}, {data: { $ne: [] }}]};
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
