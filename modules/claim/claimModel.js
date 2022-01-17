@@ -57,6 +57,8 @@ const claimSchema = new Schema(
       type: String,
       required: true,
       enum: ["monthly", "linear"],
+      default: "monthly",
+      
     },
     isDisabledBit: {
       type: Boolean,
