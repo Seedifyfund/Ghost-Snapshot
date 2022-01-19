@@ -19,6 +19,7 @@ const snapshotEmail = [
   'gsconsultantservices@gmail.com',
   'berk@seedify.fund',
   'serhat@seedify.fund',
+  'apo@seedify.fund'
 ];
 // const snapshotEmail = ['aziz.ansari@minddeft.com', 'rishabh.katheria@minddeft.net' ];
 
