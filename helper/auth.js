@@ -66,5 +66,14 @@ auth.userAuthetication = async (req, res, next) => {
   }
   return next();
 };
+auth.apiKeyAuthentication = async(req, res, next)=>{
+  const API_KEY = process.env.SEEDIFY_API_KEY
+  let apiKey = req.headers && req.headers['api_key'];
+  if(API_KEY === apiKey){
+    return next()
+  }else{
+    return errorUtil.notAuthenticated(res, req);
+  }
+}
 
 module.exports = auth;

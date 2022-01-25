@@ -118,5 +118,12 @@ UserMiddleware.checkWalletAddress = async (req, res, next) => {
     });
   }
 };
+UserMiddleware.validateSubcribeUser = async (req, res, next) => {
+  const schema = Joi.object({
+    userId: Joi.string().required(),
+    projectId: Joi.string().required(),
+  });
+  validate.validateRequest(req, res, next, schema);
+};
 
 module.exports = UserMiddleware;
