@@ -98,4 +98,6 @@ userRoute.get('/getUniqueCountries', getUniqueCountries);
 const checkisValid = [Utils.checkAddressForSolana];
 userRoute.get('/checkIsValid', checkisValid);
 
+userRoute.post('/subscribe',[ Auth.apiKeyAuthentication, UserMiddleware.validateSubcribeUser, UserCtr.subscribe]);
+
 module.exports = userRoute;
