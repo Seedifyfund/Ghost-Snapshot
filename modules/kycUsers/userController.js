@@ -1662,7 +1662,7 @@ UserCtr.subscribe = async (req, res) => {
     }
     const project = await projectsModel.findOne({ _id: projectId });
     if (project.subscribedUsers.includes(user._id)) {
-      return res.status(200).json({
+      return res.status(201).json({
         status: false,
         message: `Already subscribed for ${project.name}`,
       });
@@ -1676,8 +1676,8 @@ UserCtr.subscribe = async (req, res) => {
   } catch (err) {
     Utils.echoLog("error in subscribing users for project  ", err);
     return res.status(500).json({
-      message: "DB_ERROR",
       status: false,
+      message: "DB_ERROR",
       err: err.message ? err.message : err,
     });
   }

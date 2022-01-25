@@ -26,7 +26,7 @@ projectsCtr.addNewProject = async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({
-      status: true,
+      status: false,
       message: "Something Went Wrong ",
       err: err.message ? err.message : err,
     });
