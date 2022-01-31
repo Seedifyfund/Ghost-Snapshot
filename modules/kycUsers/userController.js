@@ -230,7 +230,7 @@ UserCtr.addCsv = async (req, res) => {
 
     let query = {
       isActive: true,
-      kycStatus: 'approved',
+      // kycStatus: 'approved',  // for SNFT Airdrop
       tier: req.query.tier.toLowerCase().trim(),
     };
 
@@ -407,7 +407,8 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     //   kycStatus: 'approved',
     // });
 
-    let query = { isActive: true, kycStatus: 'approved' };
+    // let query = { isActive: true, kycStatus: 'approved' };
+    let query = { isActive: true };  // for SNFT Airdrop
 
     if (req.query.country) {
       query.country = { $ne: req.query.country.toLowerCase().trim() };
