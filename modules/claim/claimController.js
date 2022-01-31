@@ -456,7 +456,6 @@ ClaimCtr.checkTransactionStatus = async () => {
               const claim = await ClaimModel.findOne({
                 phaseNo: dump.phaseNo,
                 tokenAddress: dump.tokenAddress.toLowerCase(),
-                contractAddress: dump.contractAddress.toLowerCase(),
                 networkSymbol: dump.networkSymbol.toUpperCase(),
               });
               dump.vestings.forEach((vesting) => {
