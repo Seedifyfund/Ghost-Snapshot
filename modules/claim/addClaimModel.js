@@ -100,10 +100,6 @@ const addClaimSchema = new Schema(
       enum: ["monthly", "linear"],
       default: "monthly",
     },
-    totalIterationCount: {
-      type: Number,
-      default: 0,
-    },
     transactionHash: {
       type: Array,
       default: [],

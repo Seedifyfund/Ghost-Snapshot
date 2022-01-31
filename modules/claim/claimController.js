@@ -222,7 +222,6 @@ ClaimCtr.addClaimDump = async (req, res) => {
     fs.unlink(files.path, () => {
       console.log("remove csv from temp : >> ");
     });
-    const iterationCount = Math.ceil(jsonArray.length / 600);
     const addClaim = new AddClaimModel({
       tokenAddress: tokenAddress,
       contractAddress: contractAddress,
@@ -239,7 +238,6 @@ ClaimCtr.addClaimDump = async (req, res) => {
       endTime,
       data: jsonArray,
       iteration: 0,
-      totalIterationCount: iterationCount,
       prevIgoDate : new Date(),
       vestings:
         vestings && typeof vestings == "string" ? JSON.parse(vestings) : null,
@@ -410,8 +408,8 @@ ClaimCtr.triggerVestings = async (req, res) => {
     dump.vestings.forEach((vesting) => {
       if (vesting._id == req.body.vestingId) {
         vesting.status = "pending";
-        vesting.phaseNo = req.body.phaseNo;
-        vesting.timestamp = req.body.timestamp;
+        vesting.phaseNo = req.body.phaseNo ? req.body.phaseNo : vesting.phaseNo;
+        vesting.timestamp = req.body.timestamp ? req.body.timestamp : vesting.timestamp;
       }
     });
     dump.prevIgoDate = new Date()
