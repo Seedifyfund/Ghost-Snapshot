@@ -453,12 +453,18 @@ ClaimCtr.checkTransactionStatus = async () => {
                   vesting._id == dump.currentVestingId &&
                   vesting.status == "pending"
               );
-              const checkClaimAlreadyAdded = await ClaimModel.findOne({
-                phaseNo: currentVesting.phaseNo,
+              const claim = await ClaimModel.findOne({
+                phaseNo: dump.phaseNo,
                 tokenAddress: dump.tokenAddress.toLowerCase(),
+                contractAddress: dump.contractAddress.toLowerCase(),
                 networkSymbol: dump.networkSymbol.toUpperCase(),
               });
-              if (!checkClaimAlreadyAdded) {
+              dump.vestings.forEach((vesting) => {
+                if (vesting._id == dump.currentVestingId) {
+                  vesting.status = "uploaded";
+                }
+              });
+              if (!claim) {
                 const addNewClaim = new ClaimModel({
                   tokenAddress: dump.tokenAddress,
                   contractAddress: dump.contractAddress,
@@ -466,24 +472,22 @@ ClaimCtr.checkTransactionStatus = async () => {
                   networkSymbol: dump.networkSymbol,
                   networkId: dump.networkId,
                   amount: dump.amount,
-                  name: currentVesting.name,
-                  timestamp: currentVesting.timestamp,
-                  phaseNo: currentVesting.phaseNo,
+                  name: dump.name,
+                  timestamp: dump.timestamp,
+                  phaseNo: dump.phaseNo,
                   logo: dump.logo,
                   vestingType : dump.vestingType,
                   endTime : dump.endTime,
                   startAmount : dump.startAmount,
                   dumpId: dump._id,
-                  vestingId: dump.currentVestingId,
+                  vestings: dump.vestings,
                 });
-                dump.vestings.forEach((vesting) => {
-                  if (vesting._id == dump.currentVestingId) {
-                    vesting.status = "uploaded";
-                  }
-                });
-                dump.currentVestingId = null;
                 await addNewClaim.save();
+              }else{
+                claim.vestings = dump.vestings
+                claim.save()
               }
+              dump.currentVestingId = null;
             }
             await AddClaimModel.findOneAndUpdate(
               { _id: dump._id },
