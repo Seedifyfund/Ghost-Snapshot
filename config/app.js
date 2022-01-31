@@ -7,7 +7,6 @@ const blockWebhookRoute = require('../modules/blockpass/blockPassWebookRoute');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-// const multer = require('multer');
 const app = express();
 
 /* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
@@ -58,7 +57,6 @@ app.all('/*', (req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   next();
 });
-// app.use(multer({ dest: __dirname + '/tmp' }).any());
 app.use(require('../route.js'));
 
 module.exports = app;

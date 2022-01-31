@@ -29,7 +29,8 @@ const ccEmail = [
   'rishabh.katheria@minddeft.net',
   'prajwal.more@minddeft.net',
   'krunal@minddeft.com',
-  'aziz.ansari@minddeft.com'
+  'aziz.ansari@minddeft.com',
+  'abhishek.anand@minddeft.com'
 ];
 // const ccEmail = ['aziz.ansari@minddeft.com', 'rishabh.katheria@minddeft.net'];
 
