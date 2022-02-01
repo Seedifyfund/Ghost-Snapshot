@@ -242,7 +242,10 @@ UserCtr.addCsv = async (req, res) => {
     if (req.query.country) {
       query.country = { $ne: req.query.country.toLowerCase().trim() };
     }
-
+    if(req.query.projectId){
+      const project = await projectsModel.findOne({_id : req.query.projectId});
+      query._id = {$in : project.subscribedUsers}
+    }
     const getUsers = await UserModel.aggregate([
       {
         $match: query,
