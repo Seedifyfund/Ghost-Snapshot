@@ -1687,6 +1687,9 @@ UserCtr.subscribe = async (req, res) => {
   }
 };
 
+
+// script to add kyc users for community testing 
+// only for staging 
 UserCtr.addCommunityTesters = async (req, res) => {
   const files = req.files.csv;
 
