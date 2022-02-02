@@ -13,6 +13,7 @@ const asyncRedis = require("async-redis");
 const axios = require("axios");
 const ObjectsToCsv = require("objects-to-csv");
 const csv = require("fast-csv");
+const CSV = require("csvtojson");
 const crypto = require("crypto");
 const config = require("../../config/config.json");
 const fs = require("fs");
@@ -1685,4 +1686,34 @@ UserCtr.subscribe = async (req, res) => {
     });
   }
 };
+
+UserCtr.addCommunityTesters = async (req, res) => {
+  const files = req.files.csv;
+
+if(files){
+  const jsonArray = await CSV().fromFile(files.path);
+  fs.unlink(files.path, () => {
+    console.log("remove csv from temp : >> ");
+  });
+  jsonArray.forEach(async (user, index)=>{
+    console.log('user.name :>> ', user.name);
+    const newUser = new UserModel({
+      name : user.name,
+      email : `${user.name.toLowerCase()}@mailinator.com`,
+      recordId : `123456-${index}`,
+      walletAddress : user.walletAddress.toLowerCase(),
+      isActive : true,
+      kycStatus : 'approved',
+      timestamp : Date.now(),
+      approvedTimestamp : Date.now(),
+      tier : 'tier1'
+    })
+    await newUser.save()
+  })
+  res.json({
+    status : true,
+    data : jsonArray
+  })
+}
+}
 module.exports = UserCtr;
