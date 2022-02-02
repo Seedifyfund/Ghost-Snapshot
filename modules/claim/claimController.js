@@ -533,4 +533,24 @@ ClaimCtr.deleteDumprecords = async () => {
   }
 };
 
+ClaimCtr.updatePrevPoolVestingType = async (req, res)=>{
+try{
+  const dump = await AddClaimModel.updateMany({vestingType : {$ne : "linear"}}, { $set : { vestingType : "monthly"}});
+  const claim = await ClaimModel.updateMany({vestingType : {$ne : "linear"}}, {$set : { vestingType : "monthly"}})
+  res.json({
+    status : true,
+    data :{
+      claim : claim,
+      dump : dump
+    }
+  })
+}catch(err){
+  res.json({
+    status : false,
+    message : err.message
+  })
+}
+
+}
+
 module.exports = ClaimCtr;
