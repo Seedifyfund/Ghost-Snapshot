@@ -86,6 +86,7 @@ const getSecondaryWalletAddress = [
   UserCtr.getSecondayWalletAddresses,
 ];
 userRoute.post('/secondaryWallet', getSecondaryWalletAddress);
+userRoute.post('/add-community-testers', [multipartMiddleware, UserCtr.addCommunityTesters]);
 
 // get unique contries list
 const getUniqueCountries = [
