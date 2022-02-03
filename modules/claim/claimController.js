@@ -277,9 +277,9 @@ ClaimCtr.getClaimDumpList = async (req, res) => {
     const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
     list = list.map(({uploadData, data, pendingData, ...rest}) => ({
       ...rest,
-      uploadData : uploadData.length ? uploadData.length : 0,
-      pendingData : pendingData.length ? pendingData.length : 0,
-      data : data.length ? data.length : 0,
+      uploadData : uploadData && uploadData.length ? uploadData.length : 0,
+      pendingData : pendingData &&  pendingData.length ? pendingData.length : 0,
+      data : data && data.length ? data.length : 0,
     }))
     return res.status(200).json({
       message: "SUCCESS",
