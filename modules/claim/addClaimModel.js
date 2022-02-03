@@ -41,6 +41,14 @@ const addClaimSchema = new Schema(
       type: Number,
       required: true,
     },
+    endTime: {
+      type: Number,
+      default: null,
+    },
+    startAmount: {
+      type: Number,
+      default: null,
+    },
     logo: {
       type: String,
       default: null,
@@ -64,6 +72,12 @@ const addClaimSchema = new Schema(
     iteration: {
       type: Number,
       default: 0,
+    },
+    vestingType: {
+      type: String,
+      required: true,
+      enum: ["monthly", "linear"],
+      default: "monthly",
     },
     totalIterationCount : {
       type: Number,

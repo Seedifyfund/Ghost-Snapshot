@@ -333,7 +333,8 @@ blockPassCtr.checkKycVerified = async (req, res) => {
           kycStatus: checkIsVerified.kycStatus === 'approved' ? true : false,
           status: checkIsVerified.kycStatus,
           data: {
-            name: checkIsVerified.name,
+            // name: checkIsVerified.name,
+            userId : checkIsVerified._id,
             snapshot: checkIsVerified.balObj,
             tier: checkIsVerified.tier,
             timestamp: checkIsVerified.timestamp,
