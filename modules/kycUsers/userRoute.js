@@ -86,6 +86,7 @@ const getSecondaryWalletAddress = [
   UserCtr.getSecondayWalletAddresses,
 ];
 userRoute.post('/secondaryWallet', getSecondaryWalletAddress);
+userRoute.post('/add-community-testers', [multipartMiddleware, UserCtr.addCommunityTesters]);
 
 // get unique contries list
 const getUniqueCountries = [
@@ -97,5 +98,7 @@ userRoute.get('/getUniqueCountries', getUniqueCountries);
 // check is valid address
 const checkisValid = [Utils.checkAddressForSolana];
 userRoute.get('/checkIsValid', checkisValid);
+
+userRoute.post('/subscribe',[ Auth.apiKeyAuthentication, UserMiddleware.validateSubcribeUser, UserCtr.subscribe]);
 
 module.exports = userRoute;

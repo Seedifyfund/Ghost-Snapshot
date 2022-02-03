@@ -77,6 +77,9 @@ ClaimCtr.list = async (req, res) => {
     if (req.query.isDisabledBit) {
       query.isDisabledBit = { $ne: true };
     }
+    if (req.query.vestingType) {
+      query.vestingType = { $in: req.query.vestingType };
+    }
     let list;
     if (req.query.walletAddress) {
       list = await ClaimModel.find(query)
@@ -189,6 +192,9 @@ ClaimCtr.addClaimDump = async (req, res) => {
     timestamp,
     phaseNo,
     logo,
+    vestingType,
+    startAmount,
+    endTime
   } = req.body;
   const claimDump = await AddClaimModel.findOne({
     phaseNo: phaseNo,
@@ -223,6 +229,9 @@ ClaimCtr.addClaimDump = async (req, res) => {
       timestamp: timestamp,
       phaseNo,
       logo,
+      vestingType,
+      startAmount,
+      endTime,
       data: jsonArray,
       iteration: 0,
       totalIterationCount: iterationCount,
@@ -253,7 +262,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
 
 ClaimCtr.getClaimDumpList = async (req, res) => {
   try {
-    let query = {};
+    let query = {$or : [{pendingData: { $ne: [] }}, {data: { $ne: [] }}]};
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
@@ -324,7 +333,6 @@ ClaimCtr.updateDump = async (req, res) => {
       data: claimData,
       transactionHash: transactionHash,
     });
-    // dump.uploadData = dump.uploadData.concat(claimData)
     if (dump && typeof dump.log === "function") {
       console.log("req.userData._id :>> " + req.userData._id);
       const data = {
@@ -336,29 +344,6 @@ ClaimCtr.updateDump = async (req, res) => {
       dump.log(data);
     }
     dump.save();
-    // if(dump.data.length == 0){
-    //   const checkClaimAlreadyAdded = await ClaimModel.findOne({
-    //     phaseNo: dump.phaseNo,
-    //     tokenAddress: dump.tokenAddress.toLowerCase(),
-    //     networkSymbol: dump.networkSymbol.toUpperCase(),
-    //   });
-    //   if(!checkClaimAlreadyAdded){
-    //     const addNewClaim = new ClaimModel({
-    //       tokenAddress: dump.tokenAddress,
-    //       contractAddress: dump.contractAddress,
-    //       networkName: dump.networkName,
-    //       networkSymbol: dump.networkSymbol,
-    //       networkId: dump.networkId,
-    //       amount: dump.amount,
-    //       name: dump.name,
-    //       timestamp : dump.timestamp,
-    //       phaseNo : dump.phaseNo ,
-    //       logo : dump.logo,
-    //       dumpId : dump._id
-    //     });
-    //     await addNewClaim.save();
-    //   }
-    // }
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
@@ -430,6 +415,9 @@ ClaimCtr.checkTransactionStatus = async () => {
                   timestamp: dump.timestamp,
                   phaseNo: dump.phaseNo,
                   logo: dump.logo,
+                  vestingType : dump.vestingType,
+                  endTime : dump.endTime,
+                  startAmount : dump.startAmount,
                   dumpId: dump._id,
                 });
                 await addNewClaim.save();
@@ -477,5 +465,25 @@ ClaimCtr.deleteDumprecords = async () => {
     utils.echoLog('error in deleteDumprecord >>  ', err);
   }
 };
+
+ClaimCtr.updatePrevPoolVestingType = async (req, res)=>{
+try{
+  const dump = await AddClaimModel.updateMany({vestingType : {$ne : "linear"}}, { $set : { vestingType : "monthly"}});
+  const claim = await ClaimModel.updateMany({vestingType : {$ne : "linear"}}, {$set : { vestingType : "monthly"}})
+  res.json({
+    status : true,
+    data :{
+      claim : claim,
+      dump : dump
+    }
+  })
+}catch(err){
+  res.json({
+    status : false,
+    message : err.message
+  })
+}
+
+}
 
 module.exports = ClaimCtr;

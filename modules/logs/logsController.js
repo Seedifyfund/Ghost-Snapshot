@@ -7,7 +7,7 @@ LogsCtr.list = async (req, res) => {
     let query = {};
     let page = req.query.page ? req.query.page : 1;
     const list = await logsModel
-      .find(query)
+      .find(query, {diff : 0})
       .populate("createdBy", "username email")
       .skip((+page - 1 || 0) * +process.env.LIMIT)
       .limit(+process.env.LIMIT)
