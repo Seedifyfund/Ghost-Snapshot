@@ -274,11 +274,20 @@ ClaimCtr.getClaimDumpList = async (req, res) => {
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
+    let sort = {createdAt : -1}
+    if(req.query.vestingType == 'monthly'){
+      query.vestingType = 'monthly'
+      query['vestings.status'] = {$in : ['upcoming'], $nin : ['pending']}
+      sort = {'vestings.timestamp': -1}
+    }
+    if(req.query.vestingType =='linear'){
+      query.vestingType = 'linear'
+    }
     let page = req.query.page ? req.query.page : 1;
     let list = await AddClaimModel.find(query)
       .skip((+page - 1 || 0) * +process.env.LIMIT)
       .limit(+process.env.LIMIT)
-      .sort({ createdAt: -1 })
+      .sort(sort)
       .lean();
 
     const totalCount = await AddClaimModel.countDocuments(query);
