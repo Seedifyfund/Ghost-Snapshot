@@ -423,8 +423,8 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     //   kycStatus: 'approved',
     // });
 
-    let query = { isActive: true, kycStatus: "approved" };
-
+    // let query = { isActive: true, kycStatus: "approved" };
+    let query = { isActive: true };  // for SNFTS AirDrops
     if (req.query.country) {
       query.country = { $ne: req.query.country.toLowerCase().trim() };
     }
@@ -478,7 +478,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
 
         getBalance.walletAddress = task.address;
         getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
-
+        getBalance.kycStatus = task.kycStatus
         console.log("getBalance.tier", getBalance.tier);
 
         console.log("user bal ", userBal);
@@ -538,7 +538,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
         // // users.push(getBalance);
 
         queue.push(
-          { address: getUsers[i].walletAddress, _id: getUsers[i]._id },
+          { address: getUsers[i].walletAddress, _id: getUsers[i]._id, kycStatus : getUsers[i].kycStatus  },
           (error) => {
             if (error) {
               console.log(`An error occurred while processing task ${error}`);
