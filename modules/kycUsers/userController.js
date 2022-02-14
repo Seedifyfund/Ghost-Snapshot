@@ -423,8 +423,8 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     //   kycStatus: 'approved',
     // });
 
-    let query = { isActive: true, kycStatus: "approved" };
-    // let query = { isActive: true };  // for SNFTS AirDrops
+    // let query = { isActive: true, kycStatus: "approved" };
+    let query = { isActive: true };  // for SNFTS AirDrops
     if (req.query.country) {
       query.country = { $ne: req.query.country.toLowerCase().trim() };
     }
