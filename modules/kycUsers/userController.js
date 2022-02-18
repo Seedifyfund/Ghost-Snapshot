@@ -1720,6 +1720,7 @@ UserCtr.addCommunityTesters = async (req, res) => {
 };
 // Find Duplicate users against wallet address
 UserCtr.findDupUsers = async (req, res) => {
+try{
   const users = await UserModel.aggregate([
     {
       $group: {
@@ -1760,7 +1761,13 @@ UserCtr.findDupUsers = async (req, res) => {
   );
   res.json({
     status: true,
-    data: csvData,
+    message : "Please check your mail"
   });
+}catch(err){
+  res.json({
+    status: false,
+    message : err.message
+  });
+}
 };
 module.exports = UserCtr;
