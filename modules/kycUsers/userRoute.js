@@ -100,5 +100,6 @@ const checkisValid = [Utils.checkAddressForSolana];
 userRoute.get('/checkIsValid', checkisValid);
 
 userRoute.post('/subscribe',[ Auth.apiKeyAuthentication, UserMiddleware.validateSubcribeUser, UserCtr.subscribe]);
+userRoute.get('/duplicate-user', UserCtr.findDupUsers);
 
 module.exports = userRoute;
