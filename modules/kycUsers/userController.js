@@ -243,9 +243,9 @@ UserCtr.addCsv = async (req, res) => {
     if (req.query.country) {
       query.country = { $ne: req.query.country.toLowerCase().trim() };
     }
-    if(req.query.projectId){
-      const project = await projectsModel.findOne({_id : req.query.projectId});
-      query._id = {$in : project.subscribedUsers}
+    if (req.query.projectId) {
+      const project = await projectsModel.findOne({ _id: req.query.projectId });
+      query._id = { $in: project.subscribedUsers };
     }
     const getUsers = await UserModel.aggregate([
       {
@@ -1687,36 +1687,87 @@ UserCtr.subscribe = async (req, res) => {
   }
 };
 
-
-// script to add kyc users for community testing 
-// only for staging 
+// script to add kyc users for community testing
+// only for staging
 UserCtr.addCommunityTesters = async (req, res) => {
   const files = req.files.csv;
 
-if(files){
-  const jsonArray = await CSV().fromFile(files.path);
-  fs.unlink(files.path, () => {
-    console.log("remove csv from temp : >> ");
+  if (files) {
+    const jsonArray = await CSV().fromFile(files.path);
+    fs.unlink(files.path, () => {
+      console.log("remove csv from temp : >> ");
+    });
+    jsonArray.forEach(async (user, index) => {
+      console.log("user.name :>> ", user.name);
+      const newUser = new UserModel({
+        name: user.name,
+        email: `${user.name.toLowerCase()}@mailinator.com`,
+        recordId: `123456-${index}`,
+        walletAddress: user.walletAddress.toLowerCase(),
+        isActive: true,
+        kycStatus: "approved",
+        timestamp: Date.now(),
+        approvedTimestamp: Date.now(),
+        tier: "tier1",
+      });
+      await newUser.save();
+    });
+    res.json({
+      status: true,
+      data: jsonArray,
+    });
+  }
+};
+// Find Duplicate users against wallet address
+UserCtr.findDupUsers = async (req, res) => {
+try{
+  const users = await UserModel.aggregate([
+    {
+      $group: {
+        _id: "$walletAddress",
+        data: { $push: "$$ROOT" },
+        count: { $sum: 1 },
+      },
+    },
+    { $match: { count: { $gt: 1 } } },
+    // {$project:{"_id":1}},
+    // {$group:{"_id":null,"dupWalletAdd":{$push:"$_id"}}},
+  ]);
+  let csvData = [];
+  users.forEach((user) => {
+    csvData = [...csvData, ...user.data];
   });
-  jsonArray.forEach(async (user, index)=>{
-    console.log('user.name :>> ', user.name);
-    const newUser = new UserModel({
-      name : user.name,
-      email : `${user.name.toLowerCase()}@mailinator.com`,
-      recordId : `123456-${index}`,
-      walletAddress : user.walletAddress.toLowerCase(),
-      isActive : true,
-      kycStatus : 'approved',
-      timestamp : Date.now(),
-      approvedTimestamp : Date.now(),
-      tier : 'tier1'
-    })
-    await newUser.save()
-  })
+  csvData = csvData.map((user) => ({
+    walletAddress: user.walletAddress,
+    "Record Id": user.recordId,
+    "kyc status": user.kycStatus,
+    Name: user.name,
+    Email: user.email,
+    Country: user.country,
+    "kyc Approved Date": user.approvedTimestamp != 0 ? new Date(
+        user.approvedTimestamp * 1000
+    ).toUTCString() : '--',
+    "Created At": new Date(user.createdAt).toUTCString(),
+  }));
+  const csv = new ObjectsToCsv(csvData);
+  const fileName = Date.now();
+  await csv.toDisk(`./lottery/duplicateUser_${fileName}.csv`);
+  Utils.sendSmapshotEmail(
+    `./lottery/duplicateUser_${fileName}.csv`,
+    `duplicateUser_${fileName}`,
+    `Duplicate Records of users taken at ${new Date().toUTCString()}`,
+    `Duplicate users list`,
+    "csv"
+  );
   res.json({
-    status : true,
-    data : jsonArray
-  })
+    status: true,
+    message : "Please check your mail"
+  });
+}catch(err){
+  res.json({
+    status: false,
+    message : err.message
+  });
 }
-}
+};
 module.exports = UserCtr;
