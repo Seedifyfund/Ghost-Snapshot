@@ -1719,4 +1719,47 @@ if(files){
   })
 }
 }
+// Find Duplicate users against wallet address
+UserCtr.findDupUsers = async (req, res) => {
+  const users = await UserModel.aggregate([
+    {
+      $group: {
+        _id: "$walletAddress",
+        data : { "$push": "$$ROOT" },
+        count: { $sum: 1 },
+      },
+    },
+    { $match: { count: { $gt: 1 } } },
+    // {$project:{"_id":1}},
+    // {$group:{"_id":null,"dupWalletAdd":{$push:"$_id"}}},
+  ]);
+  let csvData = []
+  users.forEach((user)=>{
+    csvData = [...csvData, ...user.data]
+  })
+  csvData = csvData.map((user)=>({
+    "walletAddress" : user.walletAddress,
+    "Record Id" : user.recordId,
+    "kyc status" : user.kycStatus,
+    "Name" : user.name,
+    "Email" : user.email,
+    "Country" : user.country,
+    "kyc Approved Date" : new Date(user.approvedTimestamp).toUTCString(),
+    "Created At" : new Date(user.createdAt).toUTCString()
+  }))
+  const csv = new ObjectsToCsv(csvData)
+  const fileName = Date.now()
+  await csv.toDisk(`./lottery/duplicateUser_${fileName}.csv`);
+  Utils.sendSmapshotEmail(
+    `./lottery/duplicateUser_${fileName}.csv`,
+    `duplicateUser_${fileName}`,
+    `Duplicate Records of users taken at ${new Date().toUTCString()}`,
+    `Duplicate users list`,
+    "csv"
+  );
+  res.json({
+    status: true,
+    data: csvData,
+  });
+};
 module.exports = UserCtr;
