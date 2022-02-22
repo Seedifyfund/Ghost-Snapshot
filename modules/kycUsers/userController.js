@@ -1720,54 +1720,88 @@ UserCtr.addCommunityTesters = async (req, res) => {
 };
 // Find Duplicate users against wallet address
 UserCtr.findDupUsers = async (req, res) => {
-try{
-  const users = await UserModel.aggregate([
-    {
-      $group: {
-        _id: "$walletAddress",
-        data: { $push: "$$ROOT" },
-        count: { $sum: 1 },
+  try {
+    const users = await UserModel.aggregate([
+      {
+        $sort: { createdAt: -1 },
       },
-    },
-    { $match: { count: { $gt: 1 } } },
-    // {$project:{"_id":1}},
-    // {$group:{"_id":null,"dupWalletAdd":{$push:"$_id"}}},
-  ]);
-  let csvData = [];
-  users.forEach((user) => {
-    csvData = [...csvData, ...user.data];
-  });
-  csvData = csvData.map((user) => ({
-    walletAddress: user.walletAddress,
-    "Record Id": user.recordId,
-    "kyc status": user.kycStatus,
-    Name: user.name,
-    Email: user.email,
-    Country: user.country,
-    "kyc Approved Date": user.approvedTimestamp != 0 ? new Date(
-        user.approvedTimestamp * 1000
-    ).toUTCString() : '--',
-    "Created At": new Date(user.createdAt).toUTCString(),
-  }));
-  const csv = new ObjectsToCsv(csvData);
-  const fileName = Date.now();
-  await csv.toDisk(`./lottery/duplicateUser_${fileName}.csv`);
-  Utils.sendSmapshotEmail(
-    `./lottery/duplicateUser_${fileName}.csv`,
-    `duplicateUser_${fileName}`,
-    `Duplicate Records of users taken at ${new Date().toUTCString()}`,
-    `Duplicate users list`,
-    "csv"
-  );
-  res.json({
-    status: true,
-    message : "Please check your mail"
-  });
-}catch(err){
-  res.json({
-    status: false,
-    message : err.message
-  });
-}
+      {
+        $group: {
+          _id: "$walletAddress",
+          data: { $push: "$$ROOT" },
+          count: { $sum: 1 },
+        },
+      },
+      { $match: { count: { $gt: 1 } } },
+      // {$project:{"_id":1}},
+      // {$group:{"_id":null,"dupWalletAdd":{$push:"$_id"}}},
+    ]);
+    let csvData = [];
+    let keepUsers = [];
+    let removeUsers = [];
+    // users.forEach((user) => {
+    // });
+    users.forEach((wallet) => {
+      keepUsers.push(wallet.data.shift())
+      removeUsers = [...removeUsers, ...wallet.data];
+    });
+
+    keepUsers = keepUsers.map((user) => ({
+      walletAddress: user.walletAddress,
+      "Record Id": user.recordId,
+      "kyc status": user.kycStatus,
+      Name: user.name,
+      Email: user.email,
+      Country: user.country,
+      "kyc Approved Date":
+        user.approvedTimestamp != 0
+          ? new Date(user.approvedTimestamp * 1000).toUTCString()
+          : "--",
+      "Created At": new Date(user.createdAt).toUTCString(),
+    }));
+    removeUsers = removeUsers.map((user) => ({
+      walletAddress: user.walletAddress,
+      "Record Id": user.recordId,
+      "kyc status": user.kycStatus,
+      Name: user.name,
+      Email: user.email,
+      Country: user.country,
+      "kyc Approved Date":
+        user.approvedTimestamp != 0
+          ? new Date(user.approvedTimestamp * 1000).toUTCString()
+          : "--",
+      "Created At": new Date(user.createdAt).toUTCString(),
+    }));
+    const keepCsv = new ObjectsToCsv(keepUsers);
+    const removeCsv = new ObjectsToCsv(removeUsers);
+    const fileName = Date.now();
+    await keepCsv.toDisk(`./lottery/keepDuplicateUser_${fileName}.csv`);
+    Utils.sendSmapshotEmail(
+      `./lottery/keepDuplicateUser_${fileName}.csv`,
+      `keepDuplicateUser_${fileName}`,
+      `Duplicate Records of users taken at ${new Date().toUTCString()}`,
+      `Duplicate users list to keep`,
+      "csv"
+    );
+    await removeCsv.toDisk(`./lottery/removeDuplicateUser_${fileName}.csv`);
+    Utils.sendSmapshotEmail(
+      `./lottery/removeDuplicateUser_${fileName}.csv`,
+      `removeDuplicateUser_${fileName}`,
+      `Duplicate Records of users taken at ${new Date().toUTCString()}`,
+      `Duplicate users list to remove`,
+      "csv"
+    );
+    res.json({
+      status: true,
+      keepUsers: keepUsers,
+      removeUsers: removeUsers,
+      message: "Please check your mail",
+    });
+  } catch (err) {
+    res.json({
+      status: false,
+      message: err.message,
+    });
+  }
 };
 module.exports = UserCtr;
