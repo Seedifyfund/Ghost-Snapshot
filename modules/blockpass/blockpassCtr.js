@@ -4,7 +4,6 @@ const SyncHelper = require("../sync/syncHelper");
 const Utils = require("../../helper/utils");
 const axios = require("axios");
 const syncHelper = require("../sync/syncHelper");
-const { Data } = require("../../data");
 // const BlockPassCtr = require('../blockPassUsers/blockPassCtr');
 const blockPassCtr = {};
 
