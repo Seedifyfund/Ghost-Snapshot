@@ -1780,7 +1780,7 @@ UserCtr.findDupUsers = async (req, res) => {
       `./lottery/keepDuplicateUser_${fileName}.csv`,
       `keepDuplicateUser_${fileName}`,
       `Duplicate Records of users taken at ${new Date().toUTCString()}`,
-      `Duplicate users list`,
+      `Duplicate users list to keep`,
       "csv"
     );
     await removeCsv.toDisk(`./lottery/removeDuplicateUser_${fileName}.csv`);
@@ -1788,7 +1788,7 @@ UserCtr.findDupUsers = async (req, res) => {
       `./lottery/removeDuplicateUser_${fileName}.csv`,
       `removeDuplicateUser_${fileName}`,
       `Duplicate Records of users taken at ${new Date().toUTCString()}`,
-      `Duplicate users list`,
+      `Duplicate users list to remove`,
       "csv"
     );
     res.json({
