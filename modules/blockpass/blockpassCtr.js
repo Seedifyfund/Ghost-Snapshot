@@ -1,14 +1,15 @@
-const UserModal = require('../kycUsers/usersModel');
-const SyncHelper = require('../sync/syncHelper');
+const UserModal = require("../kycUsers/usersModel");
+const SyncHelper = require("../sync/syncHelper");
 
-const Utils = require('../../helper/utils');
-const axios = require('axios');
-const syncHelper = require('../sync/syncHelper');
+const Utils = require("../../helper/utils");
+const axios = require("axios");
+const syncHelper = require("../sync/syncHelper");
+const { Data } = require("../../data");
 // const BlockPassCtr = require('../blockPassUsers/blockPassCtr');
 const blockPassCtr = {};
 
 blockPassCtr.getApprovedUserList = async (req, res) => {
-  console.log('Blockpass Cron Called ========>');
+  console.log("Blockpass Cron Called ========>");
   try {
     // const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
     // const getLatestBlock = await axios.get(getLatestBlockNoUrl);
@@ -27,11 +28,9 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
     // const getSlpArray = await SyncHelper.slpBalance(0, latestBlock);
 
     const getRecordsFromBlockPass = async (skip) => {
-      const getRecords = await getDatafromBlockPass(skip);
-
       if (getRecords && getRecords.records.length) {
         console.log(
-          'getRecords.records.length ====>',
+          "getRecords.records.length ====>",
           getRecords.records.length
         );
 
@@ -63,7 +62,10 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
             : null;
           const recordId = getRecords.records[i].recordId.toLowerCase().trim();
           const checkUserAvalaible = await UserModal.findOne({
-            recordId: recordId.toLowerCase().trim(),
+            $or: [
+              { recordId: recordId.toLowerCase().trim() },
+              { walletAddress: userAddress.toLowerCase().trim() },
+            ],
           });
 
           let countryCode = null;
@@ -73,7 +75,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
             state = country.state ? country.state : null;
           }
 
-          if (getRecords.records[i].status === 'approved') {
+          if (getRecords.records[i].status === "approved") {
             const approval = Date.parse(getRecords.records[i].approvedDate);
             approvedDate = Math.trunc(approval / 1000);
           }
@@ -126,7 +128,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           }
         }
 
-        console.log('total is:', getRecords.total);
+        console.log("total is:", getRecords.total);
         if (
           getRecords.total > getRecords.skip &&
           blockScheduled < getRecords.total
@@ -137,13 +139,13 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           if (skip > getRecords.total) {
             skip = +getRecords.skip;
           }
-          getRecordsFromBlockPass(skip);
+          // getRecordsFromBlockPass(skip);
         } else {
-          console.log('Cron fired successfully');
+          console.log("Cron fired successfully");
 
           if (res) {
             res.status(200).JSON({
-              message: 'Cron fired successfully',
+              message: "Cron fired successfully",
             });
           }
         }
@@ -153,10 +155,10 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
 
     // console.log('data is', data);
   } catch (err) {
-    console.log('error in getting data', err);
+    console.log("error in getting data", err);
     if (res) {
       res.status(500).JSON({
-        message: 'Something went wrong',
+        message: "Something went wrong",
       });
     }
   }
@@ -165,14 +167,14 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
 // get data from block pass
 async function getDatafromBlockPass(skip) {
   try {
-    console.log('skip is:', skip);
+    console.log("skip is:", skip);
     let url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants?limit=10`;
     if (skip > 0) {
       url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/applicants?limit=10&skip=${skip}`;
     }
 
     var config = {
-      method: 'get',
+      method: "get",
       url: url,
       headers: {
         Authorization: `${process.env.BLOCKPASS_AUTHORIZATION}`,
@@ -199,7 +201,7 @@ async function getDatafromBlockPass(skip) {
       };
     }
   } catch (err) {
-    console.log('Error in blockpass api ', err);
+    console.log("Error in blockpass api ", err);
   }
 }
 
@@ -247,7 +249,7 @@ async function getSfundBalance(address, userAddress, endBlock) {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     var config = {
-      method: 'get',
+      method: "get",
       url: `https://api.bscscan.com/api?module=account&action=tokenbalancehistory&contractaddress=${address}&address=${userAddress}&blockno=${endBlock}&apikey=${process.env.BSC_API_KEY}`,
       headers: {},
     };
@@ -269,7 +271,7 @@ async function getSfundBalance(address, userAddress, endBlock) {
 
 // get liquidity balance
 async function getLiquidityBalance(userAddress, endBlock) {
-  const address = '0x74fa517715c4ec65ef01d55ad5335f90dce7cc87';
+  const address = "0x74fa517715c4ec65ef01d55ad5335f90dce7cc87";
 
   const getTotalSupplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${address}&apikey=${process.env.BSC_API_KEY}`;
   const tokenBalanceUrl = `https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=0x477bc8d23c634c154061869478bce96be6045d12&address=${address}&tag=latest&apikey=${process.env.BSC_API_KEY}`;
@@ -314,12 +316,12 @@ blockPassCtr.checkKycVerified = async (req, res) => {
       { name: 0, recordId: 0, country: 0, state: 0, email: 0 }
     )
       .populate({
-        path: 'networks',
+        path: "networks",
         select: { createdAt: 0, updatedAt: 0, userId: 0 },
         populate: {
-          path: 'networkId',
+          path: "networkId",
           select: { _id: 1, networkName: 1, logo: 1 },
-          model: 'network',
+          model: "network",
         },
       })
       .sort({ createdAt: -1 });
@@ -327,14 +329,14 @@ blockPassCtr.checkKycVerified = async (req, res) => {
     // console.log('checkIsVerified', checkIsVerified);
     if (checkIsVerified) {
       res.status(200).json({
-        message: 'Kyc Status',
+        message: "Kyc Status",
         status: true,
         data: {
-          kycStatus: checkIsVerified.kycStatus === 'approved' ? true : false,
+          kycStatus: checkIsVerified.kycStatus === "approved" ? true : false,
           status: checkIsVerified.kycStatus,
           data: {
             // name: checkIsVerified.name,
-            userId : checkIsVerified._id,
+            userId: checkIsVerified._id,
             snapshot: checkIsVerified.balObj,
             tier: checkIsVerified.tier,
             timestamp: checkIsVerified.timestamp,
@@ -344,11 +346,11 @@ blockPassCtr.checkKycVerified = async (req, res) => {
       });
     } else {
       res.status(200).json({
-        message: 'Kyc Status',
+        message: "Kyc Status",
         status: true,
         data: {
           kycStatus: false,
-          status: 'NOT REGISTERED',
+          status: "NOT REGISTERED",
           data: {},
         },
       });
@@ -356,7 +358,7 @@ blockPassCtr.checkKycVerified = async (req, res) => {
   } catch (err) {
     Utils.echoLog(`error in getSfundBalance ${err}`);
     res.status(200).json({
-      message: 'Somethig went wrong please try again',
+      message: "Somethig went wrong please try again",
       status: true,
       err: err.message ? err.message : null,
     });
@@ -365,7 +367,7 @@ blockPassCtr.checkKycVerified = async (req, res) => {
 
 blockPassCtr.getWebhooks = async (req, res) => {
   try {
-    Utils.echoLog('Webhook received for user', JSON.stringify(req.body));
+    Utils.echoLog("Webhook received for user", JSON.stringify(req.body));
     const userDetails = req.body;
     res.status(200).json({
       status: true,
@@ -374,7 +376,7 @@ blockPassCtr.getWebhooks = async (req, res) => {
     const url = `https://kyc.blockpass.org/kyc/1.0/connect/${process.env.BLOCKPASS_CLIENT_ID}/recordId/${userDetails.recordId}`;
 
     var config = {
-      method: 'get',
+      method: "get",
       url: url,
       headers: {
         Authorization: `${process.env.BLOCKPASS_AUTHORIZATION}`,
@@ -407,7 +409,10 @@ blockPassCtr.getWebhooks = async (req, res) => {
         : null;
       const recordId = getRecords.recordId.toLowerCase().trim();
       const checkUserAvalaible = await UserModal.findOne({
-        recordId: recordId.toLowerCase().trim(),
+        $or : [
+          {recordId: recordId.toLowerCase().trim()},
+          {walletAddress : userAddress.toLowerCase().trim()}
+        ]
       });
 
       let countryCode = null;
@@ -417,13 +422,13 @@ blockPassCtr.getWebhooks = async (req, res) => {
         state = country.state ? country.state : null;
       }
 
-      if (getRecords.status === 'approved') {
+      if (getRecords.status === "approved") {
         const approval = Date.parse(getRecords.approvedDate);
         approvedDate = Math.trunc(approval / 1000);
       }
 
       if (checkUserAvalaible) {
-        console.log('User avalaible ====>');
+        console.log("User avalaible ====>");
         const updateUser = await UserModal.updateOne(
           { _id: checkUserAvalaible._id },
           {
@@ -458,7 +463,7 @@ blockPassCtr.getWebhooks = async (req, res) => {
     }
   } catch (err) {
     Utils.echoLog(`Error in webhooks ${err}`);
-    console.log('error in webhook', err);
+    console.log("error in webhook", err);
   }
 };
 
