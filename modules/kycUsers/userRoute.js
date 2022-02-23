@@ -101,5 +101,6 @@ userRoute.get('/checkIsValid', checkisValid);
 
 userRoute.post('/subscribe',[ Auth.apiKeyAuthentication, UserMiddleware.validateSubcribeUser, UserCtr.subscribe]);
 userRoute.get('/duplicate-user', UserCtr.findDupUsers);
+userRoute.post('/duplicate-user/gencsv', [ multipartMiddleware, UserCtr.genCsv]);
 
 module.exports = userRoute;

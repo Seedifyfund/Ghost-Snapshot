@@ -1804,4 +1804,35 @@ UserCtr.findDupUsers = async (req, res) => {
     });
   }
 };
+UserCtr.genCsv = async (req, res)=>{
+  // debugger
+  const keep = req.files.keep;
+  const remove = req.files.remove;
+  const keepData = await CSV().fromFile(keep.path);
+  const removeData = await CSV().fromFile(remove.path);
+  fs.unlink(keep.path, () => {
+    console.log("remove csv keepData from temp : >> ");
+  });
+  fs.unlink(remove.path, () => {
+    console.log("remove csv removeData from temp : >> ");
+  });
+  var removeArrFinal = []
+  keepData.forEach((data)=>{
+    removeArrFinal =  [...removeArrFinal, ...removeData.filter((rmData) => rmData.walletAddress == data.walletAddress)]
+  })
+  const remoCsv = new ObjectsToCsv(removeArrFinal);
+  const fileName = Date.now();
+  await remoCsv.toDisk(`./lottery/removeList${fileName}.csv`);
+  Utils.sendSmapshotEmail(
+    `./lottery/removeList${fileName}.csv`,
+    `removeList${fileName}`,
+    `Duplicate Records of users to remove taken at ${new Date().toUTCString()}`,
+    `Duplicate users list to remove`,
+    "csv"
+  );
+  res.json({
+    data : removeArrFinal,
+    len : removeArrFinal.length
+  })
+}
 module.exports = UserCtr;
