@@ -1821,8 +1821,10 @@ UserCtr.genCsv = async (req, res)=>{
   const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
   var network = []
   for(let i=0; i < users.length; i++){
-    const net = await networkWalletModel.findOne({userId : [users[i]._id]})
-    network.push(net)
+    if(users[i].network.length && users[i].network[0]){
+      const net = await networkWalletModel.findOne({_id : users[i].network[0]})
+      network.push(net)
+    }
   }
   var removeArrFinal = []
   const remoCsv = new ObjectsToCsv(users);
