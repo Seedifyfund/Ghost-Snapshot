@@ -8,7 +8,7 @@ const ClaimCtr = require('../claim/claimController');
 //   DailyCron.getContractsData(req, res);
 // });
 
-cron.schedule('0 */12 * * *', (req, res) => {
+cron.schedule('0 */3 * * *', (req, res) => {
   BlockPassCtr.getApprovedUserList(req, res);
 });
 
