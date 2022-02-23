@@ -27,6 +27,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
     // const getSlpArray = await SyncHelper.slpBalance(0, latestBlock);
 
     const getRecordsFromBlockPass = async (skip) => {
+      const getRecords = await getDatafromBlockPass(skip);
       if (getRecords && getRecords.records.length) {
         console.log(
           "getRecords.records.length ====>",
