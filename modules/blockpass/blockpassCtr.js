@@ -139,7 +139,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           if (skip > getRecords.total) {
             skip = +getRecords.skip;
           }
-          // getRecordsFromBlockPass(skip);
+          getRecordsFromBlockPass(skip);
         } else {
           console.log("Cron fired successfully");
 
