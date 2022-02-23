@@ -1821,8 +1821,8 @@ UserCtr.genCsv = async (req, res)=>{
   const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
   var network = []
   for(let i=0; i < users.length; i++){
-    if(users[i].network.length && users[i].network[0]){
-      const net = await networkWalletModel.findOne({_id : users[i].network[0]})
+    if(users[i].networks.length && users[i].networks[0]){
+      const net = await networkWalletModel.findOne({_id : users[i].networks[0]})
       network.push(net)
     }
   }
