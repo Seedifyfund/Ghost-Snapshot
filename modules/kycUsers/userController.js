@@ -24,6 +24,7 @@ const xlsx = require("node-xlsx");
 const networkModel = require("../network/networkModel");
 const logsModel = require("../logs/logsModel");
 const projectsModel = require("../projects/projectsModel");
+const networkWalletModel = require("../networkWallet/networkWalletModel");
 
 const UserCtr = {};
 
