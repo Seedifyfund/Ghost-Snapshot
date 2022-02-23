@@ -24,6 +24,7 @@ const xlsx = require("node-xlsx");
 const networkModel = require("../network/networkModel");
 const logsModel = require("../logs/logsModel");
 const projectsModel = require("../projects/projectsModel");
+const networkWalletModel = require("../networkWallet/networkWalletModel");
 
 const UserCtr = {};
 
@@ -1806,33 +1807,36 @@ UserCtr.findDupUsers = async (req, res) => {
 };
 UserCtr.genCsv = async (req, res)=>{
   // debugger
-  const keep = req.files.keep;
+  // const keep = req.files.keep;
   const remove = req.files.remove;
-  const keepData = await CSV().fromFile(keep.path);
+  // const keepData = await CSV().fromFile(keep.path);
   const removeData = await CSV().fromFile(remove.path);
-  fs.unlink(keep.path, () => {
-    console.log("remove csv keepData from temp : >> ");
-  });
+  // fs.unlink(keep.path, () => {
+  //   console.log("remove csv keepData from temp : >> ");
+  // });
   fs.unlink(remove.path, () => {
     console.log("remove csv removeData from temp : >> ");
   });
+  const recordIds = removeData.map((data)=>data['Record Id']);
+  const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
+  const net = await networkWalletModel.find({userId : users.map((user)=>user._id)})
   var removeArrFinal = []
-  keepData.forEach((data)=>{
-    removeArrFinal =  [...removeArrFinal, ...removeData.filter((rmData) => rmData.walletAddress == data.walletAddress)]
-  })
-  const remoCsv = new ObjectsToCsv(removeArrFinal);
+  const remoCsv = new ObjectsToCsv(users);
   const fileName = Date.now();
-  await remoCsv.toDisk(`./lottery/removeList${fileName}.csv`);
+  await remoCsv.toDisk(`./lottery/removeListFinal${fileName}.csv`);
   Utils.sendSmapshotEmail(
-    `./lottery/removeList${fileName}.csv`,
-    `removeList${fileName}`,
+    `./lottery/removeListFinal${fileName}.csv`,
+    `removeListFinal${fileName}`,
     `Duplicate Records of users to remove taken at ${new Date().toUTCString()}`,
     `Duplicate users list to remove`,
     "csv"
   );
   res.json({
     data : removeArrFinal,
-    len : removeArrFinal.length
+    len : users.length,
+    net : net,
+    recordIds : recordIds,
+    users : users
   })
 }
 module.exports = UserCtr;
