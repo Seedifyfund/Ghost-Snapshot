@@ -10,6 +10,7 @@ const networkRoute = require('./modules/network/networkRoute');
 const farmRoute = require('./modules/farm/farmRoute');
 const logsRoute = require('./modules/logs/logsRout');
 const projectRoute = require('./modules/projects/projectsRoute');
+const snftUsersRoute = require('./modules/snftUsers/snftUsersRoute');
 
 // Routes Path
 
@@ -26,6 +27,7 @@ app.use('/api/v1/network', networkRoute);
 app.use('/api/v1/farm', farmRoute);
 app.use('/api/v1/logs', logsRoute);
 app.use('/api/v1/project', projectRoute);
+app.use('/api/v1/snft', snftUsersRoute);
 
 app.all('/*', (req, res) =>
   res.status(404).json({ message: 'Invalid Requests' })
