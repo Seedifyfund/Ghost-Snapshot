@@ -97,7 +97,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
                 email: email,
                 recordId: getRecords.records[i].recordId,
                 approvedTimestamp: approvedDate,
-                walletAddress: userAddress,
+                walletAddress: userAddress.toLowerCase().trim(),
                 country: countryCode,
                 state: state,
               }
@@ -112,7 +112,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           } else {
             const addNewUser = new UserModal({
               recordId: getRecords.records[i].recordId,
-              walletAddress: userAddress,
+              walletAddress: userAddress.toLowerCase().trim(),
               email: email,
               name: name,
               totalbalance: total,
@@ -437,7 +437,7 @@ blockPassCtr.getWebhooks = async (req, res) => {
             email: email,
             recordId: getRecords.recordId,
             approvedTimestamp: approvedDate,
-            walletAddress: userAddress,
+            walletAddress: userAddress.toLowerCase().trim(),
             country: countryCode,
             state: state,
           },
@@ -446,7 +446,7 @@ blockPassCtr.getWebhooks = async (req, res) => {
       } else {
         const addNewUser = new UserModal({
           recordId: getRecords.recordId,
-          walletAddress: userAddress,
+          walletAddress: userAddress.toLowerCase().trim(),
           email: email,
           name: name,
           totalbalance: total,
