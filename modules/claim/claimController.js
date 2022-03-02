@@ -71,6 +71,7 @@ ClaimCtr.list = async (req, res) => {
   try {
     let query = {};
     let page = req.query.page ? req.query.page : 1;
+        query.isSnft = { $ne: true };
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
@@ -79,6 +80,9 @@ ClaimCtr.list = async (req, res) => {
     }
     if (req.query.vestingType) {
       query.vestingType = { $in: req.query.vestingType };
+    }
+    if(req.query.isSnft){
+      query.isSnft = true;
     }
     let list;
     if (req.query.walletAddress) {
@@ -194,7 +198,8 @@ ClaimCtr.addClaimDump = async (req, res) => {
     logo,
     vestingType,
     startAmount,
-    endTime
+    endTime,
+    isSnft,
   } = req.body;
   const claimDump = await AddClaimModel.findOne({
     phaseNo: phaseNo,
@@ -235,6 +240,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
       data: jsonArray,
       iteration: 0,
       totalIterationCount: iterationCount,
+      isSnft: (isSnft == true || isSnft == 'true') ? true : false,
     });
     if (addClaim && typeof addClaim.log === "function") {
       console.log("req.userData._id :>> " + req.userData._id);
@@ -419,6 +425,7 @@ ClaimCtr.checkTransactionStatus = async () => {
                   endTime : dump.endTime,
                   startAmount : dump.startAmount,
                   dumpId: dump._id,
+                  isSnft: dump.isSnft,
                 });
                 await addNewClaim.save();
               }
