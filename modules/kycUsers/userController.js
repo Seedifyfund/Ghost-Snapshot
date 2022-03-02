@@ -1817,12 +1817,13 @@ UserCtr.genCsv = async (req, res)=>{
   fs.unlink(remove.path, () => {
     console.log("remove csv removeData from temp : >> ");
   });
-  const recordIds = removeData.map((data)=>data['Record Id']);
-  const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
+  // const recordIds = removeData.map((data)=>data['Record Id']);
+  // const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
+ const users = removeData
   var network = []
   for(let i=0; i < users.length; i++){
     if(users[i].networks.length && users[i].networks[0]){
-      const net = await networkWalletModel.findOne({_id : users[i].networks[0]})
+      const net = await networkWalletModel.findOne({_id : users[i].networks[0]}).lean()
       if(net){
         net.userId = net.userId.filter((id)=> id != users[i]._id)
         if(net.userId.length == 0){
@@ -1830,6 +1831,7 @@ UserCtr.genCsv = async (req, res)=>{
           await networkWalletModel.findOneAndDelete({_id : net._id})
         }else{
           console.log('updated network net.userId :>> ', net._id);
+          await networkWalletModel.findOneAndUpdate({_id : net._id}, {$set : { userId : net.userId} })
           await net.save()
         }
       }
