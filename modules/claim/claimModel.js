@@ -72,6 +72,10 @@ const claimSchema = new Schema(
       type: Number,
       required: true,
     },
+    isSnft: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   {
