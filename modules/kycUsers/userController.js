@@ -1818,7 +1818,7 @@ UserCtr.genCsv = async (req, res)=>{
     console.log("remove csv removeData from temp : >> ");
   });
   const recordIds = removeData.map((data)=>data['Record Id']);
-  const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
+  const users = await  UserModel.find({recordId : {$in : recordIds}, kycStatus : { $ne : "approved"}}, { balObj : 0, __v : 0}).lean()
 //  const users = removeData
   var network = []
   for(let i=0; i < users.length; i++){
