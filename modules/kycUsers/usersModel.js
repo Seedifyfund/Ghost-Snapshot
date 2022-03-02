@@ -72,6 +72,7 @@ const userSchema = new Schema(
         'resubmit',
         'incomplete',
         'rejected',
+        'blocked'
       ],
     },
 
