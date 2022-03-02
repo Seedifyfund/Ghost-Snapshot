@@ -1818,7 +1818,7 @@ UserCtr.genCsv = async (req, res)=>{
     console.log("remove csv removeData from temp : >> ");
   });
   const recordIds = removeData.map((data)=>data['Record Id']);
-  const users = await  UserModel.find({recordId : {$in : recordIds}, kycStatus : { $ne : "approved"}}, { balObj : 0, __v : 0}).lean()
+  const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
 //  const users = removeData
   var network = []
   for(let i=0; i < users.length; i++){
@@ -1838,15 +1838,15 @@ UserCtr.genCsv = async (req, res)=>{
       network.push(net)
     }
   }
-  await  UserModel.deleteMany({recordId : {$in : recordIds}, kycStatus : { $ne : "approved"}})
+  await  UserModel.deleteMany({recordId : {$in : recordIds}})
   var removeArrFinal = []
   const remoCsv = new ObjectsToCsv(users);
   const fileName = Date.now();
-  await remoCsv.toDisk(`./lottery/deletedRecords${fileName}.csv`);
+  await remoCsv.toDisk(`./lottery/deletedRecords${fileName}Phase4.csv`);
   Utils.sendSmapshotEmail(
-    `./lottery/deletedRecords${fileName}.csv`,
-    `deletedRecords${fileName}`,
-    `Duplicate Records (Deleted) phase 2 taken at ${new Date().toUTCString()}`,
+    `./lottery/deletedRecords${fileName}Phase4.csv`,
+    `deletedRecords${fileName}Phase4`,
+    `Duplicate Records (Deleted) phase 4 taken at ${new Date().toUTCString()}`,
     `Duplicate users list Deleted`,
     "csv"
   );
