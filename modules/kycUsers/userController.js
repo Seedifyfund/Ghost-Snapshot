@@ -1838,7 +1838,7 @@ UserCtr.genCsv = async (req, res)=>{
       network.push(net)
     }
   }
-  await  UserModel.deleteMany({recordId : {$in : recordIds}})
+  await  UserModel.deleteMany({recordId : {$in : recordIds}, kycStatus : { $ne : "approved"}})
   var removeArrFinal = []
   const remoCsv = new ObjectsToCsv(users);
   const fileName = Date.now();
