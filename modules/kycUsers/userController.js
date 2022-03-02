@@ -1825,7 +1825,7 @@ UserCtr.genCsv = async (req, res)=>{
     if(users[i].networks.length && JSON.parse(users[i].networks)[0]){
       const net = await networkWalletModel.findOne({_id : JSON.parse(users[i].networks)[0] }).lean()
       if(net){
-        net.userId = net.userId.filter((id)=> id != users[i]._id)
+        net.userId = net.userId.filter((id)=> id.toString() != users[i]._id.toString())
         if(net.userId.length == 0){
           console.log('deleted network net.userId :>> ', net._id);
           await networkWalletModel.findOneAndDelete({_id : net._id})
@@ -1854,7 +1854,7 @@ UserCtr.genCsv = async (req, res)=>{
     data : removeArrFinal,
     len : users.length,
     network : network,
-    recordIds : recordIds,
+    // recordIds : recordIds,
     users : users
   })
 }
