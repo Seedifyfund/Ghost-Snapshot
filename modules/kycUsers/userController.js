@@ -1822,8 +1822,8 @@ UserCtr.genCsv = async (req, res)=>{
  const users = removeData
   var network = []
   for(let i=0; i < users.length; i++){
-    if(users[i].networks.length && users[i].networks[0]){
-      const net = await networkWalletModel.findOne({_id : users[i].networks[0]}).lean()
+    if(users[i].networks.length && JSON.parse(users[i].networks)[0]){
+      const net = await networkWalletModel.findOne({_id : JSON.parse(users[i].networks)[0] }).lean()
       if(net){
         net.userId = net.userId.filter((id)=> id != users[i]._id)
         if(net.userId.length == 0){
@@ -1842,14 +1842,14 @@ UserCtr.genCsv = async (req, res)=>{
   var removeArrFinal = []
   const remoCsv = new ObjectsToCsv(users);
   const fileName = Date.now();
-  await remoCsv.toDisk(`./lottery/deletedRecords${fileName}.csv`);
-  Utils.sendSmapshotEmail(
-    `./lottery/deletedRecords${fileName}.csv`,
-    `deletedRecords${fileName}`,
-    `Duplicate Records (Deleted) taken at ${new Date().toUTCString()}`,
-    `Duplicate users list Deleted`,
-    "csv"
-  );
+  // await remoCsv.toDisk(`./lottery/deletedRecords${fileName}.csv`);
+  // Utils.sendSmapshotEmail(
+  //   `./lottery/deletedRecords${fileName}.csv`,
+  //   `deletedRecords${fileName}`,
+  //   `Duplicate Records (Deleted) taken at ${new Date().toUTCString()}`,
+  //   `Duplicate users list Deleted`,
+  //   "csv"
+  // );
   res.json({
     data : removeArrFinal,
     len : users.length,
