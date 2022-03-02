@@ -78,7 +78,7 @@ const addClaimSchema = new Schema(
         name: { type: String, default: "" },
         vestingPercent: { type: Number, default: 0 },
         timestamp: { type: Number, default: 0 },
-        phaseNo: { type: Number, default: 0 },
+        rootHash: { type: Number, default: 0 },
         status: {
           type: String,
           enum: ["upcoming", "pending", "uploaded"],
