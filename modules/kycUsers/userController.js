@@ -1832,13 +1832,13 @@ UserCtr.genCsv = async (req, res)=>{
         }else{
           console.log('updated network net.userId :>> ', net._id);
           await networkWalletModel.findOneAndUpdate({_id : net._id}, {$set : { userId : net.userId} })
-          await net.save()
+          // await net.save()
         }
       }
       network.push(net)
     }
   }
-  await  UserModel.deleteMany({recordId : {$in : recordIds}})
+  // await  UserModel.deleteMany({recordId : {$in : recordIds}})
   var removeArrFinal = []
   const remoCsv = new ObjectsToCsv(users);
   const fileName = Date.now();
