@@ -71,7 +71,7 @@ ClaimCtr.list = async (req, res) => {
   try {
     let query = {};
     let page = req.query.page ? req.query.page : 1;
-        query.isSnft = { $ne: true };
+    query.isSnft = { $ne: true };
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
@@ -363,7 +363,7 @@ ClaimCtr.updateDump = async (req, res) => {
     });
   }
 };
-
+// edit dump(claim) records 
 ClaimCtr.editDump = async (req, res) => {
   try {
     const dump = await AddClaimModel.findOne({ _id: req.body.dumpId });
@@ -473,24 +473,5 @@ ClaimCtr.deleteDumprecords = async () => {
   }
 };
 
-ClaimCtr.updatePrevPoolVestingType = async (req, res)=>{
-try{
-  const dump = await AddClaimModel.updateMany({vestingType : {$ne : "linear"}}, { $set : { vestingType : "monthly"}});
-  const claim = await ClaimModel.updateMany({vestingType : {$ne : "linear"}}, {$set : { vestingType : "monthly"}})
-  res.json({
-    status : true,
-    data :{
-      claim : claim,
-      dump : dump
-    }
-  })
-}catch(err){
-  res.json({
-    status : false,
-    message : err.message
-  })
-}
-
-}
 
 module.exports = ClaimCtr;
