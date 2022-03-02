@@ -1817,13 +1817,13 @@ UserCtr.genCsv = async (req, res)=>{
   fs.unlink(remove.path, () => {
     console.log("remove csv removeData from temp : >> ");
   });
-  // const recordIds = removeData.map((data)=>data['Record Id']);
-  // const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
- const users = removeData
+  const recordIds = removeData.map((data)=>data['Record Id']);
+  const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
+//  const users = removeData
   var network = []
   for(let i=0; i < users.length; i++){
-    if(users[i].networks.length && JSON.parse(users[i].networks)[0]){
-      const net = await networkWalletModel.findOne({_id : JSON.parse(users[i].networks)[0] }).lean()
+    if(users[i].networks.length && users[i].networks[0]){
+      const net = await networkWalletModel.findOne({_id : users[i].networks[0] }).lean()
       if(net){
         net.userId = net.userId.filter((id)=> id.toString() != users[i]._id.toString())
         if(net.userId.length == 0){
@@ -1838,23 +1838,23 @@ UserCtr.genCsv = async (req, res)=>{
       network.push(net)
     }
   }
-  // await  UserModel.deleteMany({recordId : {$in : recordIds}})
+  await  UserModel.deleteMany({recordId : {$in : recordIds}})
   var removeArrFinal = []
   const remoCsv = new ObjectsToCsv(users);
   const fileName = Date.now();
-  // await remoCsv.toDisk(`./lottery/deletedRecords${fileName}.csv`);
-  // Utils.sendSmapshotEmail(
-  //   `./lottery/deletedRecords${fileName}.csv`,
-  //   `deletedRecords${fileName}`,
-  //   `Duplicate Records (Deleted) taken at ${new Date().toUTCString()}`,
-  //   `Duplicate users list Deleted`,
-  //   "csv"
-  // );
+  await remoCsv.toDisk(`./lottery/deletedRecords${fileName}.csv`);
+  Utils.sendSmapshotEmail(
+    `./lottery/deletedRecords${fileName}.csv`,
+    `deletedRecords${fileName}`,
+    `Duplicate Records (Deleted) phase 2 taken at ${new Date().toUTCString()}`,
+    `Duplicate users list Deleted`,
+    "csv"
+  );
   res.json({
     data : removeArrFinal,
     len : users.length,
     network : network,
-    // recordIds : recordIds,
+    recordIds : recordIds,
     users : users
   })
 }
