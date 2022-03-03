@@ -328,8 +328,8 @@ web3Helper.getTransactionStatus = async (transactionHash, networkName) => {
         resolve(null);
       }
     } catch (err) {
+      console.log("error in getTransactionStatus", err.message);
       reject(null);
-      console.log("error in getTransactionStatus", err);
     }
   });
 };
