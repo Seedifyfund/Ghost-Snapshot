@@ -1770,4 +1770,33 @@ try{
   });
 }
 };
+
+UserCtr.genTestUser = async (req, res)=>{
+  try{
+    const users = await UserModel.find({kycStatus : 'approved'}, {walletAddress : 1}).limit(20000).lean()
+    const csvData = users.map((user)=>({
+      walletAddress : user.walletAddress,
+      eTokens : Math.floor((Math.random() * 100) + 1)
+    }))
+    const csv = new ObjectsToCsv(csvData);
+    const fileName = 'dummy_users_data';
+    await csv.toDisk(`./lottery/${fileName}.csv`);
+    Utils.sendSmapshotEmail(
+      `./lottery/${fileName}.csv`,
+      `${fileName}`,
+      `test Data taken at ${new Date().toUTCString()}`,
+      `users list`,
+      "csv"
+    );
+    res.json({
+      status: true,
+      message : "Please check your mail"
+    });
+  }catch(err){
+    res.json({
+      status : false,
+      message : err.message
+    })
+  }
+}
 module.exports = UserCtr;
