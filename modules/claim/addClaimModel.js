@@ -100,11 +100,19 @@ const addClaimSchema = new Schema(
       enum: ["monthly", "linear"],
       default: "monthly",
     },
+    totalIterationCount: {
+      type: Number,
+      default: 0,
+    },
     transactionHash: {
       type: Array,
       default: [],
     },
     isDisabledBit: {
+      type: Boolean,
+      default: false,
+    },
+    isSnft: {
       type: Boolean,
       default: false,
     },

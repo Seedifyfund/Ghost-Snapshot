@@ -71,6 +71,7 @@ ClaimCtr.list = async (req, res) => {
   try {
     let query = {};
     let page = req.query.page ? req.query.page : 1;
+    query.isSnft = { $ne: true };
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
@@ -79,6 +80,9 @@ ClaimCtr.list = async (req, res) => {
     }
     if (req.query.vestingType) {
       query.vestingType = { $in: req.query.vestingType };
+    }
+    if(req.query.isSnft){
+      query.isSnft = true;
     }
     let list;
     if (req.query.walletAddress) {
@@ -199,7 +203,8 @@ ClaimCtr.addClaimDump = async (req, res) => {
     vestings,
     vestingType,
     startAmount,
-    endTime
+    endTime,
+    isSnft,
   } = req.body;
   const claimDump = await AddClaimModel.findOne({
     phaseNo: phaseNo,
@@ -241,6 +246,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
       prevIgoDate : new Date(),
       vestings:
         vestings && typeof vestings == "string" ? JSON.parse(vestings) : null,
+      isSnft: (isSnft == true || isSnft == 'true') ? true : false,
     });
     addClaim.vestings[0].status = 'pending'
     addClaim.currentVestingId = addClaim.vestings[0]._id
@@ -376,7 +382,7 @@ ClaimCtr.updateDump = async (req, res) => {
     });
   }
 };
-
+// edit dump(claim) records 
 ClaimCtr.editDump = async (req, res) => {
   try {
     const dump = await AddClaimModel.findOne({ _id: req.body.dumpId });
@@ -489,6 +495,7 @@ ClaimCtr.checkTransactionStatus = async () => {
                   startAmount : dump.startAmount,
                   dumpId: dump._id,
                   vestings: dump.vestings,
+                  isSnft: dump.isSnft,
                 });
                 await addNewClaim.save();
               }else{
@@ -538,28 +545,9 @@ ClaimCtr.deleteDumprecords = async () => {
       await AddClaimModel.findOneAndDelete({ _id: dump._id });
     });
   } catch (error) {
-    utils.echoLog("error in deleteDumprecord >>  ", err);
+    utils.echoLog("error in deleteDumprecord >>  ", error);
   }
 };
 
-ClaimCtr.updatePrevPoolVestingType = async (req, res)=>{
-try{
-  const dump = await AddClaimModel.updateMany({vestingType : {$ne : "linear"}}, { $set : { vestingType : "monthly"}});
-  const claim = await ClaimModel.updateMany({vestingType : {$ne : "linear"}}, {$set : { vestingType : "monthly"}})
-  res.json({
-    status : true,
-    data :{
-      claim : claim,
-      dump : dump
-    }
-  })
-}catch(err){
-  res.json({
-    status : false,
-    message : err.message
-  })
-}
-
-}
 
 module.exports = ClaimCtr;

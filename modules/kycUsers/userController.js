@@ -24,6 +24,7 @@ const xlsx = require("node-xlsx");
 const networkModel = require("../network/networkModel");
 const logsModel = require("../logs/logsModel");
 const projectsModel = require("../projects/projectsModel");
+const networkWalletModel = require("../networkWallet/networkWalletModel");
 
 const UserCtr = {};
 
@@ -243,9 +244,9 @@ UserCtr.addCsv = async (req, res) => {
     if (req.query.country) {
       query.country = { $ne: req.query.country.toLowerCase().trim() };
     }
-    if(req.query.projectId){
-      const project = await projectsModel.findOne({_id : req.query.projectId});
-      query._id = {$in : project.subscribedUsers}
+    if (req.query.projectId) {
+      const project = await projectsModel.findOne({ _id: req.query.projectId });
+      query._id = { $in: project.subscribedUsers };
     }
     const getUsers = await UserModel.aggregate([
       {
@@ -1687,36 +1688,184 @@ UserCtr.subscribe = async (req, res) => {
   }
 };
 
-
-// script to add kyc users for community testing 
-// only for staging 
+// script to add kyc users for community testing
+// only for staging
 UserCtr.addCommunityTesters = async (req, res) => {
   const files = req.files.csv;
 
-if(files){
-  const jsonArray = await CSV().fromFile(files.path);
-  fs.unlink(files.path, () => {
-    console.log("remove csv from temp : >> ");
+  if (files) {
+    const jsonArray = await CSV().fromFile(files.path);
+    fs.unlink(files.path, () => {
+      console.log("remove csv from temp : >> ");
+    });
+    jsonArray.forEach(async (user, index) => {
+      console.log("user.name :>> ", user.name);
+      const newUser = new UserModel({
+        name: user.name,
+        email: `${user.name.toLowerCase()}@mailinator.com`,
+        recordId: `123456-${index}`,
+        walletAddress: user.walletAddress.toLowerCase(),
+        isActive: true,
+        kycStatus: "approved",
+        timestamp: Date.now(),
+        approvedTimestamp: Date.now(),
+        tier: "tier1",
+      });
+      await newUser.save();
+    });
+    res.json({
+      status: true,
+      data: jsonArray,
+    });
+  }
+};
+// Find Duplicate users against wallet address
+UserCtr.findDupUsers = async (req, res) => {
+  try {
+    const users = await UserModel.aggregate([
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: "$walletAddress",
+          data: { $push: "$$ROOT" },
+          count: { $sum: 1 },
+        },
+      },
+      { $match: { count: { $gt: 1 } } },
+      // {$project:{"_id":1}},
+      // {$group:{"_id":null,"dupWalletAdd":{$push:"$_id"}}},
+    ]);
+    let csvData = [];
+    let keepUsers = [];
+    let removeUsers = [];
+    // users.forEach((user) => {
+    // });
+    users.forEach((wallet) => {
+      keepUsers.push(wallet.data.shift())
+      removeUsers = [...removeUsers, ...wallet.data];
+    });
+
+    keepUsers = keepUsers.map((user) => ({
+      walletAddress: user.walletAddress,
+      "Record Id": user.recordId,
+      "kyc status": user.kycStatus,
+      Name: user.name,
+      Email: user.email,
+      Country: user.country,
+      "kyc Approved Date":
+        user.approvedTimestamp != 0
+          ? new Date(user.approvedTimestamp * 1000).toUTCString()
+          : "--",
+      "Created At": new Date(user.createdAt).toUTCString(),
+    }));
+    removeUsers = removeUsers.map((user) => ({
+      walletAddress: user.walletAddress,
+      "Record Id": user.recordId,
+      "kyc status": user.kycStatus,
+      Name: user.name,
+      Email: user.email,
+      Country: user.country,
+      "kyc Approved Date":
+        user.approvedTimestamp != 0
+          ? new Date(user.approvedTimestamp * 1000).toUTCString()
+          : "--",
+      "Created At": new Date(user.createdAt).toUTCString(),
+    }));
+    const keepCsv = new ObjectsToCsv(keepUsers);
+    const removeCsv = new ObjectsToCsv(removeUsers);
+    const fileName = Date.now();
+    await keepCsv.toDisk(`./lottery/keepDuplicateUser_${fileName}.csv`);
+    Utils.sendSmapshotEmail(
+      `./lottery/keepDuplicateUser_${fileName}.csv`,
+      `keepDuplicateUser_${fileName}`,
+      `Duplicate Records of users taken at ${new Date().toUTCString()}`,
+      `Duplicate users list to keep`,
+      "csv"
+    );
+    await removeCsv.toDisk(`./lottery/removeDuplicateUser_${fileName}.csv`);
+    Utils.sendSmapshotEmail(
+      `./lottery/removeDuplicateUser_${fileName}.csv`,
+      `removeDuplicateUser_${fileName}`,
+      `Duplicate Records of users taken at ${new Date().toUTCString()}`,
+      `Duplicate users list to remove`,
+      "csv"
+    );
+    res.json({
+      status: true,
+      keepUsers: keepUsers,
+      removeUsers: removeUsers,
+      message: "Please check your mail",
+    });
+  } catch (err) {
+    res.json({
+      status: false,
+      message: err.message,
+    });
+  }
+};
+UserCtr.genCsv = async (req, res)=>{
+  // debugger
+  // const keep = req.files.keep;
+  const remove = req.files.remove;
+  // const keepData = await CSV().fromFile(keep.path);
+  const removeData = await CSV().fromFile(remove.path);
+  // fs.unlink(keep.path, () => {
+  //   console.log("remove csv keepData from temp : >> ");
+  // });
+  fs.unlink(remove.path, () => {
+    console.log("remove csv removeData from temp : >> ");
   });
-  jsonArray.forEach(async (user, index)=>{
-    console.log('user.name :>> ', user.name);
-    const newUser = new UserModel({
-      name : user.name,
-      email : `${user.name.toLowerCase()}@mailinator.com`,
-      recordId : `123456-${index}`,
-      walletAddress : user.walletAddress.toLowerCase(),
-      isActive : true,
-      kycStatus : 'approved',
-      timestamp : Date.now(),
-      approvedTimestamp : Date.now(),
-      tier : 'tier1'
-    })
-    await newUser.save()
-  })
+  const recordIds = removeData.map((data)=>data['Record Id']);
+  const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
+  const net = await networkWalletModel.find({userId : users.map((user)=>user._id)})
+  var removeArrFinal = []
+  const remoCsv = new ObjectsToCsv(users);
+  const fileName = Date.now();
+  await remoCsv.toDisk(`./lottery/removeListFinal${fileName}.csv`);
+  Utils.sendSmapshotEmail(
+    `./lottery/removeListFinal${fileName}.csv`,
+    `removeListFinal${fileName}`,
+    `Duplicate Records of users to remove taken at ${new Date().toUTCString()}`,
+    `Duplicate users list to remove`,
+    "csv"
+  );
   res.json({
-    status : true,
-    data : jsonArray
+    data : removeArrFinal,
+    len : users.length,
+    net : net,
+    recordIds : recordIds,
+    users : users
   })
 }
+
+UserCtr.genTestUser = async (req, res)=>{
+  try{
+    const users = await UserModel.find({kycStatus : 'approved'}, {walletAddress : 1}).limit(20000).lean()
+    const csvData = users.map((user)=>({
+      walletAddress : user.walletAddress,
+      eTokens : Math.floor((Math.random() * 100) + 1)
+    }))
+    const csv = new ObjectsToCsv(csvData);
+    const fileName = 'dummy_users_data';
+    await csv.toDisk(`./lottery/${fileName}.csv`);
+    Utils.sendSmapshotEmail(
+      `./lottery/${fileName}.csv`,
+      `${fileName}`,
+      `test Data taken at ${new Date().toUTCString()}`,
+      `users list`,
+      "csv"
+    );
+    res.json({
+      status: true,
+      message : "Please check your mail"
+    });
+  }catch(err){
+    res.json({
+      status : false,
+      message : err.message
+    })
+  }
 }
 module.exports = UserCtr;
