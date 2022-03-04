@@ -446,7 +446,7 @@ ClaimCtr.checkTransactionStatus = async () => {
       }
     });
   } catch (error) {
-    utils.echoLog('error in checkTransactionStatus cron  ', err);
+    utils.echoLog('error in checkTransactionStatus cron  ', error.message);
   }
 };
 // cron service for deleting dump records
