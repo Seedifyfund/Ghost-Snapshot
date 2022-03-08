@@ -99,7 +99,7 @@ ClaimCtr.list = async (req, res) => {
               req.query.walletAddress.toLowerCase() ==
               wallet.walletAddress.toLowerCase()
           );
-          claim.isInvested = wallet ? true : false;
+          claim.isInvested = wallet ? wallet.eTokens : 0;
           claim.dumpId = {
             _id: claim.dumpId._id,
             transactionHash: claim.dumpId.transactionHash,
