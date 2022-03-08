@@ -82,19 +82,11 @@ const addClaimSchema = new Schema(
         txnHash: { type: String, default: '' },
         status: {
           type: String,
-          enum: ["upcoming", "pending", "uploaded"],
+          enum: ["upcoming", "pending", "uploaded", "failed"],
           default: "upcoming",
         },
       },
     ],
-    currentVestingId : {
-      type: String,
-      default: null,
-    },
-    prevIgoDate : {
-      type: Date,
-      default: null,
-    },
     vestingType: {
       type: String,
       required: true,

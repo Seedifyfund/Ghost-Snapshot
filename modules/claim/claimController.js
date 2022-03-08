@@ -248,8 +248,6 @@ ClaimCtr.addClaimDump = async (req, res) => {
         vestings && typeof vestings == "string" ? JSON.parse(vestings) : null,
       isSnft: (isSnft == true || isSnft == 'true') ? true : false,
     });
-    addClaim.vestings[0].status = 'pending'
-    addClaim.currentVestingId = addClaim.vestings[0]._id
     if (addClaim && typeof addClaim.log === "function") {
       console.log("req.userData._id :>> " + req.userData._id);
       const data = {
@@ -404,33 +402,18 @@ ClaimCtr.editDump = async (req, res) => {
     });
   }
 };
-ClaimCtr.triggerVestings = async (req, res) => {
+ClaimCtr.topupVestings = async (req, res) => {
   try {
-    const dump = await AddClaimModel.findOne({ _id: req.body.dumpId });
-    if (dump.data.length != 0 || dump.pendingData.length != 0) {
-      return res.status(200).json({
-        status: "SUCCESS",
-        message: "Some vestings are already in process",
-      });
-    }
-    const vst = dump.vestings.find((vesting)=> vesting._id == req.body.vestingId)
-    if(vst.status == 'uploaded' || vst.status == 'pending'){
-      return res.status(200).json({
-        status: "SUCCESS",
-        message: "Some vestings are already in process",
-      });
-    }
-    dump.vestings.forEach((vesting) => {
-      if (vesting._id == req.body.vestingId) {
+
+    const dump = await AddClaimModel.findOne({ _id: req.body.dumpId }, {uploadData : 0, pendingData : 0, data: 0});
+    const vestingIndex = req.body.vestingIndex
+    const txnHash = req.body.txnHash
+    dump.vestings.forEach((vesting, index) => {
+      if (vestingIndex.includes(index) && vesting.status != "pending" ) {
         vesting.status = "pending";
-        vesting.phaseNo = req.body.phaseNo ? req.body.phaseNo : vesting.phaseNo;
-        vesting.timestamp = req.body.timestamp ? req.body.timestamp : vesting.timestamp;
+        vesting.txnHash = txnHash
       }
     });
-    dump.prevIgoDate = new Date()
-    dump.data = dump.uploadData;
-    dump.uploadData = [];
-    dump.currentVestingId = req.body.vestingId;
     dump.save();
     return res.status(200).json({
       status: "SUCCESS",
@@ -447,9 +430,11 @@ ClaimCtr.triggerVestings = async (req, res) => {
 //cron service
 ClaimCtr.checkTransactionStatus = async () => {
   try {
-    // console.log("checkTransactionStatus cron called :>> ");
-    const dumpList = await AddClaimModel.find({ pendingData: { $ne: [] } });
-    dumpList.forEach((dump) => {
+    // console.log("checkTransactionStatus cron called :>> ");$or
+    const dumpList = await AddClaimModel.find({$or : [{ pendingData: { $ne: [] } }, {'vestings.status' : {$in : ['pending']}}]}).lean();
+    console.log('dumpList.length :>> ', dumpList.length);
+    dumpList.forEach(async(dump) => {
+      console.log('dump._id :>> ', dump._id);
       if (dump.pendingData.length != 0) {
         dump.pendingData.forEach(async (pendingData) => {
           const txn = await web3Helper.getTransactionStatus(
@@ -463,20 +448,10 @@ ClaimCtr.checkTransactionStatus = async () => {
             );
             dump.uploadData = dump.uploadData.concat(pendingData.data);
             if (dump.data.length == 0 && dump.pendingData.length == 0) {
-              const currentVesting = dump.vestings.find(
-                (vesting) =>
-                  vesting._id == dump.currentVestingId &&
-                  vesting.status == "pending"
-              );
               const claim = await ClaimModel.findOne({
                 phaseNo: dump.phaseNo,
                 tokenAddress: dump.tokenAddress.toLowerCase(),
                 networkSymbol: dump.networkSymbol.toUpperCase(),
-              });
-              dump.vestings.forEach((vesting) => {
-                if (vesting._id == dump.currentVestingId) {
-                  vesting.status = "uploaded";
-                }
               });
               if (!claim) {
                 const addNewClaim = new ClaimModel({
@@ -502,7 +477,6 @@ ClaimCtr.checkTransactionStatus = async () => {
                 claim.vestings = dump.vestings
                 claim.save()
               }
-              dump.currentVestingId = null;
             }
             await AddClaimModel.findOneAndUpdate(
               { _id: dump._id },
@@ -510,8 +484,6 @@ ClaimCtr.checkTransactionStatus = async () => {
                 $set: {
                   pendingData: dump.pendingData,
                   uploadData: dump.uploadData,
-                  vestings: dump.vestings,
-                  currentVestingId: dump.currentVestingId,
                 },
               }
             );
@@ -527,9 +499,36 @@ ClaimCtr.checkTransactionStatus = async () => {
           }
         });
       }
+      else if (dump.vestings.length !=0){
+        dump.vestings.forEach(async(vesting)=>{
+          if(vesting.status === 'pending' && vesting.txnHash){
+            const txn = await web3Helper.getTransactionStatus(
+              vesting.txnHash,
+              dump.networkName
+            );
+            console.log("txn vesting :>> ", txn);
+            if(txn && txn.status == true){
+              console.log('uploaded :>> ');
+              vesting.status = "uploaded"
+            }else if(txn && txn.status == false){
+              vesting.status = "failed"
+            }
+            await AddClaimModel.findOneAndUpdate(
+              { _id: dump._id },
+              { $set: { vestings : dump.vestings } }
+            );
+            await ClaimModel.findOneAndUpdate(
+              {dumpId : dump._id},
+              { $set: { vestings : dump.vestings } }
+            )
+          }
+        })
+
+
+      }
     });
   } catch (error) {
-    utils.echoLog("error in checkTransactionStatus cron  ", err);
+    utils.echoLog("error in checkTransactionStatus cron  ", error);
   }
 };
 // cron service for deleting dump records
