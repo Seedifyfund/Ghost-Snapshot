@@ -442,7 +442,7 @@ try{
   const {
     dumpId,
     walletAddress
-  } = req.body
+  } = req.query
   const dump = await AddClaimModel.findOne({_id : dumpId }).lean()
   const user = dump.uploadData.find((usr) => walletAddress.toLowerCase() == usr.walletAddress.toLowerCase())
   if(!user){
