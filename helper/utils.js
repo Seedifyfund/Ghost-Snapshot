@@ -196,9 +196,9 @@ utils.sendSmapshotEmail = async (
       }
       if (data) {
         console.log('Email send successfully');
-        fs.unlink(location, ()=>{
-          console.log(`remove ${location}`)
-        })
+        // fs.unlink(location, ()=>{
+        //   console.log(`remove ${location}`)
+        // })
       }
     });
   } catch (err) {
