@@ -33,7 +33,18 @@ web3Helper.getRandomNumber = async (requestNo, noOfAddress, Outof) => {
     console.log("error in contract ", err);
   }
 };
+web3Helper.getVestingTokens = async (eTokens, vestingPercent)=>{
+  try{
+    web3 = new Web3(new Web3.providers.HttpProvider(provider));
+    const newVestTokens = web3.utils.toWei(
+      (+(eTokens * vestingPercent) / 100).toFixed(6)
+    );
+    return newVestTokens
+  }catch(err){
+    console.log("error in getVestingTokens ", err);
 
+  }
+}
 web3Helper.getUserStakedBalance = async (walletAddress, ContractAddress) => {
   return new Promise(async (resolve, reject) => {
     try {

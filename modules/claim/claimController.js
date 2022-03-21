@@ -6,7 +6,8 @@ const web3Helper = require("../../helper/web3Helper");
 const momentTz = require("moment-timezone");
 const utils = require("../../helper/utils");
 const ClaimCtr = {};
-
+const keccak256 = require('keccak256');
+const { MerkleTree } = require('merkletreejs');
 ClaimCtr.addNewClaim = async (req, res) => {
   try {
     const {
@@ -436,6 +437,55 @@ ClaimCtr.topupVestings = async (req, res) => {
     });
   }
 };
+ClaimCtr.createHexProof = async(req, res)=>{
+try{
+  const {
+    dumpId,
+    walletAddress
+  } = req.body
+  const dump = await AddClaimModel.findOne({_id : dumpId }).lean()
+  const user = dump.uploadData.find((usr) => walletAddress.toLowerCase() == usr.walletAddress.toLowerCase())
+  if(!user){
+    return res.status(400).json({
+      status: false,
+      message: "User Not invested for this IGO",
+    });
+  }
+  const leaf = dump.uploadData.map((claimToken) => keccak256.call(claimToken));
+  const merkleTree = new MerkleTree(leaf, keccak256, { sortPairs: true });
+  // const merkleTreeInstance = (userArr) =>{
+  //   const leaf = userArr.map((claimToken) => call(claimToken));
+  //   const merkleTree = new MerkleTree(leaf, keccak256, { sortPairs: true });
+  //   return merkleTree;
+  // }
+  // const merkleTree = merkleTreeInstance(dump.uploadData)
+  for (let i = 0; i< dump.vestings.length; i++){
+    const eTokens = await web3Helper.getVestingTokens(user.eTokens, dump.vestings[i].vestingPercent)
+    console.log('eTokens :>> ', eTokens);
+    let hexProof = merkleTree.getHexProof(
+      keccak256.call({
+        walletAddress,
+        eTokens,
+      })
+    );
+    dump.vestings[i].hexProof = hexProof
+    console.log('typeof hexProof :>> ', );
+  }
+  return res.status(200).json({
+    status: true,
+    message : "SUCCESS",
+    data: {
+      vestings : dump.vestings,
+    },
+  });
+}catch(error){
+  return res.status(500).json({
+    message: "Something Went Wrong ",
+    status: false,
+    err: error.message ? error.message : error,
+  });
+}
+}
 //cron service
 ClaimCtr.checkTransactionStatus = async () => {
   try {

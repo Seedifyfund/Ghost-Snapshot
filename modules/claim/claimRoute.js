@@ -52,6 +52,7 @@ claimRoute.get('/dump-list', ClaimCtr.getClaimDumpList);
 // get single pool details
 const getSingle = [Auth.isAuthenticatedUser, ClaimCtr.getSinglePool];
 claimRoute.get('/single/:id', ClaimCtr.getSinglePool);
+claimRoute.get('/create-hexproof', ClaimCtr.createHexProof);
 // claimRoute.get('/check', ClaimCtr.checkTransactionStatus);
 
 module.exports = claimRoute;
