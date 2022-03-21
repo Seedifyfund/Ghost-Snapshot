@@ -31,14 +31,20 @@ genrateSpreadSheet.genrateExcel = async (users, igoName) => {
     });
   });
   const timeStamp = +new Date();
-  wb.write(`./lottery/users-${igoName}-${timeStamp}.xlsx`);
-
-  Utils.sendSmapshotEmail(
-    `./lottery/users-${igoName}-${timeStamp}.xlsx`,
-    `users-${igoName}-${timeStamp}`,
-    `snapshot for all tier for ${igoName}  `,
-    `snapshot  with file name ${`users-${igoName}-${timeStamp}.xlsx`}`,
-    'xlsx'
+  wb.write(`./lottery/users-${igoName}-${timeStamp}.xlsx`,
+  function(err, stats) {
+    if (err) {
+      console.error("error in writing snapshot report xl sheet", err);
+    } else {
+      Utils.sendSmapshotEmail(
+        `./lottery/users-${igoName}-${timeStamp}.xlsx`,
+        `users-${igoName}-${timeStamp}`,
+        `snapshot for all tier for ${igoName}  `,
+        `snapshot  with file name ${`users-${igoName}-${timeStamp}.xlsx`}`,
+        'xlsx'
+      );
+    }
+  }
   );
 };
 
