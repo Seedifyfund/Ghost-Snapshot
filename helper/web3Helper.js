@@ -35,20 +35,18 @@ web3Helper.getRandomNumber = async (requestNo, noOfAddress, Outof) => {
 };
 web3Helper.getVestingTokens = async (eTokens, vestingPercent)=>{
   try{
-    return new Promise((resolve, reject)=>{
-      web3 = new Web3(new Web3.providers.HttpProvider(provider));
-      const newVestTokens = web3.utils.toWei(
-        (+(eTokens * vestingPercent) / 100).toFixed(6)
-      );
-      resolve(newVestTokens)
-    })
+    web3 = new Web3(new Web3.providers.HttpProvider(provider));
+    const newVestTokens = web3.utils.toWei(
+      (+(eTokens * vestingPercent) / 100).toFixed(6)
+    );
+    return newVestTokens
   }catch(err){
     console.log("error in getVestingTokens ", err);
 
   }
 }
 web3Helper.getSoliditySha3 = async(claimToken)=>{
-    web3 = new Web3(new Web3.providers.HttpProvider(provider));
+  web3 = new Web3(new Web3.providers.HttpProvider(provider));
     return web3.utils.soliditySha3(
       { type: 'address', value: claimToken.walletAddress },
       { type: 'uint256', value: claimToken.eTokens }
