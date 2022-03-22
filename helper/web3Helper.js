@@ -317,6 +317,8 @@ web3Helper.getTransactionStatus = async (transactionHash, networkName) => {
           ? "https://data-seed-prebsc-1-s1.binance.org:8545/"
           : networkName == 'avalanche'
           ? 'https://api.avax-test.network/ext/bc/C/rpc'
+          : networkName == 'fantom'
+          ? 'https://rpc.testnet.fantom.network/'
           : "https://data-seed-prebsc-1-s1.binance.org:8545/";
       const mainNetProvider =
         networkName == "polygon"
@@ -325,13 +327,15 @@ web3Helper.getTransactionStatus = async (transactionHash, networkName) => {
           ? "https://bsc-dataseed.binance.org/"
           : networkName == 'avalanche'
           ? 'https://api.avax.network/ext/bc/C/rpc'
+          : networkName == 'fantom'
+          ? 'https://rpc.testnet.fantom.network/'
           : "https://bsc-dataseed.binance.org/";
       const provider =
         process.env.NODE_ENV === "development"
           ? testNetProvider
           : mainNetProvider;
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
-      const trxnReciept = await web3.eth.getTransactionReceipt(transactionHash);
+      const trxnReciept = await web3.eth.getTransactionReceipt(transactionHash);fantom
       console.log(
         `trxnReciept.status :>>  ${
           trxnReciept != null ? trxnReciept.status : "null"
