@@ -335,7 +335,7 @@ web3Helper.getTransactionStatus = async (transactionHash, networkName) => {
           ? testNetProvider
           : mainNetProvider;
       const web3 = new Web3(new Web3.providers.HttpProvider(provider));
-      const trxnReciept = await web3.eth.getTransactionReceipt(transactionHash);fantom
+      const trxnReciept = await web3.eth.getTransactionReceipt(transactionHash);
       console.log(
         `trxnReciept.status :>>  ${
           trxnReciept != null ? trxnReciept.status : "null"
