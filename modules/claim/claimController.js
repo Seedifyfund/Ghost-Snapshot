@@ -441,7 +441,8 @@ ClaimCtr.createHexProof = async(req, res)=>{
 try{
   const {
     dumpId,
-    walletAddress
+    walletAddress,
+    vestingId
   } = req.query
   const dump = await AddClaimModel.findOne({_id : dumpId }).lean()
   const user = dump.uploadData.find((usr) => walletAddress.toLowerCase() == usr.walletAddress.toLowerCase())
@@ -459,22 +460,24 @@ try{
     // const merkleTree = merkleTreeInstance(dump.uploadData)
     
     for (let i = 0; i< dump.vestings.length; i++){
-      let leaf = []
-      for(let usr of dump.uploadData){
-        const newTokens = await web3Helper.getVestingTokens(usr.eTokens, dump.vestings[i].vestingPercent)
-        let data = await web3Helper.getSoliditySha3({eTokens : newTokens, walletAddress : usr.walletAddress })
-        leaf.push(data)
+      if(dump.vestings[i]._id == vestingId){
+        let leaf = []
+        for(let usr of dump.uploadData){
+          const newTokens = await web3Helper.getVestingTokens(usr.eTokens, dump.vestings[i].vestingPercent)
+          let data = await web3Helper.getSoliditySha3({eTokens : newTokens, walletAddress : usr.walletAddress })
+          leaf.push(data)
+        }
+        const merkleTree = new MerkleTree(leaf, keccak256, { sortPairs: true });
+        const eTokens = await web3Helper.getVestingTokens(user.eTokens, dump.vestings[i].vestingPercent)
+      console.log('eTokens :>> ', eTokens);
+      let hexProof = merkleTree.getHexProof(
+        await web3Helper.getSoliditySha3({
+          walletAddress,
+          eTokens,
+        })
+      );
+      dump.vestings[i].hexProof = hexProof
       }
-      const merkleTree = new MerkleTree(leaf, keccak256, { sortPairs: true });
-      const eTokens = await web3Helper.getVestingTokens(user.eTokens, dump.vestings[i].vestingPercent)
-    console.log('eTokens :>> ', eTokens);
-    let hexProof = merkleTree.getHexProof(
-      await web3Helper.getSoliditySha3({
-        walletAddress,
-        eTokens,
-      })
-    );
-    dump.vestings[i].hexProof = hexProof
   }
   return res.status(200).json({
     status: true,
