@@ -20,7 +20,7 @@ const snapshotEmail = [
   'berk@seedify.fund',
   'serhat@seedify.fund',
 ];
-// const snapshotEmail = ['aziz.ansari@minddeft.com' ];
+// const snapshotEmail = ['aziz.ansari@minddeft.com'];
 
 const ccEmail = [
   'avinash.buddana@minddeft.com',
