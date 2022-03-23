@@ -310,7 +310,7 @@ web3Helper.getTransactionStatus = async (transactionHash, networkName) => {
           : networkName == 'avalanche'
           ? 'https://api.avax.network/ext/bc/C/rpc'
           : networkName == 'fantom'
-          ? 'https://rpc.testnet.fantom.network/'
+          ? 'https://rpc.ftm.tools/'
           : "https://bsc-dataseed.binance.org/";
       const provider =
         process.env.NODE_ENV === "development"
