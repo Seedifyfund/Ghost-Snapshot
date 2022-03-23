@@ -63,7 +63,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           const recordId = getRecords.records[i].recordId.toLowerCase().trim();
           const checkUserAvalaible = await UserModal.findOne({
             $or: [
-              { recordId: recordId.toLowerCase().trim() },
+              { recordId: getRecords.records[i].recordId },
               { walletAddress: userAddress.toLowerCase().trim() },
             ],
           });
@@ -410,7 +410,7 @@ blockPassCtr.getWebhooks = async (req, res) => {
       const recordId = getRecords.recordId.toLowerCase().trim();
       const checkUserAvalaible = await UserModal.findOne({
         $or : [
-          {recordId: recordId.toLowerCase().trim()},
+          {recordId: getRecords.recordId},
           {walletAddress : userAddress.toLowerCase().trim()}
         ]
       });
