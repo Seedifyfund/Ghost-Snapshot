@@ -17,13 +17,13 @@ const addClaimSchema = new Schema(
     networkName: {
       type: String,
       required: true,
-      enum: ["polygon", "binance", "ethereum", "solana", "avalanche"],
+      enum: ["polygon", "binance", "ethereum", "solana", "avalanche", "fantom"],
       lowercase: true,
     },
     networkSymbol: {
       type: String,
       required: true,
-      enum: ["BNB", "ETH", "MATIC", "SOL", "AVAX"],
+      enum: ["BNB", "ETH", "MATIC", "SOL", "AVAX", "FTM"],
     },
     networkId: {
       type: String,
@@ -79,18 +79,22 @@ const addClaimSchema = new Schema(
       enum: ["monthly", "linear"],
       default: "monthly",
     },
-    totalIterationCount : {
+    totalIterationCount: {
       type: Number,
       default: 0,
     },
-    transactionHash : {
-        type : Array,
-        default : []
+    transactionHash: {
+      type: Array,
+      default: [],
     },
-    isDisabledBit : {
-      type : Boolean,
-      default : false
-  }
+    isDisabledBit: {
+      type: Boolean,
+      default: false,
+    },
+    isSnft: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   {
@@ -100,5 +104,5 @@ const addClaimSchema = new Schema(
     },
   }
 );
-mongoose.plugin(require('../logs/logsHelper'))
+mongoose.plugin(require("../logs/logsHelper"));
 module.exports = mongoose.model("addClaim", addClaimSchema);

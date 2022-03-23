@@ -71,6 +71,7 @@ ClaimCtr.list = async (req, res) => {
   try {
     let query = {};
     let page = req.query.page ? req.query.page : 1;
+    query.isSnft = { $ne: true };
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
     }
@@ -79,6 +80,9 @@ ClaimCtr.list = async (req, res) => {
     }
     if (req.query.vestingType) {
       query.vestingType = { $in: req.query.vestingType };
+    }
+    if(req.query.isSnft){
+      query.isSnft = true;
     }
     let list;
     if (req.query.walletAddress) {
@@ -194,7 +198,8 @@ ClaimCtr.addClaimDump = async (req, res) => {
     logo,
     vestingType,
     startAmount,
-    endTime
+    endTime,
+    isSnft,
   } = req.body;
   const claimDump = await AddClaimModel.findOne({
     phaseNo: phaseNo,
@@ -235,6 +240,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
       data: jsonArray,
       iteration: 0,
       totalIterationCount: iterationCount,
+      isSnft: (isSnft == true || isSnft == 'true') ? true : false,
     });
     if (addClaim && typeof addClaim.log === "function") {
       console.log("req.userData._id :>> " + req.userData._id);
@@ -357,7 +363,7 @@ ClaimCtr.updateDump = async (req, res) => {
     });
   }
 };
-
+// edit dump(claim) records 
 ClaimCtr.editDump = async (req, res) => {
   try {
     const dump = await AddClaimModel.findOne({ _id: req.body.dumpId });
@@ -419,6 +425,7 @@ ClaimCtr.checkTransactionStatus = async () => {
                   endTime : dump.endTime,
                   startAmount : dump.startAmount,
                   dumpId: dump._id,
+                  isSnft: dump.isSnft,
                 });
                 await addNewClaim.save();
               }
@@ -466,24 +473,5 @@ ClaimCtr.deleteDumprecords = async () => {
   }
 };
 
-ClaimCtr.updatePrevPoolVestingType = async (req, res)=>{
-try{
-  const dump = await AddClaimModel.updateMany({vestingType : {$ne : "linear"}}, { $set : { vestingType : "monthly"}});
-  const claim = await ClaimModel.updateMany({vestingType : {$ne : "linear"}}, {$set : { vestingType : "monthly"}})
-  res.json({
-    status : true,
-    data :{
-      claim : claim,
-      dump : dump
-    }
-  })
-}catch(err){
-  res.json({
-    status : false,
-    message : err.message
-  })
-}
-
-}
 
 module.exports = ClaimCtr;

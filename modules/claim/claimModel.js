@@ -17,13 +17,13 @@ const claimSchema = new Schema(
     networkName: {
       type: String,
       required: true,
-      enum: ["polygon", "binance", "ethereum", "solana", "avalanche"],
+      enum: ["polygon", "binance", "ethereum", "solana", "avalanche", "fantom"],
       lowercase: true,
     },
     networkSymbol: {
       type: String,
       required: true,
-      enum: ["BNB", "ETH", "MATIC", "SOL", "AVAX"],
+      enum: ["BNB", "ETH", "MATIC", "SOL", "AVAX", "FTM"],
     },
     networkId: {
       type: String,
@@ -71,6 +71,10 @@ const claimSchema = new Schema(
     phaseNo: {
       type: Number,
       required: true,
+    },
+    isSnft: {
+      type: Boolean,
+      default: false,
     },
   },
 

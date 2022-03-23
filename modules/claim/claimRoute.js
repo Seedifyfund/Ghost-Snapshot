@@ -51,7 +51,5 @@ claimRoute.get('/dump-list', ClaimCtr.getClaimDumpList);
 // get single pool details
 const getSingle = [Auth.isAuthenticatedUser, ClaimCtr.getSinglePool];
 claimRoute.get('/single/:id', getSingle);
-//script to update old pools vestingType as monthly
-claimRoute.get('/update-old-pools-vestings', ClaimCtr.updatePrevPoolVestingType);
 
 module.exports = claimRoute;
