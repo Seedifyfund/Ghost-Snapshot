@@ -1858,4 +1858,5 @@ UserCtr.genCsv = async (req, res)=>{
     users : users
   })
 }
+
 module.exports = UserCtr;
