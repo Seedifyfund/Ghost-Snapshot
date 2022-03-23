@@ -9,11 +9,11 @@ ClaimMiddleware.validateAdd = async (req, res, next) => {
     contractAddress: Joi.string().required(),
     tokenAddress: Joi.string().required(),
     networkName: Joi.string()
-      .valid("polygon", "binance", "ethereum", "solana", "avalanche")
+      .valid("polygon", "binance", "ethereum", "solana", "avalanche", "fantom")
       .required(),
     vestingType: Joi.string().valid("monthly", "linear").required(),
     networkSymbol: Joi.string()
-      .allow("BNB", "ETH", "MATIC", "SOL", "AVAX")
+      .allow("BNB", "ETH", "MATIC", "SOL", "AVAX", "FTM")
       .required(),
     networkId: Joi.string().required(),
     amount: Joi.number().required(),
