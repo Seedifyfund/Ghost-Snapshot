@@ -8,6 +8,8 @@ const utils = require("../../helper/utils");
 const ClaimCtr = {};
 const keccak256 = require('keccak256');
 const { MerkleTree } = require('merkletreejs');
+const { compress, decompress } = require('compress-json')
+
 ClaimCtr.addNewClaim = async (req, res) => {
   try {
     const {
@@ -145,6 +147,7 @@ ClaimCtr.getSinglePool = async (req, res) => {
       fetchPool = await ClaimModel.findOne({ _id: req.params.id })
         .populate("dumpId", "uploadData")
         .lean();
+      fetchPool = compress(fetchPool)
     } else {
       fetchPool = await ClaimModel.findOne({ _id: req.params.id }).lean();
     }
