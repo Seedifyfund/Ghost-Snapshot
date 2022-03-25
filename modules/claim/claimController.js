@@ -147,7 +147,7 @@ ClaimCtr.getSinglePool = async (req, res) => {
       fetchPool = await ClaimModel.findOne({ _id: req.params.id })
         .populate("dumpId", "uploadData")
         .lean();
-      fetchPool.dumpId.uploadData = compress(fetchPool.dumpId.uploadData)
+      // fetchPool.dumpId.uploadData = compress(fetchPool.dumpId.uploadData)
 
     } else {
       fetchPool = await ClaimModel.findOne({ _id: req.params.id }).lean();
