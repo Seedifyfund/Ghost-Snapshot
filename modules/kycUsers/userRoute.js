@@ -40,8 +40,10 @@ const getUserStaked = [
   auth.isAuthenticatedUser,
   UserMiddleware.checkProcessPending,
   UserCtr.getUsersStakedBalance,
+  // UserCtr.seedStakingSnapshot,
 ];
 userRoute.get('/getUserStake', getUserStaked);
+userRoute.get('/genstksnapshot', UserCtr.seedStakingSnapshot);
 
 // get sfund balance
 const getSfund = [UserCtr.getUserBalances];

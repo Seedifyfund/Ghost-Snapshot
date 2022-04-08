@@ -57,7 +57,10 @@ const userSchema = new Schema(
       type: JSON,
       default: {},
     },
-
+    stkPoints: {
+      type: Object,
+      default: {},
+    },
     timestamp: {
       type: Number,
       default: 0,
