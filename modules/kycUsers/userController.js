@@ -608,9 +608,11 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
       process.env.LP_APE_ADDRESS
     );
 
-    res.status(200).json({
-      message: "Your request received",
-    });
+      if(res){
+        res.status(200).json({
+          message: "Your request received",
+        });
+      }
 
     const getPools = await PoolsModel.find({});
     // const getUsers = await UserModel.find({
@@ -620,10 +622,10 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
 
     // let query = { isActive: true, kycStatus: "approved" };
     let query = { isActive: true, };
-    if (req.query.country) {
-      query.country = { $ne: req.query.country.toLowerCase().trim() };
+    // if (req.query.country) {
+    //   query.country = { $ne: req.query.country.toLowerCase().trim() };
 
-    }
+    // }
     // query.walletAddress = {$in : ["0xccac99ebba498d5a6b85853660789258af891753", "0x8e76e4c490899b93cc5a79fb46fec986008bc5c8"]}
     const getUsers = await UserModel.aggregate([
       { $match: query },
