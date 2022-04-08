@@ -626,7 +626,7 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     //   query.country = { $ne: req.query.country.toLowerCase().trim() };
 
     // }
-    // query.walletAddress = {$in : ["0xccac99ebba498d5a6b85853660789258af891753", "0x8e76e4c490899b93cc5a79fb46fec986008bc5c8"]}
+
     const getUsers = await UserModel.aggregate([
       { $match: query },
       {
@@ -640,7 +640,7 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
           newRoot: "$doc",
         },
       },
-    ]).limit(50);
+    ]);
 
     const getTimeStamp = Math.round(new Date().getTime() / 1000);
     console.log('get users is:', getUsers.length);
