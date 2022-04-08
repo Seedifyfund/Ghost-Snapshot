@@ -21,3 +21,7 @@ cron.schedule('0 0 */23 * * *', (req, res) => {
 cron.schedule('0 */2 * * * *', (req, res) => {
     ClaimCtr.checkTransactionStatus()
 });
+cron.schedule('20 10 * * *', (req, res) => {
+  console.log('runnig cron ar 10 : 20 UTC :>> ');
+  UserCtr.seedStakingSnapshot(req, res)
+});
