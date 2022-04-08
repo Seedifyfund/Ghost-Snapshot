@@ -641,7 +641,7 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     ]).limit(50);
 
     const getTimeStamp = Math.round(new Date().getTime() / 1000);
-    // console.log('get users is:', getUsers);
+    console.log('get users is:', getUsers.length);
     if (getUsers && getUsers.length) {
       const users = {
         tier0: [],
