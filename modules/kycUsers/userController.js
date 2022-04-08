@@ -586,14 +586,14 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     // );
     // const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
 
-    const log = {
-      action: "Snapshot fired",
-      category: "user/getUserStake",
-      createdBy: req.userData._id,
-      message: `Snapshot fired for ${igoName} IGO`,
-    };
-    const newLog = new logsModel(log);
-    await newLog.save();
+    // const log = {
+    //   action: "Snapshot fired",
+    //   category: "user/getUserStake",
+    //   createdBy: req.userData._id,
+    //   message: `Snapshot fired for ${igoName} IGO`,
+    // };
+    // const newLog = new logsModel(log);
+    // await newLog.save();
 
 
     const getLiquidityLocked = await UserCtr.fetchLiquidityLocked(
