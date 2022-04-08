@@ -619,7 +619,7 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     // });
 
     // let query = { isActive: true, kycStatus: "approved" };
-    let query = { isActive: true, tier : "tier2" };
+    let query = { isActive: true, };
     if (req.query.country) {
       query.country = { $ne: req.query.country.toLowerCase().trim() };
 
