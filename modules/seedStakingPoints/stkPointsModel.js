@@ -8,10 +8,10 @@ const stkPointsSchema = new Schema(
       type: Number,
       default: 0,
     },
-    totalStkPointsDist : {
-        type : Number,
-        default : 0
-    },
+    // totalStkPointsDist : {
+    //     type : Number,
+    //     default : 0
+    // },
     stkPointsDist : {
         type : Number,
         default : 0
