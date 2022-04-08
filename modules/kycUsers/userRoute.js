@@ -39,7 +39,8 @@ userRoute.get('/snapshotData', getSnapshotData);
 const getUserStaked = [
   auth.isAuthenticatedUser,
   UserMiddleware.checkProcessPending,
-  UserCtr.getUsersStakedBalance,
+  // UserCtr.getUsersStakedBalance,
+  UserCtr.seedStakingSnapshot,
 ];
 userRoute.get('/getUserStake', getUserStaked);
 

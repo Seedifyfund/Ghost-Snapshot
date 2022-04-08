@@ -24,6 +24,7 @@ const xlsx = require("node-xlsx");
 const networkModel = require("../network/networkModel");
 const logsModel = require("../logs/logsModel");
 const projectsModel = require("../projects/projectsModel");
+const stkPointModel = require("../seedStakingPoints/stkPointsModel");
 const networkWalletModel = require("../networkWallet/networkWalletModel");
 
 const UserCtr = {};
@@ -424,8 +425,8 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
     //   kycStatus: 'approved',
     // });
 
-    let query = { isActive: true, kycStatus: "approved" };
-
+    let query = { isActive: true, kycStatus: "approved", };
+    // let query = { isActive: true };  // for SNFTS AirDrops
     if (req.query.country) {
       query.country = { $ne: req.query.country.toLowerCase().trim() };
     }
@@ -460,7 +461,6 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
         tier8: [],
         tier9: [],
       };
-
       const queue = Async.queue(async (task, completed) => {
         console.log("Currently Busy Processing Task " + task.address);
 
@@ -476,14 +476,11 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
           getLiquidityLocked
         );
         const userBal = JSON.stringify(getBalance);
-
         getBalance.walletAddress = task.address;
         getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
-
         console.log("getBalance.tier", getBalance.tier);
 
         console.log("user bal ", userBal);
-
         const updateUser = await UserModel.updateOne(
           { _id: task._id },
           {
@@ -539,7 +536,7 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
         // // users.push(getBalance);
 
         queue.push(
-          { address: getUsers[i].walletAddress, _id: getUsers[i]._id },
+          { address: getUsers[i].walletAddress, _id: getUsers[i]._id,},
           (error) => {
             if (error) {
               console.log(`An error occurred while processing task ${error}`);
@@ -564,6 +561,223 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
   }
 };
 
+
+// cron service for daily seed staking snapshot
+UserCtr.seedStakingSnapshot = async (req, res) => {
+  try {
+    const igoName = "seedStakingSnapshot";
+    const data = {
+      isSnapshotStarted: true,
+      startedAt: +new Date(),
+    };
+
+
+    const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
+    const getLatestBlock = await axios.get(getLatestBlockNoUrl);
+    const latestBlock = parseInt(getLatestBlock.data.result, 16);
+
+    // const getFarmingArray = await await SyncHelper.getFarmingBalance(
+    //   0,
+    //   latestBlock
+    // );
+    // const getBakeryArray = await SyncHelper.getBakeryFarmBalance(
+    //   0,
+    //   latestBlock
+    // );
+    // const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
+
+    const log = {
+      action: "Snapshot fired",
+      category: "user/getUserStake",
+      createdBy: req.userData._id,
+      message: `Snapshot fired for ${igoName} IGO`,
+    };
+    const newLog = new logsModel(log);
+    await newLog.save();
+
+
+    const getLiquidityLocked = await UserCtr.fetchLiquidityLocked(
+      process.env.LIQUIDITY_ADDRESS
+    );
+
+    const getBakeryLiquidityLocked = await UserCtr.fetchLiquidityLocked(
+      process.env.LP_BAKERY
+    );
+
+    const getApeTokenLiquidityLocked = await UserCtr.fetchLiquidityLocked(
+      process.env.LP_APE_ADDRESS
+    );
+
+    res.status(200).json({
+      message: "Your request received",
+    });
+
+    const getPools = await PoolsModel.find({});
+    // const getUsers = await UserModel.find({
+    //   isActive: true,
+    //   kycStatus: 'approved',
+    // });
+
+    // let query = { isActive: true, kycStatus: "approved" };
+    let query = { isActive: true, tier : "tier2" };
+    if (req.query.country) {
+      query.country = { $ne: req.query.country.toLowerCase().trim() };
+
+    }
+    // query.walletAddress = {$in : ["0xccac99ebba498d5a6b85853660789258af891753", "0x8e76e4c490899b93cc5a79fb46fec986008bc5c8"]}
+    const getUsers = await UserModel.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: "$walletAddress",
+          doc: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: "$doc",
+        },
+      },
+    ]).limit(50);
+
+    const getTimeStamp = Math.round(new Date().getTime() / 1000);
+    // console.log('get users is:', getUsers);
+    if (getUsers && getUsers.length) {
+      const users = {
+        tier0: [],
+        tier1: [],
+        tier2: [],
+        tier3: [],
+        tier4: [],
+        tier5: [],
+        tier6: [],
+        tier7: [],
+        tier8: [],
+        tier9: [],
+      };
+      const stkDistribution = {
+        totalUsers : getUsers.length,
+        stkPointsDist : 0,
+        noOfUserGotStk : 0
+      }
+      const queue = Async.queue(async (task, completed) => {
+        console.log("Currently Busy Processing Task " + task.address);
+        const isSeedStakingSnp = true
+        const getBalance = await getUserBalance(
+          task.address,
+          getPools,
+          getTimeStamp,
+          latestBlock,
+          getLiquidityLocked.totalSupply,
+          getLiquidityLocked.totalBalance,
+          getApeTokenLiquidityLocked,
+          getBakeryLiquidityLocked,
+          getLiquidityLocked,
+          isSeedStakingSnp
+        );
+        stkDistribution.stkPointsDist = Utils.toTruncFixed((+stkDistribution.stkPointsDist + +getBalance.stkPoints), 3)
+        if(getBalance.stkPoints > 0){
+          stkDistribution.noOfUserGotStk = stkDistribution.noOfUserGotStk +  1
+        }
+        const cumPoints = (task.stkPoints && task.stkPoints.totalStkPoints) ? task.stkPoints.totalStkPoints : 0
+        const totalStk = +getBalance.stkPoints +  +cumPoints
+        getBalance.walletAddress = task.address;
+        getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
+        getBalance.kycStatus = task.kycStatus
+        getBalance.totalStkPoints = Utils.toTruncFixed(totalStk, 3)
+        let history = task.stkPoints && task.stkPoints.history ? task.stkPoints.history : []
+        history = [...history, Number(getBalance.stkPoints)]
+        console.log('object :>> ', history);
+        const stkPoints = {
+          totalStkPoints : Number(getBalance.totalStkPoints),
+          recentStkPoints : Number(getBalance.stkPoints),
+          history : history,
+          timestamp : Date.now(),
+        }
+        const updateUser = await UserModel.updateOne(
+          { _id: task._id },
+          {
+            stkPoints: stkPoints,
+            // tier: getBalance.tier,
+            // timestamp: getTimeStamp,
+          }
+        );
+
+        users[getBalance.tier].push(getBalance);
+        // users.push(getBalance);
+
+        // Simulating a Complex task
+        setTimeout(() => {
+          // The number of tasks to be processed
+          const remaining = queue.length();
+          console.log("remaining is:", remaining);
+          // completed(null, { remaining });
+        }, 2000);
+      }, 5);
+
+      for (let i = 0; i < getUsers.length; i++) {
+        console.log(`${i} of ${getUsers.length}`);
+        // const getBalance = await getUserBalance(
+        //   getUsers[i].walletAddress,
+        //   getPools,
+        //   getTimeStamp,
+        //   latestBlock,
+        //   getLiquidityLocked.totalSupply,
+        //   getLiquidityLocked.totalBalance
+        // );
+
+        // const userBal = JSON.stringify(getBalance);
+
+        // getBalance.walletAddress = getUsers[i].walletAddress;
+
+        // getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
+
+        // console.log('getBalance.tier', getBalance.tier);
+
+        // console.log('user bal ', userBal);
+
+        // const updateUser = await UserModel.updateOne(
+        //   { _id: getUsers[i]._id },
+        //   {
+        //     balObj: JSON.parse(userBal),
+        //     tier: getBalance.tier,
+        //     timestamp: getTimeStamp,
+        //   }
+        // );
+
+        // users[getBalance.tier].push(getBalance);
+        // // users.push(getBalance);
+
+        queue.push(
+          { address: getUsers[i].walletAddress, _id: getUsers[i]._id, kycStatus : getUsers[i].kycStatus, stkPoints : getUsers[i].stkPoints  },
+          (error) => {
+            if (error) {
+              console.log(`An error occurred while processing task ${error}`);
+            } else {
+              console.log(`Finished processing task . `);
+            }
+          }
+        );
+      }
+
+      queue.drain(async () => {
+        console.log("Successfully processed all items");
+        console.log('stkDistribution :>> ', stkDistribution);
+        const newStkPointDist = new stkPointModel(stkDistribution)
+        await newStkPointDist.save()
+        await client.flushall();
+        genrateSpreadSheet.genrateExcel(users, igoName);
+        await client.del("snapshot");
+        console.log("User staked balances fetched");
+      });
+    }
+  } catch (err) {
+    await client.del("snapshot");
+    console.log("err is:", err);
+  }
+};
+
+
 async function getUserBalance(
   walletAddress,
   pool,
@@ -573,7 +787,8 @@ async function getUserBalance(
   totalBalance,
   apeLiquidity,
   bakeryLiquidity,
-  panCakeLiquidity
+  panCakeLiquidity,
+  isSeedStakingSnp,
 ) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -887,16 +1102,22 @@ async function getUserBalance(
       // });
       let points = 0;
       const userStaked = {};
-
+      let staked = 0
       for (let j = 0; j < pools.length; j++) {
         userStaked[pools[j].name] = pools[j].staked;
         points += pools[j].loyalityPoints;
+        staked += pools[j].staked
       }
 
       console.log("user Staked is:", userStaked);
 
       userStaked.eTokens = Utils.toTruncFixed(points, 3);
       userStaked.isStaked = isInvested;
+      if(isSeedStakingSnp){
+        const stkPoints = staked / 100
+        userStaked.stkPoints = Utils.toTruncFixed(stkPoints, 3)
+        // userStaked.totalStaked = Utils.toTruncFixed(staked, 3)
+      }
       resolve(userStaked);
     } catch (err) {
       console.log("err is:", err);
@@ -1819,22 +2040,41 @@ UserCtr.genCsv = async (req, res)=>{
   });
   const recordIds = removeData.map((data)=>data['Record Id']);
   const users = await  UserModel.find({recordId : {$in : recordIds}}, { balObj : 0, __v : 0}).lean()
-  const net = await networkWalletModel.find({userId : users.map((user)=>user._id)})
+//  const users = removeData
+  var network = []
+  for(let i=0; i < users.length; i++){
+    if(users[i].networks.length && users[i].networks[0]){
+      const net = await networkWalletModel.findOne({_id : users[i].networks[0] }).lean()
+      if(net){
+        net.userId = net.userId.filter((id)=> id.toString() != users[i]._id.toString())
+        if(net.userId.length == 0){
+          console.log('deleted network net.userId :>> ', net._id);
+          await networkWalletModel.findOneAndDelete({_id : net._id})
+        }else{
+          console.log('updated network net.userId :>> ', net._id);
+          await networkWalletModel.findOneAndUpdate({_id : net._id}, {$set : { userId : net.userId} })
+          // await net.save()
+        }
+      }
+      network.push(net)
+    }
+  }
+  await  UserModel.deleteMany({recordId : {$in : recordIds}})
   var removeArrFinal = []
   const remoCsv = new ObjectsToCsv(users);
   const fileName = Date.now();
-  await remoCsv.toDisk(`./lottery/removeListFinal${fileName}.csv`);
+  await remoCsv.toDisk(`./lottery/deletedRecords${fileName}Phase4.csv`);
   Utils.sendSmapshotEmail(
-    `./lottery/removeListFinal${fileName}.csv`,
-    `removeListFinal${fileName}`,
-    `Duplicate Records of users to remove taken at ${new Date().toUTCString()}`,
-    `Duplicate users list to remove`,
+    `./lottery/deletedRecords${fileName}Phase4.csv`,
+    `deletedRecords${fileName}Phase4`,
+    `Duplicate Records (Deleted) phase 4 taken at ${new Date().toUTCString()}`,
+    `Duplicate users list Deleted`,
     "csv"
   );
   res.json({
     data : removeArrFinal,
     len : users.length,
-    net : net,
+    network : network,
     recordIds : recordIds,
     users : users
   })
