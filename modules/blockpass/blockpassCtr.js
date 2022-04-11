@@ -348,7 +348,7 @@ blockPassCtr.checkKycVerified = async (req, res) => {
       },
 
     ])
-    const percentage = Utils.toTruncFixed((+checkIsVerified.stkPoints.totalStkPoints / +totalStkPointDist[0].points), 3)
+    const percentage = Utils.toTruncFixed(((+checkIsVerified.stkPoints.totalStkPoints / +totalStkPointDist[0].points)*100), 6)
     const stkPoints = {
       totalStkPoints : checkIsVerified.stkPoints.totalStkPoints,
       recentStkPoints : checkIsVerified.stkPoints.recentStkPoints,
