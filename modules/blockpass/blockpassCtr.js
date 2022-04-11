@@ -4,6 +4,8 @@ const SyncHelper = require("../sync/syncHelper");
 const Utils = require("../../helper/utils");
 const axios = require("axios");
 const syncHelper = require("../sync/syncHelper");
+const stkPointModel = require("../seedStakingPoints/stkPointsModel");
+
 // const BlockPassCtr = require('../blockPassUsers/blockPassCtr');
 const blockPassCtr = {};
 
@@ -327,6 +329,31 @@ blockPassCtr.checkKycVerified = async (req, res) => {
       .sort({ createdAt: -1 });
 
     // console.log('checkIsVerified', checkIsVerified);
+    const totalStkPointDist = await stkPointModel.aggregate([
+      {
+        $sort : {
+          "createdAt" : -1
+        },
+      },
+      {
+        $limit : 365
+      },
+      {
+        $group:
+          {
+            _id : "",
+            points: { $sum: "$stkPointsDist"},
+            count: { $sum: 1 }
+          }
+      },
+
+    ])
+    const percentage = Utils.toTruncFixed((+checkIsVerified.stkPoints.totalStkPoints / +totalStkPointDist[0].points), 3)
+    const stkPoints = {
+      totalStkPoints : checkIsVerified.stkPoints.totalStkPoints,
+      recentStkPoints : checkIsVerified.stkPoints.recentStkPoints,
+      percentage : Number(percentage)
+    }
     if (checkIsVerified) {
       res.status(200).json({
         message: "Kyc Status",
@@ -338,6 +365,7 @@ blockPassCtr.checkKycVerified = async (req, res) => {
             // name: checkIsVerified.name,
             userId: checkIsVerified._id,
             snapshot: checkIsVerified.balObj,
+            stkPoints : stkPoints,
             tier: checkIsVerified.tier,
             timestamp: checkIsVerified.timestamp,
             networks: checkIsVerified.networks,

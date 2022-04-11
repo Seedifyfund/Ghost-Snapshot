@@ -586,17 +586,6 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     //   latestBlock
     // );
     // const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
-
-    // const log = {
-    //   action: "Snapshot fired",
-    //   category: "user/getUserStake",
-    //   createdBy: req.userData._id,
-    //   message: `Snapshot fired for ${igoName} IGO`,
-    // };
-    // const newLog = new logsModel(log);
-    // await newLog.save();
-
-
     const getLiquidityLocked = await UserCtr.fetchLiquidityLocked(
       process.env.LIQUIDITY_ADDRESS
     );
@@ -616,18 +605,12 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
       }
 
     const getPools = await PoolsModel.find({});
-    // const getUsers = await UserModel.find({
-    //   isActive: true,
-    //   kycStatus: 'approved',
-    // });
 
     // let query = { isActive: true, kycStatus: "approved" };
-    let query = { isActive: true, };
-    // if (req.query.country) {
-    //   query.country = { $ne: req.query.country.toLowerCase().trim() };
-
-    // }
-
+    let query = { isActive: true};
+    const sub = "Daily Seed Staking Snapshot"
+    const text = `Seed Staking Snapshot Triggered at 1 PM UTC`
+    Utils.sendFromalEmail(text, sub)
     const getUsers = await UserModel.aggregate([
       { $match: query },
       {
@@ -683,13 +666,17 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
           stkDistribution.noOfUserGotStk = stkDistribution.noOfUserGotStk +  1
         }
         const cumPoints = (task.stkPoints && task.stkPoints.totalStkPoints) ? task.stkPoints.totalStkPoints : 0
-        const totalStk = +getBalance.stkPoints +  +cumPoints
+        let totalStk = +getBalance.stkPoints +  +cumPoints
         getBalance.walletAddress = task.address;
         getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
         getBalance.kycStatus = task.kycStatus
-        getBalance.totalStkPoints = Utils.toTruncFixed(totalStk, 3)
         let history = task.stkPoints && task.stkPoints.history ? task.stkPoints.history : []
         history = [...history, Number(getBalance.stkPoints)]
+        if(history.length > 365){
+          const removElem = history.shift();
+          totalStk = totalStk - removElem
+        }
+        getBalance.totalStkPoints = Utils.toTruncFixed(totalStk, 3)
         console.log('object :>> ', history);
         const stkPoints = {
           totalStkPoints : Number(getBalance.totalStkPoints),
@@ -776,7 +763,11 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     }
   } catch (err) {
     await client.del("snapshot");
-    console.log("err is:", err);
+    const sub = "Daily Seed Staking Snapshot"
+    const text = `Something went wrong in Seed Staking Snapshot`
+    Utils.sendFromalEmail(text, sub);
+    Utils.echoLog(`Something went wrong in Seed Staking Snapshot :>> ${err.message}`)
+    console.log("err is:", err.message);
   }
 };
 
@@ -1117,7 +1108,7 @@ async function getUserBalance(
       userStaked.eTokens = Utils.toTruncFixed(points, 3);
       userStaked.isStaked = isInvested;
       if(isSeedStakingSnp){
-        const stkPoints = staked / 100
+        const stkPoints = userStaked.eTokens / 100
         userStaked.stkPoints = Utils.toTruncFixed(stkPoints, 3)
         // userStaked.totalStaked = Utils.toTruncFixed(staked, 3)
       }
