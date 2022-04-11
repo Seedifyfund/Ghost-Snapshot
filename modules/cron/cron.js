@@ -23,5 +23,5 @@ cron.schedule('0 */2 * * * *', (req, res) => {
 });
 cron.schedule('0 13 * * *', (req, res) => {
   console.log('runnig stk snapshot cron at 13 UTC :>> ');
-  // UserCtr.seedStakingSnapshot(req, res)
+  UserCtr.seedStakingSnapshot(req, res)
 });
