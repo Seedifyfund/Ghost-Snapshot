@@ -348,13 +348,14 @@ blockPassCtr.checkKycVerified = async (req, res) => {
       },
 
     ])
-    const percentage = Utils.toTruncFixed(((+checkIsVerified.stkPoints.totalStkPoints / +totalStkPointDist[0].points)*100), 6)
-    const stkPoints = {
-      totalStkPoints : checkIsVerified.stkPoints.totalStkPoints,
-      recentStkPoints : checkIsVerified.stkPoints.recentStkPoints,
-      percentage : Number(percentage)
-    }
+
     if (checkIsVerified) {
+      const percentage = Utils.toTruncFixed(((+checkIsVerified.stkPoints.totalStkPoints / +totalStkPointDist[0].points)*100), 6)
+      const stkPoints = {
+        totalStkPoints : checkIsVerified.stkPoints.totalStkPoints,
+        recentStkPoints : checkIsVerified.stkPoints.recentStkPoints,
+        percentage : Number(percentage)
+      }
       res.status(200).json({
         message: "Kyc Status",
         status: true,
