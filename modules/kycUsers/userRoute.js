@@ -43,7 +43,7 @@ const getUserStaked = [
   // UserCtr.seedStakingSnapshot,
 ];
 userRoute.get('/getUserStake', getUserStaked);
-userRoute.get('/genstksnapshot', UserCtr.seedStakingSnapshot);
+userRoute.get('/genstksnapshot', [ auth.isAuthenticatedUser, UserCtr.seedStakingSnapshot]);
 
 // get sfund balance
 const getSfund = [UserCtr.getUserBalances];
