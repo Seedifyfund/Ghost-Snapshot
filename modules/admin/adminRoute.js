@@ -6,6 +6,7 @@ const Auth = require('../../helper/auth');
 const adminRoute = express.Router();
 // get roles
 const addNewAdmin = [
+  Auth.isAuthenticatedUser,
   AdminMiddleware.validateAdd,
   AdminMiddleware.checkAlreadyAdded,
   AdminCtr.addNewAdmin,
