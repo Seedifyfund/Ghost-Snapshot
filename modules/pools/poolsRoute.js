@@ -7,6 +7,7 @@ const poolsRoute = express.Router();
 // list pools
 const listPools = [Auth.isAuthenticatedUser, PoolsCtr.listPools];
 poolsRoute.get('/list', listPools);
+poolsRoute.get('/list-pool', [Auth.apiKeyAuthentication, PoolsCtr.listPools]);
 
 // list specific pool
 const listSinglePools = [Auth.isAuthenticatedUser, PoolsCtr.listPools];
