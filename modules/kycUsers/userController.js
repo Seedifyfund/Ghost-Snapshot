@@ -2074,4 +2074,23 @@ UserCtr.genCsv = async (req, res)=>{
   })
 }
 
+UserCtr.getUsersCsv = async (req, res)=>{
+  try{
+    const users = await UserModel.find({}, {walletAddress : 1, kycStatus : 1, name : 1, email : 1}).lean()
+    const csv = new ObjectsToCsv(users)
+    const fileName = Math.trunc(Date.now() / 1000)
+    await csv.toDisk(`./lottery/seedStk${fileName}.csv`);
+    res.json({
+      status: true,
+      path : `./lottery/seedStk${fileName}.csv`,
+    });
+  }catch(err){
+    res.json({
+      status: false,
+      message: err.message,
+    });
+  }
+
+}
+
 module.exports = UserCtr;
