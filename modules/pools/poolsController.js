@@ -1,6 +1,7 @@
 const PoolsModel = require('./poolsModel');
 const Utils = require('../../helper/utils');
 const Web3Helper = require('../../helper/web3Helper');
+const web3Helper = require('../../helper/web3Helper');
 const poolCtr = {};
 
 // add new pool
@@ -218,5 +219,42 @@ poolCtr.listFarmingPools = async (req, res) => {
     });
   }
 };
+
+poolCtr.blockSyncPool = async () => {
+  const pools = [
+    {
+      contractAddress: "0xb667c499b88ac66899e54e27ad830d423d9fba69",
+      type: "staking"
+    },
+  {
+      contractAddress: "0x027fc3a49383d0e7bd6b81ef6c7512afd7d22a9e",
+      type: "staking"
+    },
+  {
+      contractAddress: "0x8900475bf7ed42efcacf9ae8cfc24aa96098f776",
+      type: "staking"
+    },
+  {
+      contractAddress: "0x66b8c1f8de0574e68366e8c4e47d0c8883a6ad0b",
+      type: "staking"
+    },
+  {
+      contractAddress: "0x5745b7e077a76be7ba37208ff71d843347441576",
+      type: "staking"
+    },
+  {
+      contractAddress: "0xf420f0951f0f50f50c741f6269a4816985670054",
+      type: "staking"
+    },
+    {
+      contractAddress: "0x1f10564bad9367cff4247a138ebba9a9aaeb789e",
+      type: "farming"
+    }
+  ]
+  pools.forEach(async (pool) => {
+    await web3Helper.stakingEvents(pool.type, pool.contractAddress)
+  })
+
+}
 
 module.exports = poolCtr;

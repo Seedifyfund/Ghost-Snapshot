@@ -661,8 +661,10 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
           isSeedStakingSnp
         );
         stkDistribution.stkPointsDist = Utils.toTruncFixed((+stkDistribution.stkPointsDist + +getBalance.stkPoints), 3)
+        let activeStaker = false
         if(getBalance.stkPoints > 0){
           stkDistribution.noOfUserGotStk = stkDistribution.noOfUserGotStk +  1
+          activeStaker = true
         }
         const cumPoints = (task.stkPoints && task.stkPoints.totalStkPoints) ? task.stkPoints.totalStkPoints : 0
         let totalStk = +getBalance.stkPoints +  +cumPoints
@@ -687,6 +689,7 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
           { _id: task._id },
           {
             stkPoints: stkPoints,
+            activeStaker : activeStaker
             // tier: getBalance.tier,
             // timestamp: getTimeStamp,
           }
@@ -2072,5 +2075,133 @@ UserCtr.genCsv = async (req, res)=>{
     users : users
   })
 }
+UserCtr.dumpSeedStkUsers = async(req,res)=>{
+  let errUsers = []
+  try{
+  // const keep = req.files.keep;
+  const stkUsersCsv = req.files.stkUsers;
+  // const keepData = await CSV().fromFile(keep.path);
+  const missedUsers = await CSV().fromFile(stkUsersCsv.path);
+  fs.unlink(stkUsersCsv.path, () => {
+    console.log("remove csv removeData from temp : >> ");
+  });
+const users = []
+  for(let i=0; i<missedUsers.length; i++){
+    errUsers = users
+    const user = await UserModel.findOne({walletAddress : missedUsers[i].walletAddress})
+    if(!user){
+      console.log('missedUsers[i].walletAddress :>> ', missedUsers[i].walletAddress);
+      const history = JSON.parse(missedUsers[i].seedStkPoints)
+      const newUser = new UserModel({
+        recordId: missedUsers[i].walletAddress.toLowerCase().trim(),
+        walletAddress: missedUsers[i].walletAddress.toLowerCase().trim(),
+        email: '',
+        name: "",
+        totalbalance: 0,
+        balObj: {},
+        kycStatus: "nonblockpass",
+        country: "",
+        approvedTimestamp: 0,
+        tier: "tier0",
+        stkPoints : {
+          totalStkPoints : +missedUsers[i].totalStkPoints,
+          recentStkPoints : +history[history.length-1],
+          history : history
+        }
+      })
+      await newUser.save()
+      users.push(missedUsers[i])
+    }{
+      console.log('user Found in DB:>> ', missedUsers[i].walletAddress);
+    }
+  }
+  const remoCsv = new ObjectsToCsv(users);
+  const fileName = Math.floor(Date.now()/1000);
+  const path = `./lottery/stkDumpUsers${fileName}.csv`
+  await remoCsv.toDisk(path);
+  res.json({
+    status : true,
+    path : path,
+    length : users.length
+  })
+  }catch(err){
+    const remoCsv = new ObjectsToCsv(errUsers);
+    const fileName = Math.floor(Date.now()/1000);
+    const path = `./lottery/stkDumpUsersErr${fileName}.csv`
+    await remoCsv.toDisk(path);
+    res.json({
+      status: false,
+      message: err.message,
+    });
+  }
+}
+UserCtr.addjustStkCal = async(req, res)=>{
+  try{
+    const stkUsersCsv = req.files.stkUsers;
+    const missedUsers = await CSV().fromFile(stkUsersCsv.path);
+    fs.unlink(stkUsersCsv.path, () => {
+      console.log("remove csv removeData from temp : >> ");
+    });
+  const users = []
+    const stkPoints = await stkPointModel.find({}).sort({createdAt : -1}).lean()
+    console.log('stkPoints.length :>> ', stkPoints.length);
+    console.log('missedUsers.length :>> ', missedUsers.length);
+    if(stkPoints.length ==missedUsers.length){
+      for(let i = 0; i<missedUsers.length; i++){
+        console.log('stkPoints[i]._id :>> ', stkPoints[i]._id);
+        const update = await stkPointModel.findOneAndUpdate({_id : stkPoints[i]._id},
+          {
+            $set : {
+              totalUsers : stkPoints[i].totalUsers + +missedUsers[i].count,
+              noOfUserGotStk : stkPoints[i].noOfUserGotStk + +missedUsers[i].noOfUserGotStk,
+              stkPointsDist : stkPoints[i].stkPointsDist + +missedUsers[i].sum
+        }
+      })
+      }
+    }
+    res.json({
+      status : true,
+      stkPoints : stkPoints.length,
+      missedUsers : missedUsers.length,
+      stkPoints : stkPoints
+    })
+    }catch(err){
+      res.json({
+        status: false,
+        message: err.message,
+      });
+    }
+}
+
+// add user through block syncing cron
+UserCtr.addNonBlockpassUser = async(walletAddress)=>{
+try{
+  const user = await UserModel.findOne({walletAddress : walletAddress.toLowerCase()});
+  if(!user){
+    console.log('non blockpass user not found :>> ', walletAddress);
+    const newUser = new UserModel({
+      recordId: walletAddress.toLowerCase().trim(),
+      walletAddress:walletAddress.toLowerCase().trim(),
+      email: '',
+      name: "",
+      totalbalance: 0,
+      balObj: {},
+      kycStatus: "nonblockpass",
+      country: "",
+      approvedTimestamp: 0,
+      tier: "tier0",
+    })
+    await newUser.save()
+  }else{
+    console.log('non blockpass user found :>> ', walletAddress);
+    user.activeStaker = true
+    await user.save()
+  }
+}catch(err){
+  Utils.echoLog('err in blockpass syncing user :>> ', err.message)
+  console.log('err in blockpass syncing user :>> ', err.message);
+}
+}
+
 
 module.exports = UserCtr;

@@ -47,7 +47,10 @@ const userSchema = new Schema(
       type: Boolean,
       default: true,
     },
-
+    activeStaker : {
+      type: Boolean,
+      default: true,
+    },
     totalbalance: {
       type: Number,
       default: 0,
@@ -75,7 +78,8 @@ const userSchema = new Schema(
         'resubmit',
         'incomplete',
         'rejected',
-        'blocked'
+        'blocked',
+        'nonblockpass'
       ],
     },
 

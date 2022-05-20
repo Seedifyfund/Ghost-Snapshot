@@ -103,5 +103,5 @@ userRoute.get('/checkIsValid', checkisValid);
 
 userRoute.post('/subscribe',[ Auth.apiKeyAuthentication, UserMiddleware.validateSubcribeUser, UserCtr.subscribe]);
 userRoute.get('/duplicate-user', UserCtr.findDupUsers);
-
+userRoute.post('/dump-stk-usr', [multipartMiddleware, UserCtr.dumpSeedStkUsers])
 module.exports = userRoute;
