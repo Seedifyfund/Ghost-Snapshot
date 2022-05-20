@@ -366,7 +366,7 @@ web3Helper.stakingEvents = async (type, contractAddress) => {
       toBlock: latestBlockNo,
     });
     // console.log('getPastEvents :>> ', getPastEvents);
-    // console.log('getPastEvents.length :>> ', getPastEvents.length);
+    console.log('getPastEvents.length :>> ', getPastEvents.length);
     if (getPastEvents.length) {
       const itreateEvents = async (i) => {
         if (i < getPastEvents.length) {
