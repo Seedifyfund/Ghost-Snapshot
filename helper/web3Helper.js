@@ -8,6 +8,8 @@ const TosdisFarmingAbi = require("../abi/tosdisFarming.json");
 const ApeFarmingAbi = require("../abi/apeFarming.json");
 const sfundAbi = require("../abi/sfund.json");
 const Utils = require("../helper/utils");
+const BlcokModel = require("../modules/block/blockModel");
+const UserCtr = require("../modules/kycUsers/userController");
 
 provider =
   process.env.NODE_ENV === "development"
@@ -336,5 +338,57 @@ web3Helper.getTransactionStatus = async (transactionHash, networkName) => {
       reject(null);
     }
   });
+};
+
+web3Helper.stakingEvents = async (type, contractAddress) => {
+  try {
+    const web3 = new Web3("https://bsc-dataseed.binance.org/");
+    const latestBlockNo = await web3.eth.getBlockNumber();
+    const abi = type == "staking" ? StakingContract : FarmingContract
+    const contract = new web3.eth.Contract(
+      abi,
+      contractAddress
+    );
+    // get last block synced
+    let lastBlock = await BlcokModel.findOne({poolAddress : contractAddress.toLowerCase()});
+    if(!lastBlock){
+      const newBlock = new BlcokModel({
+        poolAddress : contractAddress,
+        type : type,
+        blockNo : latestBlockNo
+      })
+      await newBlock.save()
+      lastBlock = newBlock
+    }
+    // console.log('lastBlock :>> ', lastBlock);
+    const getPastEvents = await contract.getPastEvents("allEvents", {
+      fromBlock: +lastBlock.blockNo,
+      toBlock: latestBlockNo,
+    });
+    // console.log('getPastEvents :>> ', getPastEvents);
+    // console.log('getPastEvents.length :>> ', getPastEvents.length);
+    if (getPastEvents.length) {
+      const itreateEvents = async (i) => {
+        if (i < getPastEvents.length) {
+          const result = getPastEvents[i].returnValues;
+          console.log("getPastEvents[i] :>> ", getPastEvents[i].event);
+          const walletAddress = result['staker_'].toLowerCase()
+          await UserCtr.addNonBlockpassUser(walletAddress)
+          itreateEvents(i + 1);
+        } else {
+          lastBlock.blockNo = latestBlockNo;
+          await lastBlock.save();
+        }
+      };
+      itreateEvents(0);
+    } else {
+      lastBlock.blockNo = latestBlockNo;
+      await lastBlock.save();
+    }
+    return
+  } catch (err) {
+    Utils.echoLog(`err staking event syncing ${contractAddress}:>> `, err);
+    console.log(`err staking event syncing ${contractAddress}:>> ` , err.message);
+  }
 };
 module.exports = web3Helper;
