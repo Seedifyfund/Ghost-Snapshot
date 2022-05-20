@@ -2174,35 +2174,7 @@ UserCtr.addjustStkCal = async(req, res)=>{
     }
 }
 
-// add user through block syncing cron
-UserCtr.addNonBlockpassUser = async(walletAddress)=>{
-try{
-  const user = await UserModel.findOne({walletAddress : walletAddress.toLowerCase()});
-  if(!user){
-    console.log('non blockpass user not found :>> ', walletAddress);
-    const newUser = new UserModel({
-      recordId: walletAddress.toLowerCase().trim(),
-      walletAddress:walletAddress.toLowerCase().trim(),
-      email: '',
-      name: "",
-      totalbalance: 0,
-      balObj: {},
-      kycStatus: "nonblockpass",
-      country: "",
-      approvedTimestamp: 0,
-      tier: "tier0",
-    })
-    await newUser.save()
-  }else{
-    console.log('non blockpass user found :>> ', walletAddress);
-    user.activeStaker = true
-    await user.save()
-  }
-}catch(err){
-  Utils.echoLog('err in blockpass syncing user :>> ', err.message)
-  console.log('err in blockpass syncing user :>> ', err.message);
-}
-}
+
 
 
 UserCtr.getUsersCsv = async (req, res)=>{
