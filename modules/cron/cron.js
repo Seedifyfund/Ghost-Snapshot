@@ -21,7 +21,7 @@ cron.schedule('0 0 */23 * * *', (req, res) => {
 });
 cron.schedule('0 */2 * * * *', (req, res) => {
     ClaimCtr.checkTransactionStatus()
-    poolCtr.blockSyncPool()
+    // poolCtr.blockSyncPool()
 });
 cron.schedule('0 13 * * *', (req, res) => {
   console.log('runnig stk snapshot cron at 13 UTC :>> ');
