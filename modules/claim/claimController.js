@@ -388,7 +388,7 @@ ClaimCtr.editDump = async (req, res) => {
 //cron service
 ClaimCtr.checkTransactionStatus = async () => {
   try {
-    // console.log("checkTransactionStatus cron called :>> ");
+    console.log("checkTransactionStatus cron called :>> ");
     const dumpList = await AddClaimModel.find({ pendingData: { $ne: [] } });
     dumpList.forEach((dump) => {
       if (dump.pendingData.length != 0) {
