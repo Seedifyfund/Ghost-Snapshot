@@ -221,6 +221,7 @@ poolCtr.listFarmingPools = async (req, res) => {
 };
 
 poolCtr.blockSyncPool = async () => {
+  console.log('blockSyncPool cron called :>> ');
   const pools = [
     {
       contractAddress: "0xb667c499b88ac66899e54e27ad830d423d9fba69",
