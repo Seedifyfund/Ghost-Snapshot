@@ -391,6 +391,7 @@ ClaimCtr.checkTransactionStatus = async () => {
     console.log("checkTransactionStatus cron called :>> ");
     const dumpList = await AddClaimModel.find({ pendingData: { $ne: [] } });
     dumpList.forEach((dump) => {
+      console.log('dump._id :>> ', dump._id);
       if (dump.pendingData.length != 0) {
         dump.pendingData.forEach(async (pendingData) => {
           const txn = await web3Helper.getTransactionStatus(
