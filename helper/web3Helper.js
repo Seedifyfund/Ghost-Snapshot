@@ -9,7 +9,7 @@ const ApeFarmingAbi = require("../abi/apeFarming.json");
 const sfundAbi = require("../abi/sfund.json");
 const Utils = require("../helper/utils");
 const BlcokModel = require("../modules/block/blockModel");
-const UserCtr = require("../modules/kycUsers/userController");
+const UserModel = require("../modules/kycUsers/usersModel");
 
 provider =
   process.env.NODE_ENV === "development"
@@ -373,7 +373,7 @@ web3Helper.stakingEvents = async (type, contractAddress) => {
           const result = getPastEvents[i].returnValues;
           console.log("getPastEvents[i] :>> ", getPastEvents[i].event);
           const walletAddress = result['staker_'].toLowerCase()
-          await UserCtr.addNonBlockpassUser(walletAddress)
+          await web3Helper.addNonBlockpassUser(walletAddress)
           itreateEvents(i + 1);
         } else {
           lastBlock.blockNo = latestBlockNo;
@@ -391,4 +391,33 @@ web3Helper.stakingEvents = async (type, contractAddress) => {
     console.log(`err staking event syncing ${contractAddress}:>> ` , err.message);
   }
 };
+// add user through block syncing cron
+web3Helper.addNonBlockpassUser = async ( walletAddress)=>{
+  try{
+    const user = await UserModel.findOne({walletAddress : walletAddress.toLowerCase()});
+    if(!user){
+      console.log('non blockpass user not found :>> ', walletAddress);
+      const newUser = new UserModel({
+        recordId: walletAddress.toLowerCase().trim(),
+        walletAddress:walletAddress.toLowerCase().trim(),
+        email: '',
+        name: "",
+        totalbalance: 0,
+        balObj: {},
+        kycStatus: "nonblockpass",
+        country: "",
+        approvedTimestamp: 0,
+        tier: "tier0",
+      })
+      await newUser.save()
+    }else{
+      console.log('non blockpass user found :>> ', walletAddress);
+      user.activeStaker = true
+      await user.save()
+    }
+  }catch(err){
+    Utils.echoLog('err in blockpass syncing user :>> ', err.message)
+    console.log('err in blockpass syncing user :>> ', err.message);
+  }
+  }
 module.exports = web3Helper;
