@@ -6,6 +6,9 @@ const web3Helper = require("../../helper/web3Helper");
 const momentTz = require("moment-timezone");
 const utils = require("../../helper/utils");
 const ClaimCtr = {};
+const keccak256 = require('keccak256');
+const { MerkleTree } = require('merkletreejs');
+const { compress, decompress } = require('compress-json')
 
 ClaimCtr.addNewClaim = async (req, res) => {
   try {
@@ -81,7 +84,7 @@ ClaimCtr.list = async (req, res) => {
     if (req.query.vestingType) {
       query.vestingType = { $in: req.query.vestingType };
     }
-    if(req.query.isSnft){
+    if (req.query.isSnft) {
       query.isSnft = true;
     }
     let list;
@@ -95,12 +98,14 @@ ClaimCtr.list = async (req, res) => {
       list.forEach((claim) => {
         if (claim.dumpId && claim.dumpId.uploadData.length) {
           const wallet = claim.dumpId.uploadData.find(
-            (wallet) => req.query.walletAddress.toLowerCase() == wallet.walletAddress.toLowerCase()
+            (wallet) =>
+              req.query.walletAddress.toLowerCase() ==
+              wallet.walletAddress.toLowerCase()
           );
-          claim.isInvested = wallet ? true : false;
+          claim.isInvested = wallet ? wallet.eTokens : 0;
           claim.dumpId = {
-            _id : claim.dumpId._id,
-            transactionHash : claim.dumpId.transactionHash
+            _id: claim.dumpId._id,
+            transactionHash: claim.dumpId.transactionHash,
           };
         }
       });
@@ -137,7 +142,16 @@ ClaimCtr.list = async (req, res) => {
 ClaimCtr.getSinglePool = async (req, res) => {
   try {
     const id = req.params.id;
-    const fetchPool = await ClaimModel.findOne({ _id: req.params.id });
+    var fetchPool;
+    if (req.query.csvData) {
+      fetchPool = await ClaimModel.findOne({ _id: req.params.id })
+        .populate("dumpId", "uploadData")
+        .lean();
+      // fetchPool.dumpId.uploadData = compress(fetchPool.dumpId.uploadData)
+
+    } else {
+      fetchPool = await ClaimModel.findOne({ _id: req.params.id }).lean();
+    }
 
     return res.status(200).json({
       message: "SUCCESS",
@@ -154,7 +168,7 @@ ClaimCtr.getSinglePool = async (req, res) => {
 };
 ClaimCtr.editClaim = async (req, res) => {
   try {
-    const claimBeforeUpdt = await ClaimModel.findOne({_id: req.body.claimId })
+    const claimBeforeUpdt = await ClaimModel.findOne({ _id: req.body.claimId });
     const claim = await ClaimModel.findOneAndUpdate(
       { _id: req.body.claimId },
       { $set: req.body },
@@ -166,7 +180,9 @@ ClaimCtr.editClaim = async (req, res) => {
         action: "update-claim",
         category: "claim/edit",
         createdBy: req.userData._id,
-        message: `${req.userData.username ? req.userData.username : req.userData.email} Updated claim`,
+        message: `${
+          req.userData.username ? req.userData.username : req.userData.email
+        } Updated claim`,
       };
       claimBeforeUpdt.log(data);
     }
@@ -196,6 +212,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
     timestamp,
     phaseNo,
     logo,
+    vestings,
     vestingType,
     startAmount,
     endTime,
@@ -222,7 +239,6 @@ ClaimCtr.addClaimDump = async (req, res) => {
     fs.unlink(files.path, () => {
       console.log("remove csv from temp : >> ");
     });
-    const iterationCount = Math.ceil(jsonArray.length / 600);
     const addClaim = new AddClaimModel({
       tokenAddress: tokenAddress,
       contractAddress: contractAddress,
@@ -239,8 +255,10 @@ ClaimCtr.addClaimDump = async (req, res) => {
       endTime,
       data: jsonArray,
       iteration: 0,
-      totalIterationCount: iterationCount,
-      isSnft: (isSnft == true || isSnft == 'true') ? true : false,
+      prevIgoDate: new Date(),
+      vestings:
+        vestings && typeof vestings == "string" ? JSON.parse(vestings) : null,
+      isSnft: isSnft == true || isSnft == "true" ? true : false,
     });
     if (addClaim && typeof addClaim.log === "function") {
       console.log("req.userData._id :>> " + req.userData._id);
@@ -268,25 +286,34 @@ ClaimCtr.addClaimDump = async (req, res) => {
 
 ClaimCtr.getClaimDumpList = async (req, res) => {
   try {
-    let query = {$or : [{pendingData: { $ne: [] }}, {data: { $ne: [] }}]};
+    let query = { $or: [{ pendingData: { $ne: [] } }, { data: { $ne: [] } }] };
     if (req.query.network) {
       query.networkSymbol = req.query.network.toUpperCase();
+    }
+    let sort = { createdAt: -1 };
+    if (req.query.vestingType == "monthly") {
+      query.vestingType = "monthly";
+      query["vestings.status"] = { $in: ["upcoming"], $nin: ["pending"] };
+      sort = { "vestings.timestamp": -1 };
+    }
+    if (req.query.vestingType == "linear") {
+      query.vestingType = "linear";
     }
     let page = req.query.page ? req.query.page : 1;
     let list = await AddClaimModel.find(query)
       .skip((+page - 1 || 0) * +process.env.LIMIT)
       .limit(+process.env.LIMIT)
-      .sort({ createdAt: -1 })
+      .sort(sort)
       .lean();
 
     const totalCount = await AddClaimModel.countDocuments(query);
     const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
-    list = list.map(({uploadData, data, pendingData, ...rest}) => ({
+    list = list.map(({ uploadData, data, pendingData, ...rest }) => ({
       ...rest,
-      uploadData : uploadData.length,
-      pendingData : pendingData.length,
-      data : data.length,
-    }))
+      uploadData: uploadData.length,
+      pendingData: pendingData.length,
+      data: data.length,
+    }));
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
@@ -345,7 +372,9 @@ ClaimCtr.updateDump = async (req, res) => {
         action: "update-dump",
         category: "claim/update-dump",
         createdBy: req.userData._id,
-        message: `${req.userData.username ? req.userData.username : req.userData.email} updated dump record`,
+        message: `${
+          req.userData.username ? req.userData.username : req.userData.email
+        } updated dump record`,
       };
       dump.log(data);
     }
@@ -363,7 +392,7 @@ ClaimCtr.updateDump = async (req, res) => {
     });
   }
 };
-// edit dump(claim) records 
+// edit dump(claim) records
 ClaimCtr.editDump = async (req, res) => {
   try {
     const dump = await AddClaimModel.findOne({ _id: req.body.dumpId });
@@ -385,12 +414,103 @@ ClaimCtr.editDump = async (req, res) => {
     });
   }
 };
+ClaimCtr.topupVestings = async (req, res) => {
+  try {
+    const dump = await AddClaimModel.findOne(
+      { _id: req.body.dumpId },
+      { uploadData: 0, pendingData: 0, data: 0 }
+    );
+    const vestingIndex = req.body.vestingIndex;
+    const txnHash = req.body.txnHash;
+    dump.vestings.forEach((vesting, index) => {
+      if (vestingIndex.includes(index) && vesting.status != "pending") {
+        vesting.status = "pending";
+        vesting.txnHash = txnHash;
+      }
+    });
+    dump.save();
+    return res.status(200).json({
+      status: "SUCCESS",
+      data: dump,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Something Went Wrong ",
+      status: true,
+      err: err.message ? err.message : err,
+    });
+  }
+};
+ClaimCtr.createHexProof = async(req, res)=>{
+try{
+  const {
+    dumpId,
+    walletAddress,
+    vestingId
+  } = req.query
+  const dump = await AddClaimModel.findOne({_id : dumpId }).lean()
+  const user = dump.uploadData.find((usr) => walletAddress.toLowerCase() == usr.walletAddress.toLowerCase())
+  if(!user){
+    return res.status(400).json({
+      status: false,
+      message: "User Not invested for this IGO",
+    });
+  }
+  // const merkleTreeInstance = (userArr) =>{
+    //   const leaf = userArr.map((claimToken) => call(claimToken));
+    //   const merkleTree = new MerkleTree(leaf, keccak256, { sortPairs: true });
+    //   return merkleTree;
+    // }
+    // const merkleTree = merkleTreeInstance(dump.uploadData)
+    
+    for (let i = 0; i< dump.vestings.length; i++){
+      if(dump.vestings[i]._id == vestingId){
+        let leaf = []
+        for(let usr of dump.uploadData){
+          const newTokens = await web3Helper.getVestingTokens(usr.eTokens, dump.vestings[i].vestingPercent)
+          let data = await web3Helper.getSoliditySha3({eTokens : newTokens, walletAddress : usr.walletAddress })
+          leaf.push(data)
+        }
+        const merkleTree = new MerkleTree(leaf, keccak256, { sortPairs: true });
+        const eTokens = await web3Helper.getVestingTokens(user.eTokens, dump.vestings[i].vestingPercent)
+      console.log('eTokens :>> ', eTokens);
+      let hexProof = merkleTree.getHexProof(
+        await web3Helper.getSoliditySha3({
+          walletAddress,
+          eTokens,
+        })
+      );
+      dump.vestings[i].hexProof = hexProof
+      }
+  }
+  return res.status(200).json({
+    status: true,
+    message : "SUCCESS",
+    data: {
+      vestings : dump.vestings,
+    },
+  });
+}catch(error){
+  return res.status(500).json({
+    message: "Something Went Wrong ",
+    status: false,
+    err: error.message ? error.message : error,
+  });
+}
+}
 //cron service
 ClaimCtr.checkTransactionStatus = async () => {
   try {
-    // console.log("checkTransactionStatus cron called :>> ");
-    const dumpList = await AddClaimModel.find({ pendingData: { $ne: [] } });
-    dumpList.forEach((dump) => {
+    // console.log("checkTransactionStatus cron called :>> ");$or
+    const dumpList = await AddClaimModel.find({
+      $or: [
+        { pendingData: { $ne: [] } },
+        { "vestings.status": { $in: ["pending"] } },
+      ],
+    }).lean();
+    console.log("dumpList.length :>> ", dumpList.length);
+    dumpList.forEach(async (dump) => {
+      console.log("dump._id :>> ", dump._id);
       if (dump.pendingData.length != 0) {
         dump.pendingData.forEach(async (pendingData) => {
           const txn = await web3Helper.getTransactionStatus(
@@ -404,12 +524,12 @@ ClaimCtr.checkTransactionStatus = async () => {
             );
             dump.uploadData = dump.uploadData.concat(pendingData.data);
             if (dump.data.length == 0 && dump.pendingData.length == 0) {
-              const checkClaimAlreadyAdded = await ClaimModel.findOne({
+              const claim = await ClaimModel.findOne({
                 phaseNo: dump.phaseNo,
                 tokenAddress: dump.tokenAddress.toLowerCase(),
                 networkSymbol: dump.networkSymbol.toUpperCase(),
               });
-              if (!checkClaimAlreadyAdded) {
+              if (!claim) {
                 const addNewClaim = new ClaimModel({
                   tokenAddress: dump.tokenAddress,
                   contractAddress: dump.contractAddress,
@@ -421,13 +541,17 @@ ClaimCtr.checkTransactionStatus = async () => {
                   timestamp: dump.timestamp,
                   phaseNo: dump.phaseNo,
                   logo: dump.logo,
-                  vestingType : dump.vestingType,
-                  endTime : dump.endTime,
-                  startAmount : dump.startAmount,
+                  vestingType: dump.vestingType,
+                  endTime: dump.endTime,
+                  startAmount: dump.startAmount,
                   dumpId: dump._id,
+                  vestings: dump.vestings,
                   isSnft: dump.isSnft,
                 });
                 await addNewClaim.save();
+              } else {
+                claim.vestings = dump.vestings;
+                claim.save();
               }
             }
             await AddClaimModel.findOneAndUpdate(
@@ -450,10 +574,34 @@ ClaimCtr.checkTransactionStatus = async () => {
             );
           }
         });
+      } else if (dump.vestings.length != 0) {
+        dump.vestings.forEach(async (vesting) => {
+          if (vesting.status === "pending" && vesting.txnHash) {
+            const txn = await web3Helper.getTransactionStatus(
+              vesting.txnHash,
+              dump.networkName
+            );
+            console.log("txn vesting :>> ", txn);
+            if (txn && txn.status == true) {
+              console.log("uploaded :>> ");
+              vesting.status = "uploaded";
+            } else if (txn && txn.status == false) {
+              vesting.status = "failed";
+            }
+            await AddClaimModel.findOneAndUpdate(
+              { _id: dump._id },
+              { $set: { vestings: dump.vestings } }
+            );
+            await ClaimModel.findOneAndUpdate(
+              { dumpId: dump._id },
+              { $set: { vestings: dump.vestings } }
+            );
+          }
+        });
       }
     });
   } catch (error) {
-    utils.echoLog('error in checkTransactionStatus cron  ', err);
+    utils.echoLog("error in checkTransactionStatus cron  ", error);
   }
 };
 // cron service for deleting dump records
@@ -469,9 +617,8 @@ ClaimCtr.deleteDumprecords = async () => {
       await AddClaimModel.findOneAndDelete({ _id: dump._id });
     });
   } catch (error) {
-    utils.echoLog('error in deleteDumprecord >>  ', err);
+    utils.echoLog("error in deleteDumprecord >>  ", error);
   }
 };
-
 
 module.exports = ClaimCtr;

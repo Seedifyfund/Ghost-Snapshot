@@ -68,6 +68,10 @@ const claimSchema = new Schema(
       type: mongoose.Schema.ObjectId,
       ref: "addClaim",
     },
+    vestings : {
+      type: Array,
+      default: [],
+    },
     phaseNo: {
       type: Number,
       required: true,
