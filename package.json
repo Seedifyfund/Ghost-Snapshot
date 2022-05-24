@@ -22,7 +22,6 @@
     "bcryptjs": "^2.4.3",
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
-    "compress-json": "^2.0.1",
     "connect-multiparty": "^2.2.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
