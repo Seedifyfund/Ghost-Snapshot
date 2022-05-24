@@ -90,7 +90,7 @@ const addClaimSchema = new Schema(
     vestingType: {
       type: String,
       required: true,
-      enum: ["monthly", "linear"],
+      enum: ["monthly", "linear", "merkle"],
       default: "monthly",
     },
     totalIterationCount: {
