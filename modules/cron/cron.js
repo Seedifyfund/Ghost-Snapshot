@@ -19,7 +19,7 @@ cron.schedule('0 */12 * * *', (req, res) => {
 cron.schedule('0 0 */23 * * *', (req, res) => {
   ClaimCtr.deleteDumprecords()
 });
-cron.schedule('0 */1 * * * *', (req, res) => {
+cron.schedule('0 */2 * * * *', (req, res) => {
     ClaimCtr.checkTransactionStatus()
     // poolCtr.blockSyncPool()
 });
