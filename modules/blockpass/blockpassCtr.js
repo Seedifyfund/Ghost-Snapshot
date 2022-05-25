@@ -65,7 +65,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
           const recordId = getRecords.records[i].recordId.toLowerCase().trim();
           const checkUserAvalaible = await UserModal.findOne({
             $or: [
-              { recordId: getRecords.records[i].recordId },
+              { recordId: recordId },
               { walletAddress: userAddress.toLowerCase().trim() },
             ],
           });
@@ -97,7 +97,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
                 kycStatus: getRecords.records[i].status,
                 name: name,
                 email: email,
-                recordId: getRecords.records[i].recordId,
+                recordId: recordId,
                 approvedTimestamp: approvedDate,
                 walletAddress: userAddress.toLowerCase().trim(),
                 country: countryCode,
@@ -113,7 +113,7 @@ blockPassCtr.getApprovedUserList = async (req, res) => {
             // itreateBlocks(i + 1);
           } else {
             const addNewUser = new UserModal({
-              recordId: getRecords.records[i].recordId,
+              recordId: recordId,
               walletAddress: userAddress.toLowerCase().trim(),
               email: email,
               name: name,
@@ -438,7 +438,7 @@ blockPassCtr.getWebhooks = async (req, res) => {
       const recordId = getRecords.recordId.toLowerCase().trim();
       const checkUserAvalaible = await UserModal.findOne({
         $or : [
-          {recordId: getRecords.recordId},
+          {recordId: recordId},
           {walletAddress : userAddress.toLowerCase().trim()}
         ]
       });
@@ -463,7 +463,7 @@ blockPassCtr.getWebhooks = async (req, res) => {
             kycStatus: getRecords.status,
             name: name,
             email: email,
-            recordId: getRecords.recordId,
+            recordId: recordId,
             approvedTimestamp: approvedDate,
             walletAddress: userAddress.toLowerCase().trim(),
             country: countryCode,
@@ -473,7 +473,7 @@ blockPassCtr.getWebhooks = async (req, res) => {
         );
       } else {
         const addNewUser = new UserModal({
-          recordId: getRecords.recordId,
+          recordId: recordId,
           walletAddress: userAddress.toLowerCase().trim(),
           email: email,
           name: name,
