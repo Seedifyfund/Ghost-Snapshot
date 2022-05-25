@@ -372,8 +372,10 @@ web3Helper.stakingEvents = async (type, contractAddress) => {
         if (i < getPastEvents.length) {
           const result = getPastEvents[i].returnValues;
           console.log("getPastEvents[i] :>> ", getPastEvents[i].event);
-          const walletAddress = result['staker_'].toLowerCase()
-          await web3Helper.addNonBlockpassUser(walletAddress)
+          if(getPastEvents[i].event){
+            const walletAddress = result['staker_'].toLowerCase()
+            await web3Helper.addNonBlockpassUser(walletAddress)
+          }
           itreateEvents(i + 1);
         } else {
           lastBlock.blockNo = latestBlockNo;
