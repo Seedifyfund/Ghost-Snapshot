@@ -408,6 +408,7 @@ web3Helper.addNonBlockpassUser = async ( walletAddress)=>{
         country: "",
         approvedTimestamp: 0,
         tier: "tier0",
+        activeStaker : true
       })
       await newUser.save()
     }else{
