@@ -566,25 +566,9 @@ UserCtr.getUsersStakedBalance = async (req, res) => {
 UserCtr.seedStakingSnapshot = async (req, res) => {
   try {
     const igoName = "seedStakingSnapshot";
-    const data = {
-      isSnapshotStarted: true,
-      startedAt: +new Date(),
-    };
-
-
     const getLatestBlockNoUrl = `https://api.bscscan.com/api?module=proxy&action=eth_blockNumber&apikey=CWZ1A15GW1ANBXEKUUE32Z2V2F4U1Q6TVA`;
     const getLatestBlock = await axios.get(getLatestBlockNoUrl);
     const latestBlock = parseInt(getLatestBlock.data.result, 16);
-
-    // const getFarmingArray = await await SyncHelper.getFarmingBalance(
-    //   0,
-    //   latestBlock
-    // );
-    // const getBakeryArray = await SyncHelper.getBakeryFarmBalance(
-    //   0,
-    //   latestBlock
-    // );
-    // const getTosdisArray = await SyncHelper.getToshFarmBalance(0, latestBlock);
     const getLiquidityLocked = await UserCtr.fetchLiquidityLocked(
       process.env.LIQUIDITY_ADDRESS
     );
@@ -606,12 +590,12 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     const getPools = await PoolsModel.find({});
 
     // let query = { isActive: true, kycStatus: "approved" };
-    let query = { isActive: true};
+    // let query = { isActive: true,};
     const sub = "Daily Seed Staking Snapshot"
     const text = `Seed Staking Snapshot Triggered at 1 PM UTC`
     Utils.sendFromalEmail(text, sub)
     const getUsers = await UserModel.aggregate([
-      { $match: query },
+      // { $match: query },
       {
         $group: {
           _id: "$walletAddress",
@@ -648,18 +632,25 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
       const queue = Async.queue(async (task, completed) => {
         console.log("Currently Busy Processing Task " + task.address);
         const isSeedStakingSnp = true
-        const getBalance = await getUserBalance(
-          task.address,
-          getPools,
-          getTimeStamp,
-          latestBlock,
-          getLiquidityLocked.totalSupply,
-          getLiquidityLocked.totalBalance,
-          getApeTokenLiquidityLocked,
-          getBakeryLiquidityLocked,
-          getLiquidityLocked,
-          isSeedStakingSnp
-        );
+        let getBalance = {}
+        if(task.activeStaker === true){
+           getBalance = await getUserBalance(
+            task.address,
+            getPools,
+            getTimeStamp,
+            latestBlock,
+            getLiquidityLocked.totalSupply,
+            getLiquidityLocked.totalBalance,
+            getApeTokenLiquidityLocked,
+            getBakeryLiquidityLocked,
+            getLiquidityLocked,
+            isSeedStakingSnp
+          );
+        }else{
+          getBalance.stkPoints = 0;
+          getBalance.eTokens = 0;
+        }
+
         stkDistribution.stkPointsDist = Utils.toTruncFixed((+stkDistribution.stkPointsDist + +getBalance.stkPoints), 3)
         let activeStaker = false
         if(getBalance.stkPoints > 0){
@@ -678,7 +669,7 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
           totalStk = totalStk - removElem
         }
         getBalance.totalStkPoints = Utils.toTruncFixed(totalStk, 3)
-        console.log('object :>> ', history);
+        console.log('history :>> ', history);
         const stkPoints = {
           totalStkPoints : Number(getBalance.totalStkPoints),
           recentStkPoints : Number(getBalance.stkPoints),
@@ -689,14 +680,13 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
           { _id: task._id },
           {
             stkPoints: stkPoints,
-            activeStaker : activeStaker
-            // tier: getBalance.tier,
+            activeStaker : activeStaker,
+            tier: getBalance.tier,
             // timestamp: getTimeStamp,
           }
         );
 
         users[getBalance.tier].push(getBalance);
-        // users.push(getBalance);
 
         // Simulating a Complex task
         setTimeout(() => {
@@ -709,39 +699,8 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
 
       for (let i = 0; i < getUsers.length; i++) {
         console.log(`${i} of ${getUsers.length}`);
-        // const getBalance = await getUserBalance(
-        //   getUsers[i].walletAddress,
-        //   getPools,
-        //   getTimeStamp,
-        //   latestBlock,
-        //   getLiquidityLocked.totalSupply,
-        //   getLiquidityLocked.totalBalance
-        // );
-
-        // const userBal = JSON.stringify(getBalance);
-
-        // getBalance.walletAddress = getUsers[i].walletAddress;
-
-        // getBalance.tier = await SyncHelper.getUserTier(+getBalance.eTokens);
-
-        // console.log('getBalance.tier', getBalance.tier);
-
-        // console.log('user bal ', userBal);
-
-        // const updateUser = await UserModel.updateOne(
-        //   { _id: getUsers[i]._id },
-        //   {
-        //     balObj: JSON.parse(userBal),
-        //     tier: getBalance.tier,
-        //     timestamp: getTimeStamp,
-        //   }
-        // );
-
-        // users[getBalance.tier].push(getBalance);
-        // // users.push(getBalance);
-
         queue.push(
-          { address: getUsers[i].walletAddress, _id: getUsers[i]._id, kycStatus : getUsers[i].kycStatus, stkPoints : getUsers[i].stkPoints  },
+          { address: getUsers[i].walletAddress, _id: getUsers[i]._id, kycStatus : getUsers[i].kycStatus, stkPoints : getUsers[i].stkPoints, activeStaker : getUsers[i].activeStaker  },
           (error) => {
             if (error) {
               console.log(`An error occurred while processing task ${error}`);
