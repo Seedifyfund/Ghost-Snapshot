@@ -588,6 +588,10 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
       }
 
     const getPools = await PoolsModel.find({});
+    const poolNameMaping = {}
+    for (let pool of getPools){
+      poolNameMaping[pool.poolName] = 0;
+    }
 
     // let query = { isActive: true, kycStatus: "approved" };
     // let query = { isActive: true,};
@@ -647,8 +651,10 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
             isSeedStakingSnp
           );
         }else{
-          getBalance.stkPoints = 0;
+          getBalance = poolNameMaping
           getBalance.eTokens = 0;
+          getBalance.isStaked = false;
+          getBalance.stkPoints = 0;
         }
 
         stkDistribution.stkPointsDist = Utils.toTruncFixed((+stkDistribution.stkPointsDist + +getBalance.stkPoints), 3)
