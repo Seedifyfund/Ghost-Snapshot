@@ -592,9 +592,10 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     for (let pool of getPools){
       poolNameMaping[pool.poolName] = 0;
     }
+    const poolNames = JSON.stringify(poolNameMaping)
 
     // let query = { isActive: true, kycStatus: "approved" };
-    // let query = { isActive: true,};
+    let query = { isActive: true, activeStaker : false};
     const sub = "Daily Seed Staking Snapshot"
     const text = `Seed Staking Snapshot Triggered at 1 PM UTC`
     Utils.sendFromalEmail(text, sub)
@@ -651,7 +652,7 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
             isSeedStakingSnp
           );
         }else{
-          getBalance = poolNameMaping
+          getBalance = JSON.parse(poolNames)
           getBalance.eTokens = 0;
           getBalance.isStaked = false;
           getBalance.stkPoints = 0;
