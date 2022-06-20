@@ -14,27 +14,27 @@ const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
 const REFRESH_TOKEN =
   '1//04UvgkQSVetB2CgYIARAAGAQSNwF-L9Ir5l9OgU2eVkWMO1ZnJ-34xxh1lcpSCZdubTpiA2j04QErHrW2zXLc0pmS7cBULDHsiX8';
 
-// const snapshotEmail = [
-//   'cem@seedify.fund',
-//   'gsconsultantservices@gmail.com',
-//   'berk@seedify.fund',
-//   'serhat@seedify.fund',
-//   'apo@seedify.fund',
-//   'sungur@seedify.fund'
-// ];
-const snapshotEmail = ['aziz.ansari@minddeft.com'];
+const snapshotEmail = [
+  'cem@seedify.fund',
+  'gsconsultantservices@gmail.com',
+  'berk@seedify.fund',
+  'serhat@seedify.fund',
+  'apo@seedify.fund',
+  'sungur@seedify.fund'
+];
+// const snapshotEmail = ['aziz.ansari@minddeft.com'];
 
-// const ccEmail = [
-//   'avinash.buddana@minddeft.com',
-//   'shantikumar@minddeft.com',
-//   'chaitanya.krishna@minddeft.com',
-//   'rishabh.katheria@minddeft.net',
-//   'prajwal.more@minddeft.net',
-//   'krunal@minddeft.com',
-//   'aziz.ansari@minddeft.com',
-//   'abhishek.anand@minddeft.com'
-// ];
-const ccEmail = ['aziz.ansari@minddeft.com'];
+const ccEmail = [
+  'avinash.buddana@minddeft.com',
+  'shantikumar@minddeft.com',
+  'chaitanya.krishna@minddeft.com',
+  'rishabh.katheria@minddeft.net',
+  'prajwal.more@minddeft.net',
+  'krunal@minddeft.com',
+  'aziz.ansari@minddeft.com',
+  'abhishek.anand@minddeft.com'
+];
+// const ccEmail = ['aziz.ansari@minddeft.com'];
 
 utils.sendEmail = async (data, message, email) => {
   try {
