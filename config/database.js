@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
-const url = `mongodb+srv://Sadmin:fxxHWM7pbI7tL9Bn@snapshot.o35fi.mongodb.net/seedify?retryWrites=true&w=majority`;
+// const url = `mongodb+srv://Sadmin:fxxHWM7pbI7tL9Bn@snapshot.o35fi.mongodb.net/seedify?retryWrites=true&w=majority`;
+const url = `mongodb://localhost:27017/seedify`;
 
 mongoose
   .connect(`${url}`, {
