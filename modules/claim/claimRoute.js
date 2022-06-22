@@ -3,6 +3,7 @@ const ClaimCtr = require('./claimController');
 const ClaimMiddleware = require('./claimMiddleware');
 const Auth = require('../../helper/auth');
 const multipart = require('connect-multiparty');
+const { usersPoolList } = require('./claimController');
 const multipartMiddleware = multipart();
 const claimRoute = express.Router();
 // get roles
@@ -46,6 +47,9 @@ claimRoute.post('/edit-dump', editDump);
 // login admin
 const list = [ClaimCtr.list];
 claimRoute.get('/list', list);
+claimRoute.get('/users-pools', usersPoolList);
+
+
 claimRoute.get('/dump-list', ClaimCtr.getClaimDumpList);
 
 // get single pool details
