@@ -134,6 +134,60 @@ ClaimCtr.list = async (req, res) => {
   }
 };
 
+
+// claim pool list for single user 
+ClaimCtr.usersPoolList = async(req, res)=>{
+  try {
+    let page = req.query.page ? req.query.page : 1;
+    const walletAddress = req.query.walletAddress
+    let query = {
+      "uploadData.walletAddress" : walletAddress
+    };
+    if (req.query.network) {
+      query.networkSymbol = req.query.network.toUpperCase();
+    }
+    let list;
+    list = await AddClaimModel.find(query, { _id : 1})
+    .skip((+page - 1 || 0) * +process.env.LIMIT)
+    .limit(+process.env.LIMIT)
+    .sort({ createdAt: -1 })
+    .lean();
+    list =  await ClaimModel.find({dumpId : {$in : list.map((id)=>id)}})
+    .populate("dumpId", "uploadData")
+    .sort({createdAt : -1})
+    .lean();
+  list.forEach((claim) => {
+    if (claim.dumpId && claim.dumpId.uploadData.length) {
+      const wallet = claim.dumpId.uploadData.find(
+        (wallet) => req.query.walletAddress.toLowerCase() == wallet.walletAddress.toLowerCase()
+      );
+      claim.isInvested = wallet ? true : false;
+      claim.allocation = +wallet.eTokens
+      delete claim.dumpId
+    }
+  });
+    const totalCount = await AddClaimModel.countDocuments(query);
+    const pageCount = Math.ceil(totalCount / +process.env.LIMIT);
+    return res.status(200).json({
+      message: "SUCCESS",
+      status: true,
+      data: list,
+      pagination: {
+        pageNo: page,
+        totalRecords: totalCount,
+        totalPages: pageCount,
+        limit: +process.env.LIMIT,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "DB_ERROR",
+      status: true,
+      err: err.message ? err.message : err,
+    });
+  }
+}
+
 ClaimCtr.getSinglePool = async (req, res) => {
   try {
     const id = req.params.id;
