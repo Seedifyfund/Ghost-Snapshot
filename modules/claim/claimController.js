@@ -96,12 +96,21 @@ ClaimCtr.list = async (req, res) => {
         .lean();
       list.forEach((claim) => {
         if (claim.dumpId && claim.dumpId.uploadData.length) {
-          const wallet = claim.dumpId.uploadData.find(
-            (wallet) =>
-              req.query.walletAddress.toLowerCase() ==
-              wallet.walletAddress.toLowerCase()
-          );
-          claim.isInvested = wallet ? wallet.eTokens : 0;
+          if(claim.networkSymbol == "SOL"){
+            const wallet = claim.dumpId.uploadData.find(
+              (wallet) =>
+                req.query.walletAddress.toLowerCase() ==
+                wallet.address.toLowerCase()
+            );
+            claim.isInvested = wallet ? wallet.amount : 0;
+          }else{
+            const wallet = claim.dumpId.uploadData.find(
+              (wallet) =>
+                req.query.walletAddress.toLowerCase() ==
+                wallet.walletAddress.toLowerCase()
+            );
+            claim.isInvested = wallet ? wallet.eTokens : 0;
+          }
           claim.dumpId = {
             _id: claim.dumpId._id,
             transactionHash: claim.dumpId.transactionHash,
