@@ -14,6 +14,10 @@ const addClaimSchema = new Schema(
       required: true,
       lowercase: true,
     },
+    vestingInfo: {
+      type: String,
+      default : null
+    },
     networkName: {
       type: String,
       required: true,

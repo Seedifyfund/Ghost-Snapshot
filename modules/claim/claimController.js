@@ -8,7 +8,7 @@ const utils = require("../../helper/utils");
 const ClaimCtr = {};
 const keccak256 = require('keccak256');
 const { MerkleTree } = require('merkletreejs');
-
+const util = require('util');
 ClaimCtr.addNewClaim = async (req, res) => {
   try {
     const {
@@ -214,12 +214,19 @@ ClaimCtr.addClaimDump = async (req, res) => {
     startAmount,
     endTime,
     isSnft,
+    vestingInfo
   } = req.body;
   const claimDump = await AddClaimModel.findOne({
     phaseNo: phaseNo,
     tokenAddress: tokenAddress.toLowerCase(),
     networkSymbol: networkSymbol.toUpperCase(),
   });
+  if(!files){
+    return res.status(200).json({
+      message: "Please upload csv",
+      status: false,
+    });
+  }
   if (claimDump) {
     if (files) {
       fs.unlink(files.path, () => {
@@ -231,32 +238,41 @@ ClaimCtr.addClaimDump = async (req, res) => {
       status: false,
     });
   }
-  if (files) {
-    const jsonArray = await csv().fromFile(files.path);
+  let jsonArray;
+  const dumpBody = {
+    tokenAddress: tokenAddress,
+    contractAddress: contractAddress,
+    networkName: networkName,
+    networkSymbol: networkSymbol,
+    networkId: networkId,
+    amount: amount,
+    name: name,
+    timestamp: timestamp,
+    phaseNo,
+    logo,
+    vestingType,
+    startAmount,
+    endTime,
+    iteration: 0,
+    vestingInfo : vestingInfo ? vestingInfo : null,
+    prevIgoDate: new Date(),
+    vestings:
+      vestings && typeof vestings == "string" ? JSON.parse(vestings) : null,
+    isSnft: isSnft == true || isSnft == "true" ? true : false,
+  }
+    if(files.type == "application/json"){
+      const readFile = util.promisify(fs.readFile);
+      jsonArray = await readFile(files.path, 'utf8')
+      jsonArray = JSON.parse(jsonArray)
+      dumpBody.uploadData = jsonArray
+    }else{
+      jsonArray = await csv().fromFile(files.path);
+      dumpBody.data = jsonArray
+    }
     fs.unlink(files.path, () => {
       console.log("remove csv from temp : >> ");
     });
-    const addClaim = new AddClaimModel({
-      tokenAddress: tokenAddress,
-      contractAddress: contractAddress,
-      networkName: networkName,
-      networkSymbol: networkSymbol,
-      networkId: networkId,
-      amount: amount,
-      name: name,
-      timestamp: timestamp,
-      phaseNo,
-      logo,
-      vestingType,
-      startAmount,
-      endTime,
-      data: jsonArray,
-      iteration: 0,
-      prevIgoDate: new Date(),
-      vestings:
-        vestings && typeof vestings == "string" ? JSON.parse(vestings) : null,
-      isSnft: isSnft == true || isSnft == "true" ? true : false,
-    });
+    const addClaim = new AddClaimModel(dumpBody);
     if (addClaim && typeof addClaim.log === "function") {
       console.log("req.userData._id :>> " + req.userData._id);
       const data = {
@@ -268,17 +284,25 @@ ClaimCtr.addClaimDump = async (req, res) => {
       addClaim.log(data);
     }
     await addClaim.save();
+    if(networkSymbol == "SOL"){
+      const body = addClaim.toJSON()
+      const dumpId = body._id
+      delete body._id
+      delete body.createdAt
+      delete body.updatedAt
+      delete body.__v
+      const newClaim = new ClaimModel({
+        dumpId,
+        ...body
+      })
+      await newClaim.save()
+    }
     return res.status(200).json({
       message: "SUCCESS",
       status: true,
       data: addClaim,
     });
-  } else {
-    return res.status(200).json({
-      message: "Please upload csv",
-      status: false,
-    });
-  }
+
 };
 
 ClaimCtr.getClaimDumpList = async (req, res) => {
