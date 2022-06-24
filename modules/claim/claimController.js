@@ -99,8 +99,8 @@ ClaimCtr.list = async (req, res) => {
           if(claim.networkSymbol == "SOL"){
             const wallet = claim.dumpId.uploadData.find(
               (wallet) =>
-                req.query.walletAddress.toLowerCase() ==
-                wallet.address.toLowerCase()
+                req.query.walletAddress ==
+                wallet.address
             );
             claim.isInvested = wallet ? wallet.amount : 0;
           }else{
@@ -275,6 +275,8 @@ ClaimCtr.addClaimDump = async (req, res) => {
       jsonArray = JSON.parse(jsonArray)
       dumpBody.uploadData = jsonArray
     }else{
+      dumpBody.tokenAddress = dumpBody.tokenAddress.toLowerCase()
+      dumpBody.contractAddress = dumpBody.contractAddress.toLowerCase()
       jsonArray = await csv().fromFile(files.path);
       dumpBody.data = jsonArray
     }
