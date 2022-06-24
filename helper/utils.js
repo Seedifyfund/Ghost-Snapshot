@@ -26,14 +26,14 @@ const REFRESH_TOKEN =
 const snapshotEmail = ['aziz.ansari@minddeft.com'];
 
 // const ccEmail = [
-//   'avinash.buddana@minddeft.com',
 //   'shantikumar@minddeft.com',
-//   'chaitanya.krishna@minddeft.com',
 //   'rishabh.katheria@minddeft.net',
-//   'prajwal.more@minddeft.net',
 //   'krunal@minddeft.com',
 //   'aziz.ansari@minddeft.com',
-//   'abhishek.anand@minddeft.com'
+//   'abhishek.anand@minddeft.com',
+//   'suraj.chitroda@minddeft.com',
+//   'kamal.singh@minddeft.net',
+//   'bharat.kushwaha@minddeft.com',
 // ];
 const ccEmail = ['aziz.ansari@minddeft.com'];
 
