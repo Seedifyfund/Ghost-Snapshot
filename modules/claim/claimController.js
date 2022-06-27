@@ -303,8 +303,8 @@ ClaimCtr.addClaimDump = async (req, res) => {
       delete body.updatedAt
       delete body.__v
       const newClaim = new ClaimModel({
-        dumpId,
-        ...body
+        ...body,
+        dumpId : dumpId,
       })
       await newClaim.save()
     }
