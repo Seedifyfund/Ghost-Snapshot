@@ -30,6 +30,7 @@ var corsOptions = {
     'https://claim.seedify.info',
     'http://localhost:3000',
     'https://admin.seedify.info',
+    'https://stage.seedify.fund/',
   ],
 };
 
