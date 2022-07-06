@@ -43,6 +43,7 @@
     "node-cron": "^3.0.0",
     "node-xlsx": "^0.17.2",
     "nodemailer": "^6.5.0",
+    "nodemon": "^2.0.19",
     "objects-to-csv": "^1.3.6",
     "web3": "^1.4.0",
     "winston": "^3.3.3",
