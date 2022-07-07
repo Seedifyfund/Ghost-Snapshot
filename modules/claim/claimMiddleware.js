@@ -11,7 +11,7 @@ ClaimMiddleware.validateAdd = async (req, res, next) => {
     networkName: Joi.string()
       .valid("polygon", "binance", "ethereum", "solana", "avalanche", "fantom")
       .required(),
-    vestingType: Joi.string().valid("monthly", "linear").required(),
+    vestingType: Joi.string().valid("monthly", "linear", "merkle").required(),
     networkSymbol: Joi.string()
       .allow("BNB", "ETH", "MATIC", "SOL", "AVAX", "FTM")
       .required(),

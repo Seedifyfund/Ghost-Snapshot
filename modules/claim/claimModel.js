@@ -7,12 +7,16 @@ const claimSchema = new Schema(
     contractAddress: {
       type: String,
       required: true,
-      lowercase: true,
+      // lowercase: true,
     },
     tokenAddress: {
       type: String,
       required: true,
-      lowercase: true,
+      // lowercase: true,
+    },
+    vestingInfo: {
+      type: String,
+      default : null
     },
     networkName: {
       type: String,
@@ -56,7 +60,7 @@ const claimSchema = new Schema(
     vestingType: {
       type: String,
       required: true,
-      enum: ["monthly", "linear"],
+      enum: ["monthly", "linear", "merkle"],
       default: "monthly",
       
     },
@@ -67,6 +71,10 @@ const claimSchema = new Schema(
     dumpId: {
       type: mongoose.Schema.ObjectId,
       ref: "addClaim",
+    },
+    vestings : {
+      type: Array,
+      default: [],
     },
     phaseNo: {
       type: Number,

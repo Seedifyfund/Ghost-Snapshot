@@ -7,12 +7,16 @@ const addClaimSchema = new Schema(
     contractAddress: {
       type: String,
       required: true,
-      lowercase: true,
+      // lowercase: true,
     },
     tokenAddress: {
       type: String,
       required: true,
-      lowercase: true,
+      // lowercase: true,
+    },
+    vestingInfo: {
+      type: String,
+      default : null
     },
     networkName: {
       type: String,
@@ -73,10 +77,24 @@ const addClaimSchema = new Schema(
       type: Number,
       default: 0,
     },
+    vestings: [
+      {
+        name: { type: String, default: "" },
+        vestingPercent: { type: Number, default: 0 },
+        timestamp: { type: Number, default: 0 },
+        rootHash: { type: String, default: '' },
+        txnHash: { type: String, default: '' },
+        status: {
+          type: String,
+          enum: ["upcoming", "pending", "uploaded", "failed"],
+          default: "upcoming",
+        },
+      },
+    ],
     vestingType: {
       type: String,
       required: true,
-      enum: ["monthly", "linear"],
+      enum: ["monthly", "linear", "merkle"],
       default: "monthly",
     },
     totalIterationCount: {

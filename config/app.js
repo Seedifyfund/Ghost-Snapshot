@@ -31,6 +31,7 @@ var corsOptions = {
     'http://localhost:3000',
     'https://admin.seedify.info',
     'https://stage.seedify.fund/',
+    'http://13.213.253.74:3000'
   ],
 };
 
