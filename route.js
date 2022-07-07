@@ -11,7 +11,7 @@ const farmRoute = require('./modules/farm/farmRoute');
 const logsRoute = require('./modules/logs/logsRout');
 const projectRoute = require('./modules/projects/projectsRoute');
 const snftUsersRoute = require('./modules/snftUsers/snftUsersRoute');
-
+const settingRoute = require('./modules/settings/settingRoutes');
 // Routes Path
 
 const app = express.Router();
@@ -28,6 +28,7 @@ app.use('/api/v1/farm', farmRoute);
 app.use('/api/v1/logs', logsRoute);
 app.use('/api/v1/project', projectRoute);
 app.use('/api/v1/snft', snftUsersRoute);
+app.use('/api/v1/settings', settingRoute);
 
 app.all('/*', (req, res) =>
   res.status(404).json({ message: 'Invalid Requests' })
