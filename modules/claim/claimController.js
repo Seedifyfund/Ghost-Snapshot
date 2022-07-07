@@ -86,6 +86,9 @@ ClaimCtr.list = async (req, res) => {
     if (req.query.isSnft) {
       query.isSnft = true;
     }
+    if(req.query.search){
+      query['name'] = new RegExp(`${req.query.search}`, 'i') 
+     }
     let list;
     if (req.query.walletAddress) {
       list = await ClaimModel.find(query)

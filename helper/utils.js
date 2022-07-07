@@ -5,37 +5,13 @@ const Web3 = require('web3');
 const solanaWeb3 = require('@solana/web3.js');
 const fs = require('fs');
 const ObjectsToCsv = require('objects-to-csv');
+const settingHelper = require('../modules/settings/settingHelper');
 const utils = {};
 
-const CLIENT_ID =
-  '160468034128-6kg7ono0ksjl35j850d8hdct1npk95iu.apps.googleusercontent.com';
-const CLEINT_SECRET = 'm4Je9QFx45OuR3V0YnhAo-yL';
-const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
-const REFRESH_TOKEN =
-  '1//04UvgkQSVetB2CgYIARAAGAQSNwF-L9Ir5l9OgU2eVkWMO1ZnJ-34xxh1lcpSCZdubTpiA2j04QErHrW2zXLc0pmS7cBULDHsiX8';
-
-const snapshotEmail = [
-  'cem@seedify.fund',
-  'gsconsultantservices@gmail.com',
-  'berk@seedify.fund',
-  'serhat@seedify.fund',
-  'apo@seedify.fund',
-  'sungur@seedify.fund',
-  'mariano@seedify.fund'
-];
-// const snapshotEmail = ['aziz.ansari@minddeft.com'];
-
-const ccEmail = [
-  'shantikumar@minddeft.com',
-  'rishabh.katheria@minddeft.net',
-  'krunal@minddeft.com',
-  'aziz.ansari@minddeft.com',
-  'abhishek.anand@minddeft.com',
-  'suraj.chitroda@minddeft.com',
-  'kamal.singh@minddeft.net',
-  'bharat.kushwaha@minddeft.com',
-];
-// const ccEmail = ['aziz.ansari@minddeft.com'];
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLEINT_SECRET = process.env.GOOGLE_CLEINT_SECRET;
+const REDIRECT_URI = process.env.GOOGLE_REDIRECT;
+const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
 
 utils.sendEmail = async (data, message, email) => {
   try {
@@ -178,6 +154,9 @@ utils.sendSmapshotEmail = async (
       },
     });
 
+    let snapshotEmail = await settingHelper.getSnapshotEmails();
+    let ccEmail = await settingHelper.getccEmails();
+
     let mailContent = {
       from: 'snapshot@seedify.fund',
       to: snapshotEmail,
@@ -263,6 +242,10 @@ utils.sendFromalEmail = async (text, subject) => {
         accessToken: accessToken,
       },
     });
+
+
+    let snapshotEmail = await settingHelper.getSnapshotEmails();
+    let ccEmail = await settingHelper.getccEmails();
 
     let mailContent = {
       from: 'snapshot@seedify.fund',
