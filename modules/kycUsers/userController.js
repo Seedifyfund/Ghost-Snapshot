@@ -639,26 +639,37 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
         console.log("Currently Busy Processing Task " + task.address);
         const isSeedStakingSnp = true
         let getBalance = {}
-        if(task.activeStaker === true){
-           getBalance = await getUserBalance(
-            task.address,
-            getPools,
-            getTimeStamp,
-            latestBlock,
-            getLiquidityLocked.totalSupply,
-            getLiquidityLocked.totalBalance,
-            getApeTokenLiquidityLocked,
-            getBakeryLiquidityLocked,
-            getLiquidityLocked,
-            isSeedStakingSnp
-          );
-        }else{
-          getBalance = JSON.parse(poolNames)
-          getBalance.eTokens = 0;
-          getBalance.isStaked = false;
-          getBalance.stkPoints = 0;
-        }
-
+        // if(task.activeStaker === true){
+        //    getBalance = await getUserBalance(
+        //     task.address,
+        //     getPools,
+        //     getTimeStamp,
+        //     latestBlock,
+        //     getLiquidityLocked.totalSupply,
+        //     getLiquidityLocked.totalBalance,
+        //     getApeTokenLiquidityLocked,
+        //     getBakeryLiquidityLocked,
+        //     getLiquidityLocked,
+        //     isSeedStakingSnp
+        //   );
+        // }else{
+        //   getBalance = JSON.parse(poolNames)
+        //   getBalance.eTokens = 0;
+        //   getBalance.isStaked = false;
+        //   getBalance.stkPoints = 0;
+        // }
+        getBalance = await getUserBalance(
+          task.address,
+          getPools,
+          getTimeStamp,
+          latestBlock,
+          getLiquidityLocked.totalSupply,
+          getLiquidityLocked.totalBalance,
+          getApeTokenLiquidityLocked,
+          getBakeryLiquidityLocked,
+          getLiquidityLocked,
+          isSeedStakingSnp
+        );
         stkDistribution.stkPointsDist = Utils.toTruncFixed((+stkDistribution.stkPointsDist + +getBalance.stkPoints), 3)
         let activeStaker = false
         if(getBalance.stkPoints > 0){
