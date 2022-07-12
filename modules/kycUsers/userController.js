@@ -599,22 +599,22 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     let query = { isActive: true, activeStaker : false};
     const sub = "Daily Seed Staking Snapshot"
     const text = `Seed Staking Snapshot Triggered at 1 PM UTC`
-    Utils.sendFromalEmail(text, sub)
-    const getUsers = await UserModel.aggregate([
-      // { $match: query },
-      {
-        $group: {
-          _id: "$walletAddress",
-          doc: { $first: "$$ROOT" },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: "$doc",
-        },
-      },
-    ]);
-
+    // Utils.sendFromalEmail(text, sub)
+    // const getUsers = await UserModel.aggregate([
+    //   // { $match: query },
+    //   {
+    //     $group: {
+    //       _id: "$walletAddress",
+    //       doc: { $first: "$$ROOT" },
+    //     },
+    //   },
+    //   {
+    //     $replaceRoot: {
+    //       newRoot: "$doc",
+    //     },
+    //   },
+    // ]);
+    const getUsers = await UserModel.find({}).lean();
     const getTimeStamp = Math.round(new Date().getTime() / 1000);
     console.log('get users is:', getUsers.length);
     if (getUsers && getUsers.length) {
