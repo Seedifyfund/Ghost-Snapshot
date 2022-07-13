@@ -599,7 +599,7 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     let query = { isActive: true, activeStaker : false};
     const sub = "Daily Seed Staking Snapshot"
     const text = `Seed Staking Snapshot Triggered at 1 PM UTC`
-    // Utils.sendFromalEmail(text, sub)
+    Utils.sendFromalEmail(text, sub)
     // const getUsers = await UserModel.aggregate([
     //   // { $match: query },
     //   {
@@ -1926,7 +1926,6 @@ UserCtr.findDupUsers = async (req, res) => {
       {
         $group: {
           _id: "$walletAddress",
-          data: { $push: "$$ROOT" },
           count: { $sum: 1 },
         },
       },
