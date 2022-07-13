@@ -416,7 +416,7 @@ web3Helper.addNonBlockpassUser = async ( walletAddress)=>{
   try{
     const user = await UserModel.findOne({walletAddress : walletAddress.toLowerCase().trim()});
     if(user){
-      console.log('non blockpass user found :>> ', walletAddress);
+      console.log('user found blkp :>> ', walletAddress);
       user.activeStaker = true
       await user.save()
     }else{
