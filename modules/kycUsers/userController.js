@@ -600,21 +600,21 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
     const sub = "Daily Seed Staking Snapshot"
     const text = `Seed Staking Snapshot Triggered at 1 PM UTC`
     Utils.sendFromalEmail(text, sub)
-    const getUsers = await UserModel.aggregate([
-      // { $match: query },
-      {
-        $group: {
-          _id: "$walletAddress",
-          doc: { $first: "$$ROOT" },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: "$doc",
-        },
-      },
-    ]);
-
+    // const getUsers = await UserModel.aggregate([
+    //   // { $match: query },
+    //   {
+    //     $group: {
+    //       _id: "$walletAddress",
+    //       doc: { $first: "$$ROOT" },
+    //     },
+    //   },
+    //   {
+    //     $replaceRoot: {
+    //       newRoot: "$doc",
+    //     },
+    //   },
+    // ]);
+    const getUsers = await UserModel.find({}).lean();
     const getTimeStamp = Math.round(new Date().getTime() / 1000);
     console.log('get users is:', getUsers.length);
     if (getUsers && getUsers.length) {
@@ -639,25 +639,38 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
         console.log("Currently Busy Processing Task " + task.address);
         const isSeedStakingSnp = true
         let getBalance = {}
-        if(task.activeStaker === true){
-           getBalance = await getUserBalance(
-            task.address,
-            getPools,
-            getTimeStamp,
-            latestBlock,
-            getLiquidityLocked.totalSupply,
-            getLiquidityLocked.totalBalance,
-            getApeTokenLiquidityLocked,
-            getBakeryLiquidityLocked,
-            getLiquidityLocked,
-            isSeedStakingSnp
-          );
-        }else{
-          getBalance = JSON.parse(poolNames)
-          getBalance.eTokens = 0;
-          getBalance.isStaked = false;
-          getBalance.stkPoints = 0;
-        }
+        // if(task.activeStaker === true){
+        //    getBalance = await getUserBalance(
+        //     task.address,
+        //     getPools,
+        //     getTimeStamp,
+        //     latestBlock,
+        //     getLiquidityLocked.totalSupply,
+        //     getLiquidityLocked.totalBalance,
+        //     getApeTokenLiquidityLocked,
+        //     getBakeryLiquidityLocked,
+        //     getLiquidityLocked,
+        //     isSeedStakingSnp
+        //   );
+        // }else{
+        //   getBalance = JSON.parse(poolNames)
+        //   getBalance.eTokens = 0;
+        //   getBalance.isStaked = false;
+        //   getBalance.stkPoints = 0;
+        // }
+        
+        getBalance = await getUserBalance(
+          task.address,
+          getPools,
+          getTimeStamp,
+          latestBlock,
+          getLiquidityLocked.totalSupply,
+          getLiquidityLocked.totalBalance,
+          getApeTokenLiquidityLocked,
+          getBakeryLiquidityLocked,
+          getLiquidityLocked,
+          isSeedStakingSnp
+        );
 
         stkDistribution.stkPointsDist = Utils.toTruncFixed((+stkDistribution.stkPointsDist + +getBalance.stkPoints), 3)
         let activeStaker = false
@@ -1913,7 +1926,6 @@ UserCtr.findDupUsers = async (req, res) => {
       {
         $group: {
           _id: "$walletAddress",
-          data: { $push: "$$ROOT" },
           count: { $sum: 1 },
         },
       },

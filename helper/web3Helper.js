@@ -414,8 +414,12 @@ web3Helper.stakingEvents = async (type, contractAddress) => {
 // add user through block syncing cron
 web3Helper.addNonBlockpassUser = async ( walletAddress)=>{
   try{
-    const user = await UserModel.findOne({walletAddress : walletAddress.toLowerCase()});
-    if(!user){
+    const user = await UserModel.findOne({walletAddress : walletAddress.toLowerCase().trim()});
+    if(user){
+      console.log('non blockpass user found :>> ', walletAddress);
+      user.activeStaker = true
+      await user.save()
+    }else{
       console.log('non blockpass user not found :>> ', walletAddress);
       const newUser = new UserModel({
         recordId: walletAddress.toLowerCase().trim(),
@@ -430,11 +434,7 @@ web3Helper.addNonBlockpassUser = async ( walletAddress)=>{
         tier: "tier0",
         activeStaker : true
       })
-      await newUser.save()
-    }else{
-      console.log('non blockpass user found :>> ', walletAddress);
-      user.activeStaker = true
-      await user.save()
+      await newUser.save();
     }
   }catch(err){
     Utils.echoLog('err in blockpass syncing user :>> ', err.message)
