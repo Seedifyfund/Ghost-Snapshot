@@ -658,7 +658,7 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
         //   getBalance.isStaked = false;
         //   getBalance.stkPoints = 0;
         // }
-        
+
         getBalance = await getUserBalance(
           task.address,
           getPools,
@@ -671,7 +671,6 @@ UserCtr.seedStakingSnapshot = async (req, res) => {
           getLiquidityLocked,
           isSeedStakingSnp
         );
-
         stkDistribution.stkPointsDist = Utils.toTruncFixed((+stkDistribution.stkPointsDist + +getBalance.stkPoints), 3)
         let activeStaker = false
         if(getBalance.stkPoints > 0){
