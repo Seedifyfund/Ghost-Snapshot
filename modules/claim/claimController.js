@@ -81,7 +81,12 @@ ClaimCtr.list = async (req, res) => {
       query.isDisabledBit = { $ne: true };
     }
     if (req.query.vestingType) {
-      query.vestingType = { $in: req.query.vestingType };
+      if (req.query.vestingType == 'monthly'){
+        query = { ...query ,  $or: [{ vestingType: 'monthly' }, { vestingType: 'merkle' }] };
+      }
+      else{
+        query.vestingType = { $in: req.query.vestingType };
+      }
     }
     if (req.query.isSnft) {
       query.isSnft = true;
@@ -121,6 +126,7 @@ ClaimCtr.list = async (req, res) => {
         }
       });
     } else {
+      console.log(query);
       list = await ClaimModel.find(query)
         .populate("dumpId", "transactionHash")
         .skip((+page - 1 || 0) * +process.env.LIMIT)
