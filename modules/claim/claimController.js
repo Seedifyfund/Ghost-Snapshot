@@ -739,7 +739,7 @@ ClaimCtr.editVesting = async (req, res) => {
     // console.log("🚀 ~ file: claimController.js ~ line 740 ~ ClaimCtr.editVesting= ~ typeof vestings", typeof vestings)
     
     dump.vestings = vestings && typeof vestings == "object" ? vestings : dump.vestings;
-    dump.save();
+    await dump.save();
 
     return res.status(200).json({
       status: "SUCCESS",

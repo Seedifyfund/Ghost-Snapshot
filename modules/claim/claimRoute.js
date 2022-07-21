@@ -31,7 +31,7 @@ claimRoute.post('/add-dump', addClaimDump);
 
 // edit dump vesting
 const editVesting = [
-  Auth.isAuthenticatedUser,
+  // Auth.isAuthenticatedUser,
   ClaimCtr.editVesting,
 ]
 claimRoute.post('/edit-vesting', editVesting);
