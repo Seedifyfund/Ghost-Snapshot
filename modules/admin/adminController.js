@@ -59,7 +59,7 @@ AdminCtr.login = async (req, res) => {
       userAttemts = userAttemts ? userAttemts : 0;
       console.log(`${fetchUser.username} has previously ${userAttemts} failed attempts.`);
       if(MAX_USER_ATTEMPTS<=userAttemts){
-        return res.status(429).send("Too Many Attempts try it 24 hour later");
+        return res.status(429).json({status: false,message: "Too Many Attempts try it 24 hour later"});
       }
       if (bcrypt.compareSync(req.body.password, fetchUser.password)) {
         
