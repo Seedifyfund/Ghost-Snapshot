@@ -29,6 +29,13 @@ const addClaimDump = [
 ];
 claimRoute.post('/add-dump', addClaimDump);
 
+// edit dump vesting
+const editVesting = [
+  // Auth.isAuthenticatedUser,
+  ClaimCtr.editVesting,
+]
+claimRoute.post('/edit-vesting', editVesting);
+
 // update dump record for each iteration and enter record in main claim model
 const updateDump = [
   Auth.isAuthenticatedUser,

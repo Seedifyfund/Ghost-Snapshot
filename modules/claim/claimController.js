@@ -9,6 +9,7 @@ const ClaimCtr = {};
 const keccak256 = require('keccak256');
 const { MerkleTree } = require('merkletreejs');
 const util = require('util');
+
 ClaimCtr.addNewClaim = async (req, res) => {
   try {
     const {
@@ -156,7 +157,6 @@ ClaimCtr.list = async (req, res) => {
   }
 };
 
-
 // claim pool list for single user 
 ClaimCtr.usersPoolList = async(req, res)=>{
   try {
@@ -235,6 +235,7 @@ ClaimCtr.getSinglePool = async (req, res) => {
     });
   }
 };
+
 ClaimCtr.editClaim = async (req, res) => {
   try {
     const claimBeforeUpdt = await ClaimModel.findOne({ _id: req.body.claimId });
@@ -428,6 +429,7 @@ ClaimCtr.getClaimDumpList = async (req, res) => {
     });
   }
 };
+
 ClaimCtr.getClaimDump = async (req, res) => {
   try {
     const dump = await AddClaimModel.findOne({ _id: req.params.dumpId });
@@ -444,6 +446,7 @@ ClaimCtr.getClaimDump = async (req, res) => {
     });
   }
 };
+
 ClaimCtr.updateDump = async (req, res) => {
   const { transactionHash, dumpId, numberOfRecords } = req.body;
   try {
@@ -487,6 +490,7 @@ ClaimCtr.updateDump = async (req, res) => {
     });
   }
 };
+
 // edit dump(claim) records
 ClaimCtr.editDump = async (req, res) => {
   try {
@@ -509,6 +513,7 @@ ClaimCtr.editDump = async (req, res) => {
     });
   }
 };
+
 ClaimCtr.topupVestings = async (req, res) => {
   try {
     const dump = await AddClaimModel.findOne(
@@ -536,6 +541,7 @@ ClaimCtr.topupVestings = async (req, res) => {
     });
   }
 };
+
 ClaimCtr.createHexProof = async(req, res)=>{
 try{
   const {
@@ -593,6 +599,7 @@ try{
   });
 }
 }
+
 //cron service
 ClaimCtr.checkTransactionStatus = async () => {
   try {
@@ -700,6 +707,7 @@ ClaimCtr.checkTransactionStatus = async () => {
     utils.echoLog('error in checkTransactionStatus cron  ', error.message);
   }
 };
+
 // cron service for deleting dump records
 ClaimCtr.deleteDumprecords = async () => {
   try {
@@ -708,7 +716,9 @@ ClaimCtr.deleteDumprecords = async () => {
     const dumpList1 = await AddClaimModel.find({
       transactionHash: [],
       updatedAt: { $lte: currentDate },
+      networkSymbol: { $ne: "SOL" }, // for solana pools
     });
+
     dumpList1.forEach(async (dump) => {
       await AddClaimModel.findOneAndDelete({ _id: dump._id });
     });
@@ -716,5 +726,36 @@ ClaimCtr.deleteDumprecords = async () => {
     utils.echoLog("error in deleteDumprecord >>  ", error);
   }
 };
+
+ClaimCtr.editVesting = async (req, res) => {
+  try {
+    const dump = await AddClaimModel.findOne(
+      { _id: req.body.dumpId },
+      { uploadData: 0, pendingData: 0, data: 0 }
+    );
+    if (!dump){
+      return res.status(404).json({status: false, message: 'record not found'})
+    }
+    const { vestings } = req.body;
+    
+    // console.log("🚀 ~ file: claimController.js ~ line 737 ~ ClaimCtr.editVesting= ~ vestings", vestings)
+    // console.log("🚀 ~ file: claimController.js ~ line 740 ~ ClaimCtr.editVesting= ~ typeof vestings", typeof vestings)
+    
+    dump.vestings = vestings && typeof vestings == "object" ? vestings : dump.vestings;
+    await dump.save();
+
+    return res.status(200).json({
+      status: "SUCCESS",
+      data: dump,
+    })
+
+  } catch (error) {
+    return res.status(400).json({
+      message: 'Something went wrong',
+      status: false,
+      err: error.message ? error.message : error
+    })
+  }
+}
 
 module.exports = ClaimCtr;
