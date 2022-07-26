@@ -49,7 +49,7 @@ AdminCtr.login = async (req, res) => {
       query.username = req.body.username;
     }
 
-    const MAX_LOCK_PERIOD = 60 * 60 * 24;
+    const MAX_LOCK_PERIOD = 60 * 60 * 12; // 12 hours lock time
     const MAX_USER_ATTEMPTS = 5;
 
     const fetchUser = await AdminModel.findOne(query);
@@ -59,7 +59,7 @@ AdminCtr.login = async (req, res) => {
       userAttemts = userAttemts ? userAttemts : 0;
       console.log(`${fetchUser.username} has previously ${userAttemts} failed attempts.`);
       if(MAX_USER_ATTEMPTS<=userAttemts){
-        return res.status(429).json({status: false,message: "Too Many Attempts try it 24 hour later"});
+        return res.status(429).json({status: false,message: "Too Many Attempts try it 12 hour later"});
       }
       if (bcrypt.compareSync(req.body.password, fetchUser.password)) {
         
