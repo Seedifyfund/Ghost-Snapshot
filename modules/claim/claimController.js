@@ -735,11 +735,16 @@ ClaimCtr.editVesting = async (req, res) => {
     if (!dump){
       return res.status(404).json({status: false, message: 'record not found'})
     }
+    const claim = await ClaimModel.findOne(
+      { dumpId: req.body.dumpId }
+    );
     const { vestings } = req.body;
     
-    // console.log("🚀 ~ file: claimController.js ~ line 737 ~ ClaimCtr.editVesting= ~ vestings", vestings)
-    // console.log("🚀 ~ file: claimController.js ~ line 740 ~ ClaimCtr.editVesting= ~ typeof vestings", typeof vestings)
-    
+    // edit vesting in claim model
+    claim.vestings =  vestings && typeof vestings == "object" ? vestings : claim.vestings;
+    await claim.save();
+
+    // edit vesting in addclaim model
     dump.vestings = vestings && typeof vestings == "object" ? vestings : dump.vestings;
     await dump.save();
 
