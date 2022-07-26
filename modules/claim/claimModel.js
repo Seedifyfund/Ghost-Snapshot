@@ -84,6 +84,10 @@ const claimSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    description: {
+      type: String,
+      default: "",
+    }
   },
 
   {
