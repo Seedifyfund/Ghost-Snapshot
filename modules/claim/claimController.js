@@ -715,7 +715,9 @@ ClaimCtr.deleteDumprecords = async () => {
     const dumpList1 = await AddClaimModel.find({
       transactionHash: [],
       updatedAt: { $lte: currentDate },
+      networkSymbol: { $ne: "SOL" }, // for solana pools
     });
+
     dumpList1.forEach(async (dump) => {
       await AddClaimModel.findOneAndDelete({ _id: dump._id });
     });
