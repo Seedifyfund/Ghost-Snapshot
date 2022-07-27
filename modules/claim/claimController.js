@@ -23,6 +23,7 @@ ClaimCtr.addNewClaim = async (req, res) => {
       timestamp,
       phaseNo,
       logo,
+      description,
     } = req.body;
 
     const checkClaimAlreadyAdded = await ClaimModel.findOne({
@@ -49,6 +50,7 @@ ClaimCtr.addNewClaim = async (req, res) => {
         networkId: networkId,
         amount: amount,
         name: name,
+        description,
         timestamp,
         phaseNo,
         logo,
@@ -287,7 +289,8 @@ ClaimCtr.addClaimDump = async (req, res) => {
     startAmount,
     endTime,
     isSnft,
-    vestingInfo
+    vestingInfo,
+    description,
   } = req.body;
   const claimDump = await AddClaimModel.findOne({
     phaseNo: phaseNo,
@@ -326,6 +329,7 @@ ClaimCtr.addClaimDump = async (req, res) => {
     vestingType,
     startAmount,
     endTime,
+    description,
     iteration: 0,
     vestingInfo : vestingInfo ? vestingInfo : null,
     prevIgoDate: new Date(),
