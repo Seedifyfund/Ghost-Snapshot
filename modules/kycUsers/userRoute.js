@@ -105,4 +105,7 @@ userRoute.post('/subscribe',[ Auth.apiKeyAuthentication, UserMiddleware.validate
 userRoute.get('/duplicate-user', UserCtr.findDupUsers);
 userRoute.get('/get-user-data', [Auth.apiKeyAuthentication, UserCtr.getUsersCsv]);
 
+// Tier infomation - Thirdparty routes
+userRoute.get('/tier-info/:address', [UserCtr.getTierInfo]);
+
 module.exports = userRoute;

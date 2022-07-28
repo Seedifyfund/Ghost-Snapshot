@@ -2151,9 +2151,6 @@ UserCtr.addjustStkCal = async(req, res)=>{
     }
 }
 
-
-
-
 UserCtr.getUsersCsv = async (req, res)=>{
   try{
     const users = await UserModel.find({}, {walletAddress : 1, kycStatus : 1, name : 1, email : 1}).lean()
@@ -2170,7 +2167,36 @@ UserCtr.getUsersCsv = async (req, res)=>{
       message: err.message,
     });
   }
+}
 
+UserCtr.getTierInfo = async (req, res) => {
+  try{
+    const { address } = req.params;
+    const user = await UserModel.findOne({ walletAddress: address.toLowerCase().trim()});
+
+    if (user){
+      const data = {
+        tier: user.tier ? user.tier : 'tier0',
+        walletAddress: user.walletAddress,
+      }
+      return res.status(200).json({
+        status: true,
+        data: data
+      });
+    }
+    
+    return res.status(404).json({
+      status: false,
+      message: "User not found",
+    })
+  }
+  catch(err){
+    console.log(err);
+    res.json({
+      status: false,
+      message: err.message,
+    });
+  }
 }
 
 module.exports = UserCtr;
