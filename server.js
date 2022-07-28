@@ -8,6 +8,7 @@ const expressSwagger = require('express-swagger-generator')(app);
 
 let options = {
     "swagger": "2.0",
+    "swaggerDefinition":{
     "info": {
       "description": "This are APIs for finding user information",
       "version": "1.0.0",
@@ -101,7 +102,8 @@ let options = {
           }
         }
       }
-    },
+    }
+  },
   basedir: __dirname, //app absolute path
   files: ['./routes/**/*.js'] //Path to the API handle folder
 };
