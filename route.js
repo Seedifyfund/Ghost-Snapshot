@@ -30,8 +30,6 @@ app.use('/api/v1/project', projectRoute);
 app.use('/api/v1/snft', snftUsersRoute);
 app.use('/api/v1/settings', settingRoute);
 
-app.all('/*', (req, res) =>
-  res.status(404).json({ message: 'Invalid Requests' })
-);
+
 
 module.exports = app;
